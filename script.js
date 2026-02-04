@@ -36,13 +36,13 @@ const CASES_DATA = {
         price: 0,
         type: "free",
         items: [
-            {nft: NFT_DATABASE[0], chance: 30},
-            {nft: NFT_DATABASE[1], chance: 25},
-            {nft: NFT_DATABASE[2], chance: 20},
-            {nft: NFT_DATABASE[3], chance: 15},
-            {nft: NFT_DATABASE[4], chance: 7},
-            {nft: NFT_DATABASE[12], chance: 2},
-            {nft: NFT_DATABASE[13], chance: 1}
+            {nft: NFT_DATABASE[0], chance: 35},  // Подарок - 35%
+            {nft: NFT_DATABASE[1], chance: 30},  // 3 звезды - 30%
+            {nft: NFT_DATABASE[2], chance: 20},  // 5 звёзд - 20%
+            {nft: NFT_DATABASE[3], chance: 10},  // 15 звёзд - 10%
+            {nft: NFT_DATABASE[4], chance: 4},   // 50 звёзд - 4%
+            {nft: NFT_DATABASE[12], chance: 0.8},  // Happy Brownie - 0.8%
+            {nft: NFT_DATABASE[13], chance: 0.2}   // Instant Ramen - 0.2%
         ]
     },
     basic: {
@@ -51,13 +51,13 @@ const CASES_DATA = {
         price: 50,
         type: "basic",
         items: [
-            {nft: NFT_DATABASE[1], chance: 25},
-            {nft: NFT_DATABASE[2], chance: 20},
-            {nft: NFT_DATABASE[3], chance: 18},
-            {nft: NFT_DATABASE[7], chance: 15},
-            {nft: NFT_DATABASE[8], chance: 12},
-            {nft: NFT_DATABASE[9], chance: 7},
-            {nft: NFT_DATABASE[10], chance: 3}
+            {nft: NFT_DATABASE[1], chance: 30},  // 3 звезды
+            {nft: NFT_DATABASE[2], chance: 25},  // 5 звёзд
+            {nft: NFT_DATABASE[3], chance: 20},  // 15 звёзд
+            {nft: NFT_DATABASE[7], chance: 12},  // Astral Shard
+            {nft: NFT_DATABASE[8], chance: 8},   // Backpack
+            {nft: NFT_DATABASE[9], chance: 4},   // Crystal Eagle
+            {nft: NFT_DATABASE[10], chance: 1}   // Durovs C*ap
         ]
     },
     premium: {
@@ -66,17 +66,18 @@ const CASES_DATA = {
         price: 150,
         type: "premium",
         items: [
-            {nft: NFT_DATABASE[2], chance: 22},
-            {nft: NFT_DATABASE[3], chance: 20},
-            {nft: NFT_DATABASE[4], chance: 15},
-            {nft: NFT_DATABASE[10], chance: 18},
-            {nft: NFT_DATABASE[11], chance: 12},
-            {nft: NFT_DATABASE[12], chance: 8},
-            {nft: NFT_DATABASE[13], chance: 4},
-            {nft: NFT_DATABASE[14], chance: 1}
+            {nft: NFT_DATABASE[2], chance: 28},  // 5 звёзд
+            {nft: NFT_DATABASE[3], chance: 24},  // 15 звёзд
+            {nft: NFT_DATABASE[4], chance: 18},  // 50 звёзд
+            {nft: NFT_DATABASE[10], chance: 15}, // Durovs Cap
+            {nft: NFT_DATABASE[11], chance: 8},  // Faith Amulet
+            {nft: NFT_DATABASE[12], chance: 5},  // Happy Brownie
+            {nft: NFT_DATABASE[13], chance: 1.5},  // Instant Ramen
+            {nft: NFT_DATABASE[14], chance: 0.5}   // Jolly Chimp
         ]
     }
 };
+
 
 // ДОСТИЖЕНИЯ
 const ACHIEVEMENTS = [
@@ -173,6 +174,60 @@ function init() {
     loadUserProgress();
     loadInventory();
     loadAchievements();
+    
+    // ✅ ГЕНЕРИРУЕМ ФЕЙКОВУЮ ИСТОРИЮ
+    generateFakeHistory();
+    
+    generateCases();
+    updateFreeTimer();
+    loadRefLink();
+    fetchOnlineCount();
+    loadHistory();
+    initParticles();
+    hideLoader();
+    
+    setInterval(() => fetchOnlineCount(), 15000);
+    setInterval(updateFreeTimer, 60000);
+    
+    // ✅ ОБНОВЛЯЕМ ИСТОРИЮ КАЖДЫЕ 30 СЕКУНД
+    setInterval(() => {
+        // Добавляем случайное открытие
+        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * 3)];
+        const randomItem = getRandomItemByChance(randomCase.items);
+        const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван'];
+        const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+        
+        globalHistory.unshift({
+            nft: randomItem.nft,
+            username: randomName,
+            time: 'только что'
+        });
+        
+        if (globalHistory.length > 20) {
+            globalHistory = globalHistory.slice(0, 20);
+        }
+        
+        renderGlobalHistory();
+    }, 30000); // Каждые 30 секунд
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            generateCases();
+        });
+    });
+}
+
+    
+    // Загружаем баланс звёзд
+    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+    document.getElementById('balance').textContent = gameStars;
+    
+    loadUserProgress();
+    loadInventory();
+    loadAchievements();
     generateNFTSlider();
     generateCases();
     updateFreeTimer();
@@ -195,6 +250,103 @@ function init() {
     });
 }
 
+// ГЛОБАЛЬНАЯ ИСТОРИЯ ОТКРЫТИЙ (симуляция)
+let globalHistory = [];
+
+// Генерируем фейковую историю при загрузке
+function generateFakeHistory() {
+    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена', 'Сергей', 'Ольга'];
+    
+    for (let i = 0; i < 10; i++) {
+        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * 3)];
+        const randomItem = getRandomItemByChance(randomCase.items);
+        const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+        const minutesAgo = Math.floor(Math.random() * 30) + 1;
+        
+        globalHistory.push({
+            nft: randomItem.nft,
+            username: randomName,
+            time: `${minutesAgo} мин назад`
+        });
+    }
+    
+    renderGlobalHistory();
+}
+
+// Отображение глобальной истории
+function renderGlobalHistory() {
+    const slider = document.getElementById('nftScroll');
+    if (!slider) return;
+    
+    if (globalHistory.length === 0) {
+        slider.innerHTML = `
+            <div style="width: 100%; text-align: center; padding: 40px 20px; opacity: 0.5;">
+                <div style="font-size: 48px; margin-bottom: 15px;">😴</div>
+                <div style="font-size: 16px; font-weight: 600;">В данный момент никто не крутил кейсы</div>
+                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">Будь первым!</div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Дублируем для бесконечной прокрутки
+    const doubled = [...globalHistory, ...globalHistory, ...globalHistory];
+    
+    slider.innerHTML = doubled.map(item => {
+        const nft = item.nft;
+        const color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+        
+        let displayIcon = '';
+        if (nft.isCurrency) {
+            displayIcon = nft.name === 'Подарок' ? '💝' : '⭐';
+        }
+        
+        return `
+            <div class="nft-card" style="border: 2px solid ${color};">
+                <div class="nft-image" style="border: 2px solid ${color};">
+                    ${nft.isCurrency 
+                        ? `<div style="font-size: 40px;">${displayIcon}</div>`
+                        : `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:40px>💎</div>'">`
+                    }
+                </div>
+                <div class="nft-value" style="color: ${color};">
+                    ${nft.isCurrency 
+                        ? nft.name 
+                        : `${nft.ton} TON`
+                    }
+                </div>
+                <div style="font-size: 11px; color: #6b7280; margin-top: 5px; text-align: center;">
+                    👤 ${item.username}
+                </div>
+                <div style="font-size: 10px; color: #6b7280; text-align: center;">
+                    ${item.time}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Добавление в глобальную историю
+function addToGlobalHistory(nft) {
+    const user = tg.initDataUnsafe?.user;
+    const username = user?.first_name || 'Игрок';
+    
+    globalHistory.unshift({
+        nft: nft,
+        username: username,
+        time: 'только что'
+    });
+    
+    // Ограничиваем до 20 записей
+    if (globalHistory.length > 20) {
+        globalHistory = globalHistory.slice(0, 20);
+    }
+    
+    renderGlobalHistory();
+    
+    // Отправляем на сервер (если есть backend)
+    // fetch('/api/add-drop', { method: 'POST', body: JSON.stringify({nft, username}) });
+}
 function loadUserProgress() {
     userLevel = parseInt(localStorage.getItem('userLevel') || '1');
     userXP = parseInt(localStorage.getItem('userXP') || '0');
@@ -594,7 +746,11 @@ function showResult(nft) {
             createConfetti();
         }
     }
+    
+    // ✅ ДОБАВЛЯЕМ В ГЛОБАЛЬНУЮ ИСТОРИЮ
+    addToGlobalHistory(nft);
 }
+
 
 function createConfetti() {
     for (let i = 0; i < 50; i++) {
@@ -939,3 +1095,6 @@ function activatePromo() {
 }
 
 init();
+
+
+
