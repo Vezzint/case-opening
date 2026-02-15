@@ -8,14 +8,11 @@ const ADMIN_ID = 6584350034;
 
 // БАЗА NFT + ВАЛЮТА
 const NFT_DATABASE = [
-    // ВАЛЮТА (id: 0-4)
     {id: 0, name: "Подарок", stars: 0, ton: 0, image: "nft/Gift.jpg", isCurrency: true, amount: 1, rarity: "special", icon: "💝"},
     {id: 1, name: "3 звезды", stars: 3, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 3, rarity: "common", icon: "⭐"},
     {id: 2, name: "5 звёзд", stars: 5, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 5, rarity: "common", icon: "⭐"},
     {id: 3, name: "15 звёзд", stars: 15, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 15, rarity: "rare", icon: "⭐"},
     {id: 4, name: "50 звёзд", stars: 50, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 50, rarity: "epic", icon: "⭐"},
-
-    // NFT (id: 5-14)
     {id: 5, name: "1 may", stars: 20, ton: 0.10, image: "nft/1 may.jpg", rarity: "common"},
     {id: 6, name: "Artisan Brick", stars: 35, ton: 0.18, image: "nft/Artisan Brick.jpg", rarity: "common"},
     {id: 7, name: "Astral Shard", stars: 45, ton: 0.25, image: "nft/Astral Shard.jpg", rarity: "rare"},
@@ -28,7 +25,6 @@ const NFT_DATABASE = [
     {id: 14, name: "Jolly Chimp", stars: 800, ton: 5.00, image: "nft/Jolly Chimp.jpg", rarity: "mythic"}
 ];
 
-// КЕЙСЫ
 const CASES_DATA = {
     free: {
         name: "🎁 Бесплатный кейс",
@@ -78,7 +74,6 @@ const CASES_DATA = {
     }
 };
 
-// ДОСТИЖЕНИЯ
 const ACHIEVEMENTS = [
     {id: 'first_case', name: 'Первый кейс', desc: 'Открой свой первый кейс', icon: '🎁', reward: 10},
     {id: 'cases_5', name: 'Новичок', desc: 'Открой 5 кейсов', icon: '📦', reward: 25},
@@ -141,10 +136,10 @@ function hideLoader() {
 }
 
 function generateFakeHistory() {
-    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена', 'Сергей', 'Ольга'];
+    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена'];
 
     for (let i = 0; i < 15; i++) {
-        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * Object.keys(CASES_DATA).length)];
+        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * 3)];
         const randomItem = getRandomItemByChance(randomCase.items);
         const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
         const minutesAgo = Math.floor(Math.random() * 45) + 1;
@@ -163,17 +158,6 @@ function renderGlobalHistory() {
     const slider = document.getElementById('nftScroll');
     if (!slider) return;
 
-    if (globalHistory.length === 0) {
-        slider.innerHTML = `
-            <div style="width: 100%; text-align: center; padding: 40px 20px; opacity: 0.5;">
-                <div style="font-size: 48px; margin-bottom: 15px;">😴</div>
-                <div style="font-size: 16px; font-weight: 600;">В данный момент никто не крутил кейсы</div>
-                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">Будь первым!</div>
-            </div>
-        `;
-        return;
-    }
-
     const doubled = [...globalHistory, ...globalHistory, ...globalHistory];
 
     slider.innerHTML = doubled.map(item => {
@@ -190,10 +174,7 @@ function renderGlobalHistory() {
                     }
                 </div>
                 <div class="nft-value" style="color: ${color}; font-size: 13px; margin-top: 10px;">
-                    ${nft.isCurrency 
-                        ? nft.name 
-                        : `${nft.ton} TON`
-                    }
+                    ${nft.isCurrency ? nft.name : `${nft.ton} TON`}
                 </div>
                 <div style="font-size: 11px; color: #fff; margin-top: 8px; text-align: center; font-weight: 600;">
                     👤 ${item.username}
@@ -259,25 +240,6 @@ function init() {
     setInterval(() => fetchOnlineCount(), 15000);
     setInterval(updateFreeTimer, 60000);
 
-    setInterval(() => {
-        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * Object.keys(CASES_DATA).length)];
-        const randomItem = getRandomItemByChance(randomCase.items);
-        const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван'];
-        const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-
-        globalHistory.unshift({
-            nft: randomItem.nft,
-            username: randomName,
-            time: 'только что'
-        });
-
-        if (globalHistory.length > 25) {
-            globalHistory = globalHistory.slice(0, 25);
-        }
-
-        renderGlobalHistory();
-    }, Math.random() * 20000 + 20000);
-
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -327,364 +289,63 @@ function addXP(amount) {
     updateLevelDisplay();
 }
 
-function openAdminPanel() {
-    if (!isAdmin) return;
+// ============ ПРОВЕРКА ДОСТУПНОСТИ БЕСПЛАТНОГО КЕЙСА ============
+function canOpenFreeCase() {
+    if (isAdmin) return true; // Админ может всегда
 
-    document.getElementById('adminPanel').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    loadAdminStats();
-    loadAllUsers();
+    const lastOpen = localStorage.getItem('lastFreeCase');
+    if (!lastOpen) return true; // Ещё не открывали
+
+    const timePassed = new Date() - new Date(lastOpen);
+    const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+
+    return timeLeft <= 0;
 }
 
-function closeAdminPanel() {
-    document.getElementById('adminPanel').classList.remove('active');
-    document.body.style.overflow = '';
+function getFreeTimerText() {
+    const lastOpen = localStorage.getItem('lastFreeCase');
+    if (!lastOpen) return null;
+
+    const timePassed = new Date() - new Date(lastOpen);
+    const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+
+    if (timeLeft <= 0) return null;
+
+    const h = Math.floor(timeLeft / 3600000);
+    const m = Math.floor((timeLeft % 3600000) / 60000);
+    return `Через ${h}ч ${m}м`;
 }
 
-function loadAdminStats() {
-    const stats = {
-        totalUsers: 1,
-        onlineUsers: 15 + Math.floor(Math.random() * 10),
-        totalCases: parseInt(localStorage.getItem('openedCases') || '0'),
-        totalStars: parseInt(localStorage.getItem('gameStars') || '0'),
-        totalNFTs: JSON.parse(localStorage.getItem('inventory') || '[]').length,
-        achievements: JSON.parse(localStorage.getItem('achievements') || '[]').length
-    };
-
-    document.getElementById('adminStats').innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">👥</div>
-                <div class="admin-stat-value">${stats.totalUsers}</div>
-                <div class="admin-stat-label">Пользователей</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">🟢</div>
-                <div class="admin-stat-value">${stats.onlineUsers}</div>
-                <div class="admin-stat-label">Онлайн</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">📦</div>
-                <div class="admin-stat-value">${stats.totalCases}</div>
-                <div class="admin-stat-label">Открыто кейсов</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">⭐</div>
-                <div class="admin-stat-value">${stats.totalStars}</div>
-                <div class="admin-stat-label">Звёзд у вас</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">💎</div>
-                <div class="admin-stat-value">${stats.totalNFTs}</div>
-                <div class="admin-stat-label">NFT собрано</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">🏆</div>
-                <div class="admin-stat-value">${stats.achievements}</div>
-                <div class="admin-stat-label">Достижений</div>
-            </div>
-        </div>
-    `;
-}
-
-function loadAllUsers() {
-    const currentUser = tg.initDataUnsafe?.user;
-    const users = [{
-        id: currentUser?.id || 123456,
-        username: currentUser?.username || 'admin',
-        first_name: currentUser?.first_name || 'Admin',
-        stars: parseInt(localStorage.getItem('gameStars') || '0'),
-        level: parseInt(localStorage.getItem('userLevel') || '1'),
-        cases: parseInt(localStorage.getItem('openedCases') || '0'),
-        nfts: JSON.parse(localStorage.getItem('inventory') || '[]').length,
-        isAdmin: true
-    }];
-
-    document.getElementById('adminUsersList').innerHTML = users.map(user => `
-        <div class="admin-user-row">
-            <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700;">
-                    ${user.first_name.charAt(0).toUpperCase()}
-                </div>
-                <div style="flex: 1;">
-                    <div style="font-size: 16px; font-weight: 700;">
-                        ${user.first_name}
-                        ${user.isAdmin ? '<span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 3px 8px; border-radius: 8px; font-size: 11px; margin-left: 8px; color: #000;">ADMIN</span>' : ''}
-                    </div>
-                    <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-                        @${user.username} • ID: ${user.id}
-                    </div>
-                    <div style="display: flex; gap: 15px; margin-top: 8px; font-size: 12px; color: #6b7280;">
-                        <span>⭐ ${user.stars}</span>
-                        <span>📊 Lvl ${user.level}</span>
-                        <span>📦 ${user.cases}</span>
-                        <span>💎 ${user.nfts}</span>
-                    </div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(${user.id}, '${user.username}', ${user.stars})">
-                    💰
-                </button>
-                <button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress(${user.id}, '${user.username}')">
-                    🗑️
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function manageUserBalance(userId, username, currentStars) {
-    const modal = document.createElement('div');
-    modal.className = 'admin-modal';
-    modal.innerHTML = `
-        <div class="admin-modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 20px; font-weight: 800;">💰 Управление балансом</h3>
-                <div style="font-size: 28px; cursor: pointer; color: #6b7280;" onclick="this.closest('.admin-modal').remove()">✕</div>
-            </div>
-
-            <div style="background: rgba(30, 30, 40, 0.5); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">Пользователь</div>
-                <div style="font-size: 18px; font-weight: 700;">@${username}</div>
-                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">Текущий баланс: <span style="color: #10b981; font-weight: 700;">${currentStars} ⭐</span></div>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">Количество звёзд</label>
-                <input type="number" id="starsAmount" placeholder="Введите количество" style="width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 16px;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="admin-btn admin-btn-success" onclick="giveStars(${userId}, '${username}', ${currentStars})">
-                    ➕ Выдать
-                </button>
-                <button class="admin-btn admin-btn-danger" onclick="takeStars(${userId}, '${username}', ${currentStars})">
-                    ➖ Забрать
-                </button>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px;">
-                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=100">+100</button>
-                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=500">+500</button>
-                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=1000">+1000</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function giveStars(userId, username, currentStars) {
-    const amount = parseInt(document.getElementById('starsAmount').value);
-
-    if (!amount || amount <= 0) {
-        tg.showAlert('Введите корректное количество!');
-        return;
-    }
-
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-    gameStars += amount;
-    localStorage.setItem('gameStars', gameStars);
-    document.getElementById('balance').textContent = gameStars;
-
-    tg.showPopup({
-        title: '✅ Успешно!',
-        message: `Выдано ${amount} ⭐ звёзд пользователю @${username}\n\nНовый баланс: ${gameStars} ⭐`,
-        buttons: [{type: 'ok'}]
-    });
-
-    document.querySelector('.admin-modal').remove();
-    loadAllUsers();
-}
-
-function takeStars(userId, username, currentStars) {
-    const amount = parseInt(document.getElementById('starsAmount').value);
-
-    if (!amount || amount <= 0) {
-        tg.showAlert('Введите корректное количество!');
-        return;
-    }
-
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-    gameStars = Math.max(0, gameStars - amount);
-    localStorage.setItem('gameStars', gameStars);
-    document.getElementById('balance').textContent = gameStars;
-
-    tg.showPopup({
-        title: '✅ Успешно!',
-        message: `Забрано ${amount} ⭐ звёзд у пользователя @${username}\n\nНовый баланс: ${gameStars} ⭐`,
-        buttons: [{type: 'ok'}]
-    });
-
-    document.querySelector('.admin-modal').remove();
-    loadAllUsers();
-}
-
-function resetUserProgress(userId, username) {
-    tg.showPopup({
-        title: '⚠️ ВНИМАНИЕ!',
-        message: `Вы уверены что хотите сбросить ВСЕ данные пользователя @${username}?\n\n• Баланс звёзд\n• Уровень и XP\n• Инвентарь\n• Достижения\n• Историю\n\nЭто действие НЕОБРАТИМО!`,
-        buttons: [
-            {id: 'confirm', type: 'destructive', text: 'Да, сбросить всё'},
-            {type: 'cancel'}
-        ]
-    }, (btnId) => {
-        if (btnId === 'confirm') {
-            localStorage.setItem('gameStars', '0');
-            localStorage.setItem('userLevel', '1');
-            localStorage.setItem('userXP', '0');
-            localStorage.setItem('openedCases', '0');
-            localStorage.setItem('inventory', '[]');
-            localStorage.setItem('achievements', '[]');
-            localStorage.setItem('caseHistory', '[]');
-
-            document.getElementById('balance').textContent = '0';
-            userLevel = 1;
-            userXP = 0;
-            updateLevelDisplay();
-
-            tg.showAlert('Прогресс полностью сброшен!');
-            loadAllUsers();
-        }
-    });
-}
-
-function sendGlobalNotification() {
-    tg.showPopup({
-        title: '📢 Уведомление',
-        message: 'Функция отправки уведомлений работает!\n\n(Для реальной отправки нужен backend)',
-        buttons: [{type: 'ok'}]
-    });
-}
-
-function createPromoCode() {
-    tg.showPopup({
-        title: '🎟️ Промокод',
-        message: 'Доступные промокоды:\n\nWELCOME - 100⭐\nNEWYEAR2026 - 200⭐\nLUCKY - 150⭐',
-        buttons: [{type: 'ok'}]
-    });
-}
-
-function exportUserData() {
-    const data = {
-        stars: localStorage.getItem('gameStars'),
-        level: localStorage.getItem('userLevel'),
-        xp: localStorage.getItem('userXP'),
-        cases: localStorage.getItem('openedCases'),
-        inventory: localStorage.getItem('inventory'),
-        achievements: localStorage.getItem('achievements')
-    };
-
-    console.log('Exported data:', data);
-    tg.showAlert('Данные экспортированы в консоль!');
-}
-
-function switchAdminTab(tab) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-
-    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-    document.getElementById(`adminTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-
-    if (tab === 'users') loadAllUsers();
-    if (tab === 'stats') loadAdminStats();
-}
-
-function fetchOnlineCount() {
-    const online = 150 + Math.floor(Math.random() * 50) - 25;
-    document.getElementById('onlineCount').textContent = `${online} Online`;
-}
-
-function generateCases() {
-    const container = document.getElementById('casesContainer');
-    if (!container) return;
-
-    const cases = Object.entries(CASES_DATA).filter(([key, data]) => {
-        if (currentFilter === 'all') return true;
-        return data.type === currentFilter;
-    });
-
-    container.innerHTML = cases.map(([key, data]) => {
-        const isFree = data.price === 0;
-        return `
-            <div class="case-big" onclick="showCaseInfo('${key}')">
-                ${isFree ? '<div class="case-badge">FREE</div>' : ''}
-                <div class="case-image-section">
-                    <div class="case-main-image">${data.icon}</div>
-                </div>
-                <div class="case-info-section">
-                    <div class="case-title">${data.name}</div>
-                    <div class="case-footer">
-                        ${isFree ? `
-                            <div>
-                                <div class="case-status" id="freeStatus">ДОСТУПЕН</div>
-                                <div class="case-timer" id="freeTimer"></div>
-                            </div>
-                        ` : `
-                            <div class="case-price">⭐ ${data.price}</div>
-                        `}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    updateFreeTimer();
-}
-
+// ============ ПОКАЗ ИНФОРМАЦИИ О КЕЙСЕ ============
 function showCaseInfo(caseKey) {
-    currentCase = caseKey;
     const data = CASES_DATA[caseKey];
-    
+
     if (!data) {
         tg.showAlert('Ошибка: кейс не найден');
         return;
     }
-    
-    // ПРОВЕРКА КД ДЛЯ БЕСПЛАТНОГО КЕЙСА
-    if (data.price === 0 && !isAdmin) {
-        const lastOpen = localStorage.getItem('lastFreeCase');
-        if (lastOpen) {
-            const timePassed = new Date() - new Date(lastOpen);
-            const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
-            
-            if (timeLeft > 0) {
-                const h = Math.floor(timeLeft / 3600000);
-                const m = Math.floor((timeLeft % 3600000) / 60000);
-                tg.showAlert(`Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${h}ч ${m}м`);
-                return; // НЕ ОТКРЫВАЕМ ОКНО
-            }
-        }
+
+    // ПРОВЕРКА КД ДЛЯ БЕСПЛАТНОГО - БЛОКИРУЕМ ОТКРЫТИЕ ОКНА
+    if (data.price === 0 && !canOpenFreeCase()) {
+        const timerText = getFreeTimerText();
+        tg.showAlert(`⏰ Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${timerText}`);
+        return; // НЕ ОТКРЫВАЕМ ОКНО ВООБЩЕ!!!
     }
-    
+
+    currentCase = caseKey;
+
     document.getElementById('modalCaseTitle').textContent = data.name;
     document.getElementById('modalCaseIcon').textContent = data.icon;
     document.getElementById('modalCaseName').textContent = data.name.toUpperCase();
     document.getElementById('modalCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : `⭐ ${data.price}`;
-    
-    // ОБНОВЛЯЕМ ТЕКСТ КНОПКИ
-    const openBtn = document.getElementById('modalOpenBtn');
-    if (data.price === 0) {
-        openBtn.textContent = 'Открыть бесплатно';
-    } else {
-        const gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-        if (gameStars < data.price && !isAdmin) {
-            openBtn.textContent = `Недостаточно звёзд (есть ${gameStars} ⭐)`;
-            openBtn.style.opacity = '0.5';
-            openBtn.style.cursor = 'not-allowed';
-        } else {
-            openBtn.textContent = `Открыть за ⭐ ${data.price}`;
-            openBtn.style.opacity = '1';
-            openBtn.style.cursor = 'pointer';
-        }
-    }
-    
+    document.getElementById('modalOpenBtn').textContent = data.price === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${data.price}`;
+
     const itemsList = document.getElementById('modalItemsList');
     itemsList.innerHTML = data.items.map(item => {
         const nft = item.nft;
-        
+
         if (!nft) return '';
-        
+
         if (nft.isCurrency) {
             return `
                 <div class="item-row">
@@ -719,11 +380,10 @@ function showCaseInfo(caseKey) {
             `;
         }
     }).join('');
-    
+
     document.getElementById('modalInfo').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
-
 
 function getRarityColor(rarity) {
     const colors = {
@@ -742,6 +402,7 @@ function closeInfoModal() {
     document.body.style.overflow = '';
 }
 
+// ============ ОТКРЫТИЕ КЕЙСА С ДВОЙНОЙ ПРОВЕРКОЙ ============
 function openCaseFromModal() {
     if (!currentCase) return;
 
@@ -749,28 +410,22 @@ function openCaseFromModal() {
     let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
 
     if (data.price === 0) {
-        // ПРОВЕРКА КД
-        if (!isAdmin) {
-            const lastOpen = localStorage.getItem('lastFreeCase');
-            if (lastOpen) {
-                const timePassed = new Date() - new Date(lastOpen);
-                const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
-
-                if (timeLeft > 0) {
-                    const h = Math.floor(timeLeft / 3600000);
-                    const m = Math.floor((timeLeft % 3600000) / 60000);
-                    tg.showAlert(`Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${h}ч ${m}м`);
-                    return;
-                }
-            }
+        // ПОВТОРНАЯ ПРОВЕРКА КД ПЕРЕД ОТКРЫТИЕМ!!!
+        if (!canOpenFreeCase()) {
+            const timerText = getFreeTimerText();
+            tg.showAlert(`⏰ Ещё рано! Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${timerText}`);
+            closeInfoModal();
+            return;
         }
+
         localStorage.setItem('lastFreeCase', new Date().toISOString());
         closeInfoModal();
         setTimeout(() => startRoulette(currentCase), 300);
+
     } else {
         // ПРОВЕРКА БАЛАНСА
         if (gameStars < data.price && !isAdmin) {
-            tg.showAlert(`Недостаточно звёзд!\n\nУ вас: ${gameStars} ⭐\nНужно: ${data.price} ⭐\n\nОткройте бесплатный кейс или пригласите друзей!`);
+            tg.showAlert(`❌ Недостаточно звёзд!\n\nУ вас: ${gameStars} ⭐\nНужно: ${data.price} ⭐\n\nОткройте бесплатный кейс или пригласите друзей!`);
             return;
         }
 
@@ -783,6 +438,55 @@ function openCaseFromModal() {
         closeInfoModal();
         setTimeout(() => startRoulette(currentCase), 300);
     }
+}
+
+function fetchOnlineCount() {
+    const online = 150 + Math.floor(Math.random() * 50) - 25;
+    document.getElementById('onlineCount').textContent = `${online} Online`;
+}
+
+function generateCases() {
+    const container = document.getElementById('casesContainer');
+    if (!container) return;
+
+    const cases = Object.entries(CASES_DATA).filter(([key, data]) => {
+        if (currentFilter === 'all') return true;
+        return data.type === currentFilter;
+    });
+
+    container.innerHTML = cases.map(([key, data]) => {
+        const isFree = data.price === 0;
+        const isAvailable = isFree ? canOpenFreeCase() : true;
+        const timerText = isFree ? getFreeTimerText() : null;
+
+        return `
+            <div class="case-big" onclick="showCaseInfo('${key}')" style="${!isAvailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
+                ${isFree ? '<div class="case-badge">FREE</div>' : ''}
+                <div class="case-image-section">
+                    <div class="case-main-image">${data.icon}</div>
+                </div>
+                <div class="case-info-section">
+                    <div class="case-title">${data.name}</div>
+                    <div class="case-footer">
+                        ${isFree ? `
+                            <div>
+                                <div class="case-status" style="color: ${isAvailable ? '#10b981' : '#ef4444'};">
+                                    ${isAvailable ? '✅ ДОСТУПЕН' : '🔒 ЗАБЛОКИРОВАН'}
+                                </div>
+                                ${timerText ? `<div class="case-timer">${timerText}</div>` : ''}
+                            </div>
+                        ` : `
+                            <div class="case-price">⭐ ${data.price}</div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateFreeTimer() {
+    generateCases(); // Перегенерируем все кейсы с обновлённым таймером
 }
 
 function startRoulette(caseKey) {
@@ -1166,33 +870,6 @@ function unlockAchievement(achId) {
     renderAchievements();
 }
 
-function updateFreeTimer() {
-    const statusEl = document.getElementById('freeStatus');
-    const timerEl = document.getElementById('freeTimer');
-    if (!statusEl || !timerEl) return;
-
-    const lastOpen = localStorage.getItem('lastFreeCase');
-    if (!lastOpen) {
-        statusEl.textContent = 'ДОСТУПЕН';
-        statusEl.style.color = '#10b981';
-        timerEl.textContent = '';
-        return;
-    }
-
-    const diff = 24 * 60 * 60 * 1000 - (new Date() - new Date(lastOpen));
-    if (diff <= 0) {
-        statusEl.textContent = 'ДОСТУПЕН';
-        statusEl.style.color = '#10b981';
-        timerEl.textContent = '';
-    } else {
-        statusEl.textContent = 'НЕДОСТУПЕН';
-        statusEl.style.color = '#ef4444';
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        timerEl.textContent = `Через ${h}ч ${m}м`;
-    }
-}
-
 function switchTab(tab) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     event.currentTarget.classList.add('active');
@@ -1269,5 +946,41 @@ function activatePromo() {
     }
 }
 
-init();
+// АДМИН ПАНЕЛЬ (упрощённая версия)
+function openAdminPanel() {
+    if (!isAdmin) return;
+    tg.showPopup({
+        title: '👑 ADMIN',
+        message: 'Админ панель\n\nВаш баланс: ' + localStorage.getItem('gameStars') + ' ⭐',
+        buttons: [
+            {id: 'give1000', type: 'default', text: 'Выдать +1000 ⭐'},
+            {id: 'reset', type: 'destructive', text: 'Сбросить прогресс'},
+            {type: 'cancel'}
+        ]
+    }, (btnId) => {
+        if (btnId === 'give1000') {
+            let stars = parseInt(localStorage.getItem('gameStars') || '0');
+            stars += 1000;
+            localStorage.setItem('gameStars', stars);
+            document.getElementById('balance').textContent = stars;
+            tg.showAlert('Выдано +1000 ⭐');
+        } else if (btnId === 'reset') {
+            localStorage.clear();
+            location.reload();
+        }
+    });
+}
 
+function closeAdminPanel() {}
+function loadAdminStats() {}
+function loadAllUsers() {}
+function manageUserBalance() {}
+function giveStars() {}
+function takeStars() {}
+function resetUserProgress() {}
+function sendGlobalNotification() {}
+function createPromoCode() {}
+function exportUserData() {}
+function switchAdminTab() {}
+
+init();
