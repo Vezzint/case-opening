@@ -9,12 +9,12 @@ const ADMIN_ID = 6584350034;
 // БАЗА NFT + ВАЛЮТА
 const NFT_DATABASE = [
     // ВАЛЮТА (id: 0-4)
-    {id: 0, name: "Подарок", stars: 0, ton: 0, image: "nft/Gift.jpg", isCurrency: true, amount: 1, rarity: "special"},
-    {id: 1, name: "3 звезды", stars: 3, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 3, rarity: "common"},
-    {id: 2, name: "5 звёзд", stars: 5, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 5, rarity: "common"},
-    {id: 3, name: "15 звёзд", stars: 15, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 15, rarity: "rare"},
-    {id: 4, name: "50 звёзд", stars: 50, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 50, rarity: "epic"},
-    
+    {id: 0, name: "Подарок", stars: 0, ton: 0, image: "nft/Gift.jpg", isCurrency: true, amount: 1, rarity: "special", icon: "💝"},
+    {id: 1, name: "3 звезды", stars: 3, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 3, rarity: "common", icon: "⭐"},
+    {id: 2, name: "5 звёзд", stars: 5, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 5, rarity: "common", icon: "⭐"},
+    {id: 3, name: "15 звёзд", stars: 15, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 15, rarity: "rare", icon: "⭐"},
+    {id: 4, name: "50 звёзд", stars: 50, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 50, rarity: "epic", icon: "⭐"},
+
     // NFT (id: 5-14)
     {id: 5, name: "1 may", stars: 20, ton: 0.10, image: "nft/1 may.jpg", rarity: "common"},
     {id: 6, name: "Artisan Brick", stars: 35, ton: 0.18, image: "nft/Artisan Brick.jpg", rarity: "common"},
@@ -28,7 +28,7 @@ const NFT_DATABASE = [
     {id: 14, name: "Jolly Chimp", stars: 800, ton: 5.00, image: "nft/Jolly Chimp.jpg", rarity: "mythic"}
 ];
 
-// КЕЙСЫ С РЕАЛИСТИЧНЫМИ ШАНСАМИ
+// КЕЙСЫ
 const CASES_DATA = {
     free: {
         name: "🎁 Бесплатный кейс",
@@ -75,35 +75,6 @@ const CASES_DATA = {
             {nft: NFT_DATABASE[13], chance: 1.5},
             {nft: NFT_DATABASE[14], chance: 0.5}
         ]
-    },
-    elite: {
-        name: "👑 Elite Case",
-        icon: "👑",
-        price: 300,
-        type: "elite",
-        items: [
-            {nft: NFT_DATABASE[3], chance: 30},
-            {nft: NFT_DATABASE[4], chance: 25},
-            {nft: NFT_DATABASE[10], chance: 20},
-            {nft: NFT_DATABASE[11], chance: 12},
-            {nft: NFT_DATABASE[12], chance: 8},
-            {nft: NFT_DATABASE[13], chance: 4},
-            {nft: NFT_DATABASE[14], chance: 1}
-        ]
-    },
-    mega: {
-        name: "🌟 Mega Case",
-        icon: "🌟",
-        price: 500,
-        type: "elite",
-        items: [
-            {nft: NFT_DATABASE[4], chance: 35},
-            {nft: NFT_DATABASE[10], chance: 25},
-            {nft: NFT_DATABASE[11], chance: 18},
-            {nft: NFT_DATABASE[12], chance: 12},
-            {nft: NFT_DATABASE[13], chance: 8},
-            {nft: NFT_DATABASE[14], chance: 2}
-        ]
     }
 };
 
@@ -112,34 +83,8 @@ const ACHIEVEMENTS = [
     {id: 'first_case', name: 'Первый кейс', desc: 'Открой свой первый кейс', icon: '🎁', reward: 10},
     {id: 'cases_5', name: 'Новичок', desc: 'Открой 5 кейсов', icon: '📦', reward: 25},
     {id: 'cases_10', name: 'Коллекционер', desc: 'Открой 10 кейсов', icon: '🎰', reward: 50},
-    {id: 'cases_25', name: 'Азартный', desc: 'Открой 25 кейсов', icon: '🎲', reward: 100},
-    {id: 'cases_50', name: 'Фанат кейсов', desc: 'Открой 50 кейсов', icon: '🏆', reward: 200},
-    {id: 'cases_100', name: 'Легенда', desc: 'Открой 100 кейсов', icon: '👑', reward: 500},
-    {id: 'rare_drop', name: 'Везунчик', desc: 'Получи редкое NFT', icon: '💎', reward: 50},
-    {id: 'epic_drop', name: 'Эпический дроп', desc: 'Получи эпическое NFT', icon: '⚡', reward: 100},
     {id: 'legendary_drop', name: 'Легендарная удача', desc: 'Получи легендарное NFT', icon: '⭐', reward: 200},
-    {id: 'mythic_drop', name: 'Божественный', desc: 'Получи мифическое NFT', icon: '🔥', reward: 500},
-    {id: 'stars_100', name: 'Богач', desc: 'Накопи 100 звёзд', icon: '💰', reward: 50},
-    {id: 'stars_500', name: 'Миллионер', desc: 'Накопи 500 звёзд', icon: '💸', reward: 100},
-    {id: 'stars_1000', name: 'Олигарх', desc: 'Накопи 1000 звёзд', icon: '🤑', reward: 300},
-    {id: 'level_5', name: 'Опытный', desc: 'Достигни 5 уровня', icon: '📈', reward: 50},
-    {id: 'level_10', name: 'Профи', desc: 'Достигни 10 уровня', icon: '🎖️', reward: 150},
-    {id: 'level_25', name: 'Мастер', desc: 'Достигни 25 уровня', icon: '🏅', reward: 400},
-    {id: 'inventory_10', name: 'Коллекция', desc: 'Собери 10 NFT', icon: '🗃️', reward: 75},
-    {id: 'inventory_25', name: 'Музей', desc: 'Собери 25 NFT', icon: '🏛️', reward: 200},
-    {id: 'sell_nft', name: 'Торговец', desc: 'Продай первое NFT', icon: '💵', reward: 30},
-    {id: 'ref_1', name: 'Пригласитель', desc: 'Пригласи 1 друга', icon: '👤', reward: 50},
-    {id: 'ref_5', name: 'Социальный', desc: 'Пригласи 5 друзей', icon: '👥', reward: 150},
-    {id: 'ref_10', name: 'Амбассадор', desc: 'Пригласи 10 друзей', icon: '👨‍👩‍👧‍👦', reward: 350}
-];
-
-// ЕЖЕДНЕВНЫЕ ЗАДАНИЯ
-const DAILY_QUESTS = [
-    {id: 'quest_case_1', name: 'Открой 1 кейс', target: 1, reward: 10, icon: '🎁', type: 'cases'},
-    {id: 'quest_case_3', name: 'Открой 3 кейса', target: 3, reward: 30, icon: '📦', type: 'cases'},
-    {id: 'quest_case_5', name: 'Открой 5 кейсов', target: 5, reward: 75, icon: '🎰', type: 'cases'},
-    {id: 'quest_invite_1', name: 'Пригласи 1 друга', target: 1, reward: 50, icon: '👤', type: 'refs'},
-    {id: 'quest_sell_1', name: 'Продай 1 NFT', target: 1, reward: 25, icon: '💵', type: 'sells'}
+    {id: 'ref_5', name: 'Социальный', desc: 'Пригласи 5 друзей', icon: '👥', reward: 150}
 ];
 
 let currentFilter = 'all';
@@ -151,17 +96,6 @@ let inventory = [];
 let openedCases = 0;
 let achievements = [];
 let globalHistory = [];
-let dailyQuests = {};
-let totalSells = 0;
-
-// ЗВУКИ
-function playSound(type) {
-    try {
-        const audio = new Audio(`sounds/${type}.mp3`);
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-    } catch(e) {}
-}
 
 function initParticles() {
     const canvas = document.getElementById('particles');
@@ -169,7 +103,7 @@ function initParticles() {
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
+
     const particles = [];
     for (let i = 0; i < 50; i++) {
         particles.push({
@@ -181,7 +115,7 @@ function initParticles() {
             opacity: Math.random() * 0.5 + 0.2
         });
     }
-    
+
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => {
@@ -206,31 +140,29 @@ function hideLoader() {
     }, 2000);
 }
 
-// ГЕНЕРАЦИЯ ФЕЙКОВОЙ ИСТОРИИ
 function generateFakeHistory() {
-    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена', 'Сергей', 'Ольга', 'Павел', 'София'];
-    
+    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена', 'Сергей', 'Ольга'];
+
     for (let i = 0; i < 15; i++) {
         const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * Object.keys(CASES_DATA).length)];
         const randomItem = getRandomItemByChance(randomCase.items);
         const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
         const minutesAgo = Math.floor(Math.random() * 45) + 1;
-        
+
         globalHistory.push({
             nft: randomItem.nft,
             username: randomName,
             time: `${minutesAgo} мин назад`
         });
     }
-    
+
     renderGlobalHistory();
 }
 
-// ОТОБРАЖЕНИЕ ГЛОБАЛЬНОЙ ИСТОРИИ
 function renderGlobalHistory() {
     const slider = document.getElementById('nftScroll');
     if (!slider) return;
-    
+
     if (globalHistory.length === 0) {
         slider.innerHTML = `
             <div style="width: 100%; text-align: center; padding: 40px 20px; opacity: 0.5;">
@@ -241,18 +173,14 @@ function renderGlobalHistory() {
         `;
         return;
     }
-    
+
     const doubled = [...globalHistory, ...globalHistory, ...globalHistory];
-    
+
     slider.innerHTML = doubled.map(item => {
         const nft = item.nft;
         const color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        
-        let displayIcon = '';
-        if (nft.isCurrency) {
-            displayIcon = nft.name === 'Подарок' ? '💝' : '⭐';
-        }
-        
+        const displayIcon = nft.isCurrency ? nft.icon : '';
+
         return `
             <div class="nft-card" style="border: 2px solid ${color}; min-width: 160px; height: 200px;">
                 <div class="nft-image" style="border: 2px solid ${color}; width: 90px; height: 90px; margin: 0 auto;">
@@ -278,38 +206,20 @@ function renderGlobalHistory() {
     }).join('');
 }
 
-// ДОБАВЛЕНИЕ В ГЛОБАЛЬНУЮ ИСТОРИЮ
 function addToGlobalHistory(nft) {
     const user = tg.initDataUnsafe?.user;
     const username = user?.first_name || 'Игрок';
-    
+
     globalHistory.unshift({
         nft: nft,
         username: username,
         time: 'только что'
     });
-    
+
     if (globalHistory.length > 25) {
         globalHistory = globalHistory.slice(0, 25);
     }
-    
-    renderGlobalHistory();
-}
 
-// ОБНОВЛЕНИЕ ВРЕМЕНИ В ИСТОРИИ
-function updateHistoryTimes() {
-    globalHistory = globalHistory.map(item => {
-        if (item.time === 'только что') {
-            item.time = '1 мин назад';
-        } else {
-            const match = item.time.match(/(\d+) мин/);
-            if (match) {
-                const mins = parseInt(match[1]) + 1;
-                item.time = `${mins} мин назад`;
-            }
-        }
-        return item;
-    });
     renderGlobalHistory();
 }
 
@@ -317,12 +227,12 @@ function init() {
     const user = tg.initDataUnsafe?.user;
     if (user) {
         document.getElementById('userName').textContent = user.first_name || 'Player';
-        
+
         if (user.id === ADMIN_ID) {
             isAdmin = true;
             document.getElementById('adminBadge').classList.remove('hidden');
         }
-        
+
         const avatarContainer = document.getElementById('avatarContainer');
         if (user.photo_url) {
             avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar">`;
@@ -330,14 +240,13 @@ function init() {
             avatarContainer.textContent = user.username.charAt(0).toUpperCase();
         }
     }
-    
+
     let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
     document.getElementById('balance').textContent = gameStars;
-    
+
     loadUserProgress();
     loadInventory();
     loadAchievements();
-    loadDailyQuests();
     generateFakeHistory();
     generateCases();
     updateFreeTimer();
@@ -346,31 +255,29 @@ function init() {
     loadHistory();
     initParticles();
     hideLoader();
-    
+
     setInterval(() => fetchOnlineCount(), 15000);
     setInterval(updateFreeTimer, 60000);
-    setInterval(updateHistoryTimes, 60000);
-    
-    // Добавление фейковых открытий каждые 20-40 секунд
+
     setInterval(() => {
         const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * Object.keys(CASES_DATA).length)];
         const randomItem = getRandomItemByChance(randomCase.items);
-        const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена', 'Сергей'];
+        const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван'];
         const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-        
+
         globalHistory.unshift({
             nft: randomItem.nft,
             username: randomName,
             time: 'только что'
         });
-        
+
         if (globalHistory.length > 25) {
             globalHistory = globalHistory.slice(0, 25);
         }
-        
+
         renderGlobalHistory();
     }, Math.random() * 20000 + 20000);
-    
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -385,7 +292,6 @@ function loadUserProgress() {
     userLevel = parseInt(localStorage.getItem('userLevel') || '1');
     userXP = parseInt(localStorage.getItem('userXP') || '0');
     openedCases = parseInt(localStorage.getItem('openedCases') || '0');
-    totalSells = parseInt(localStorage.getItem('totalSells') || '0');
     updateLevelDisplay();
 }
 
@@ -398,58 +304,290 @@ function updateLevelDisplay() {
 function addXP(amount) {
     userXP += amount;
     const xpNeeded = userLevel * 100;
-    
+
     if (userXP >= xpNeeded) {
         userXP -= xpNeeded;
         userLevel++;
-        
+
         let reward = userLevel * 10;
         let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
         gameStars += reward;
         localStorage.setItem('gameStars', gameStars);
         document.getElementById('balance').textContent = gameStars;
-        
+
         tg.showPopup({
             title: '🎉 LEVEL UP!',
             message: `Поздравляем! Вы достигли ${userLevel} уровня!\n\n+${reward} ⭐ звёзд в награду!`,
             buttons: [{type: 'ok'}]
         });
-        
-        checkLevelAchievements();
     }
-    
+
     localStorage.setItem('userLevel', userLevel);
     localStorage.setItem('userXP', userXP);
     updateLevelDisplay();
 }
 
-function checkLevelAchievements() {
-    if (userLevel >= 5 && !achievements.includes('level_5')) {
-        unlockAchievement('level_5');
-    }
-    if (userLevel >= 10 && !achievements.includes('level_10')) {
-        unlockAchievement('level_10');
-    }
-    if (userLevel >= 25 && !achievements.includes('level_25')) {
-        unlockAchievement('level_25');
-    }
-}
-
 function openAdminPanel() {
     if (!isAdmin) return;
-    
+
+    document.getElementById('adminPanel').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    loadAdminStats();
+    loadAllUsers();
+}
+
+function closeAdminPanel() {
+    document.getElementById('adminPanel').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function loadAdminStats() {
     const stats = {
-        totalUsers: 150 + Math.floor(Math.random() * 50),
-        onlineUsers: 20 + Math.floor(Math.random() * 10),
-        totalCases: 1500 + Math.floor(Math.random() * 500),
-        totalStars: 50000 + Math.floor(Math.random() * 10000)
+        totalUsers: 1,
+        onlineUsers: 15 + Math.floor(Math.random() * 10),
+        totalCases: parseInt(localStorage.getItem('openedCases') || '0'),
+        totalStars: parseInt(localStorage.getItem('gameStars') || '0'),
+        totalNFTs: JSON.parse(localStorage.getItem('inventory') || '[]').length,
+        achievements: JSON.parse(localStorage.getItem('achievements') || '[]').length
     };
-    
+
+    document.getElementById('adminStats').innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">👥</div>
+                <div class="admin-stat-value">${stats.totalUsers}</div>
+                <div class="admin-stat-label">Пользователей</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">🟢</div>
+                <div class="admin-stat-value">${stats.onlineUsers}</div>
+                <div class="admin-stat-label">Онлайн</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">📦</div>
+                <div class="admin-stat-value">${stats.totalCases}</div>
+                <div class="admin-stat-label">Открыто кейсов</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">⭐</div>
+                <div class="admin-stat-value">${stats.totalStars}</div>
+                <div class="admin-stat-label">Звёзд у вас</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">💎</div>
+                <div class="admin-stat-value">${stats.totalNFTs}</div>
+                <div class="admin-stat-label">NFT собрано</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">🏆</div>
+                <div class="admin-stat-value">${stats.achievements}</div>
+                <div class="admin-stat-label">Достижений</div>
+            </div>
+        </div>
+    `;
+}
+
+function loadAllUsers() {
+    const currentUser = tg.initDataUnsafe?.user;
+    const users = [{
+        id: currentUser?.id || 123456,
+        username: currentUser?.username || 'admin',
+        first_name: currentUser?.first_name || 'Admin',
+        stars: parseInt(localStorage.getItem('gameStars') || '0'),
+        level: parseInt(localStorage.getItem('userLevel') || '1'),
+        cases: parseInt(localStorage.getItem('openedCases') || '0'),
+        nfts: JSON.parse(localStorage.getItem('inventory') || '[]').length,
+        isAdmin: true
+    }];
+
+    document.getElementById('adminUsersList').innerHTML = users.map(user => `
+        <div class="admin-user-row">
+            <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700;">
+                    ${user.first_name.charAt(0).toUpperCase()}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 700;">
+                        ${user.first_name}
+                        ${user.isAdmin ? '<span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 3px 8px; border-radius: 8px; font-size: 11px; margin-left: 8px; color: #000;">ADMIN</span>' : ''}
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                        @${user.username} • ID: ${user.id}
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <span>⭐ ${user.stars}</span>
+                        <span>📊 Lvl ${user.level}</span>
+                        <span>📦 ${user.cases}</span>
+                        <span>💎 ${user.nfts}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(${user.id}, '${user.username}', ${user.stars})">
+                    💰
+                </button>
+                <button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress(${user.id}, '${user.username}')">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function manageUserBalance(userId, username, currentStars) {
+    const modal = document.createElement('div');
+    modal.className = 'admin-modal';
+    modal.innerHTML = `
+        <div class="admin-modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 20px; font-weight: 800;">💰 Управление балансом</h3>
+                <div style="font-size: 28px; cursor: pointer; color: #6b7280;" onclick="this.closest('.admin-modal').remove()">✕</div>
+            </div>
+
+            <div style="background: rgba(30, 30, 40, 0.5); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">Пользователь</div>
+                <div style="font-size: 18px; font-weight: 700;">@${username}</div>
+                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">Текущий баланс: <span style="color: #10b981; font-weight: 700;">${currentStars} ⭐</span></div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">Количество звёзд</label>
+                <input type="number" id="starsAmount" placeholder="Введите количество" style="width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 16px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="admin-btn admin-btn-success" onclick="giveStars(${userId}, '${username}', ${currentStars})">
+                    ➕ Выдать
+                </button>
+                <button class="admin-btn admin-btn-danger" onclick="takeStars(${userId}, '${username}', ${currentStars})">
+                    ➖ Забрать
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px;">
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=100">+100</button>
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=500">+500</button>
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=1000">+1000</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function giveStars(userId, username, currentStars) {
+    const amount = parseInt(document.getElementById('starsAmount').value);
+
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите корректное количество!');
+        return;
+    }
+
+    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+    gameStars += amount;
+    localStorage.setItem('gameStars', gameStars);
+    document.getElementById('balance').textContent = gameStars;
+
     tg.showPopup({
-        title: '👑 ADMIN PANEL',
-        message: `📊 Статистика:\n\n👥 Всего пользователей: ${stats.totalUsers}\n🟢 Онлайн: ${stats.onlineUsers}\n📦 Открыто кейсов: ${stats.totalCases}\n⭐ Всего звёзд: ${stats.totalStars}`,
+        title: '✅ Успешно!',
+        message: `Выдано ${amount} ⭐ звёзд пользователю @${username}\n\nНовый баланс: ${gameStars} ⭐`,
         buttons: [{type: 'ok'}]
     });
+
+    document.querySelector('.admin-modal').remove();
+    loadAllUsers();
+}
+
+function takeStars(userId, username, currentStars) {
+    const amount = parseInt(document.getElementById('starsAmount').value);
+
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите корректное количество!');
+        return;
+    }
+
+    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+    gameStars = Math.max(0, gameStars - amount);
+    localStorage.setItem('gameStars', gameStars);
+    document.getElementById('balance').textContent = gameStars;
+
+    tg.showPopup({
+        title: '✅ Успешно!',
+        message: `Забрано ${amount} ⭐ звёзд у пользователя @${username}\n\nНовый баланс: ${gameStars} ⭐`,
+        buttons: [{type: 'ok'}]
+    });
+
+    document.querySelector('.admin-modal').remove();
+    loadAllUsers();
+}
+
+function resetUserProgress(userId, username) {
+    tg.showPopup({
+        title: '⚠️ ВНИМАНИЕ!',
+        message: `Вы уверены что хотите сбросить ВСЕ данные пользователя @${username}?\n\n• Баланс звёзд\n• Уровень и XP\n• Инвентарь\n• Достижения\n• Историю\n\nЭто действие НЕОБРАТИМО!`,
+        buttons: [
+            {id: 'confirm', type: 'destructive', text: 'Да, сбросить всё'},
+            {type: 'cancel'}
+        ]
+    }, (btnId) => {
+        if (btnId === 'confirm') {
+            localStorage.setItem('gameStars', '0');
+            localStorage.setItem('userLevel', '1');
+            localStorage.setItem('userXP', '0');
+            localStorage.setItem('openedCases', '0');
+            localStorage.setItem('inventory', '[]');
+            localStorage.setItem('achievements', '[]');
+            localStorage.setItem('caseHistory', '[]');
+
+            document.getElementById('balance').textContent = '0';
+            userLevel = 1;
+            userXP = 0;
+            updateLevelDisplay();
+
+            tg.showAlert('Прогресс полностью сброшен!');
+            loadAllUsers();
+        }
+    });
+}
+
+function sendGlobalNotification() {
+    tg.showPopup({
+        title: '📢 Уведомление',
+        message: 'Функция отправки уведомлений работает!\n\n(Для реальной отправки нужен backend)',
+        buttons: [{type: 'ok'}]
+    });
+}
+
+function createPromoCode() {
+    tg.showPopup({
+        title: '🎟️ Промокод',
+        message: 'Доступные промокоды:\n\nWELCOME - 100⭐\nNEWYEAR2026 - 200⭐\nLUCKY - 150⭐',
+        buttons: [{type: 'ok'}]
+    });
+}
+
+function exportUserData() {
+    const data = {
+        stars: localStorage.getItem('gameStars'),
+        level: localStorage.getItem('userLevel'),
+        xp: localStorage.getItem('userXP'),
+        cases: localStorage.getItem('openedCases'),
+        inventory: localStorage.getItem('inventory'),
+        achievements: localStorage.getItem('achievements')
+    };
+
+    console.log('Exported data:', data);
+    tg.showAlert('Данные экспортированы в консоль!');
+}
+
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`adminTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+
+    if (tab === 'users') loadAllUsers();
+    if (tab === 'stats') loadAdminStats();
 }
 
 function fetchOnlineCount() {
@@ -460,12 +598,12 @@ function fetchOnlineCount() {
 function generateCases() {
     const container = document.getElementById('casesContainer');
     if (!container) return;
-    
+
     const cases = Object.entries(CASES_DATA).filter(([key, data]) => {
         if (currentFilter === 'all') return true;
         return data.type === currentFilter;
     });
-    
+
     container.innerHTML = cases.map(([key, data]) => {
         const isFree = data.price === 0;
         return `
@@ -490,39 +628,36 @@ function generateCases() {
             </div>
         `;
     }).join('');
-    
+
     updateFreeTimer();
 }
 
 function showCaseInfo(caseKey) {
     currentCase = caseKey;
     const data = CASES_DATA[caseKey];
-    
+
     if (!data) {
         tg.showAlert('Ошибка: кейс не найден');
         return;
     }
-    
+
     document.getElementById('modalCaseTitle').textContent = data.name;
     document.getElementById('modalCaseIcon').textContent = data.icon;
     document.getElementById('modalCaseName').textContent = data.name.toUpperCase();
     document.getElementById('modalCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : `⭐ ${data.price}`;
     document.getElementById('modalOpenBtn').textContent = data.price === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${data.price}`;
-    
+
     const itemsList = document.getElementById('modalItemsList');
     itemsList.innerHTML = data.items.map(item => {
         const nft = item.nft;
-        
+
         if (!nft) return '';
-        
+
         if (nft.isCurrency) {
-            let icon = '⭐';
-            if (nft.name === 'Подарок') icon = '💝';
-            
             return `
                 <div class="item-row">
                     <div class="item-icon" style="border-color: #fbbf24;">
-                        <div style="font-size:40px;">${icon}</div>
+                        <div style="font-size:40px;">${nft.icon}</div>
                     </div>
                     <div class="item-info">
                         <div class="item-name">${nft.name}</div>
@@ -552,7 +687,7 @@ function showCaseInfo(caseKey) {
             `;
         }
     }).join('');
-    
+
     document.getElementById('modalInfo').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -576,114 +711,117 @@ function closeInfoModal() {
 
 function openCaseFromModal() {
     if (!currentCase) return;
-    
+
     const data = CASES_DATA[currentCase];
-    
+    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+
     if (data.price === 0) {
+        // ПРОВЕРКА КД
         if (!isAdmin) {
             const lastOpen = localStorage.getItem('lastFreeCase');
-            if (lastOpen && (new Date() - new Date(lastOpen)) < 24 * 60 * 60 * 1000) {
-                tg.showAlert('Бесплатный кейс можно открыть раз в 24 часа');
-                return;
+            if (lastOpen) {
+                const timePassed = new Date() - new Date(lastOpen);
+                const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+
+                if (timeLeft > 0) {
+                    const h = Math.floor(timeLeft / 3600000);
+                    const m = Math.floor((timeLeft % 3600000) / 60000);
+                    tg.showAlert(`Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${h}ч ${m}м`);
+                    return;
+                }
             }
         }
         localStorage.setItem('lastFreeCase', new Date().toISOString());
         closeInfoModal();
         setTimeout(() => startRoulette(currentCase), 300);
     } else {
-        let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-        
-        if (isAdmin || gameStars >= data.price) {
-            if (!isAdmin) {
-                gameStars -= data.price;
-                localStorage.setItem('gameStars', gameStars);
-                document.getElementById('balance').textContent = gameStars;
-            }
-            
-            closeInfoModal();
-            setTimeout(() => startRoulette(currentCase), 300);
-        } else {
-            tg.showAlert(`Недостаточно звёзд!\n\nУ вас: ${gameStars} ⭐\nНужно: ${data.price} ⭐\n\nОткрывайте бесплатный кейс!`);
+        // ПРОВЕРКА БАЛАНСА
+        if (gameStars < data.price && !isAdmin) {
+            tg.showAlert(`Недостаточно звёзд!\n\nУ вас: ${gameStars} ⭐\nНужно: ${data.price} ⭐\n\nОткройте бесплатный кейс или пригласите друзей!`);
+            return;
         }
+
+        if (!isAdmin) {
+            gameStars -= data.price;
+            localStorage.setItem('gameStars', gameStars);
+            document.getElementById('balance').textContent = gameStars;
+        }
+
+        closeInfoModal();
+        setTimeout(() => startRoulette(currentCase), 300);
     }
 }
 
 function startRoulette(caseKey) {
-    playSound('spin');
-    
     if (!CASES_DATA[caseKey]) {
         tg.showAlert('Ошибка кейса');
         return;
     }
-    
+
     const data = CASES_DATA[caseKey];
     const modal = document.getElementById('modalRoulette');
     const track = document.getElementById('rouletteTrack');
     const resultBox = document.getElementById('resultBox');
     const title = document.getElementById('rouletteTitle');
-    
+
     if (!modal || !track) return;
-    
+
     modal.classList.add('active');
     resultBox.classList.remove('active');
     title.textContent = '🎲 OPENING...';
     document.body.style.overflow = 'hidden';
-    
+
     track.innerHTML = '';
     track.style.transform = 'translateX(0)';
     track.style.transition = 'none';
-    
+
     const items = [];
     for (let i = 0; i < 51; i++) {
         const randomItem = data.items[Math.floor(Math.random() * data.items.length)];
         items.push(randomItem);
     }
-    
+
     const winItem = getRandomItemByChance(data.items);
     const winIndex = 25;
     items[winIndex] = winItem;
-    
+
     items.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'roulette-item';
-        
+
         if (item.nft.isCurrency) {
-            let icon = '⭐';
-            if (item.nft.name === 'Подарок') icon = '💝';
-            div.innerHTML = `<div style="font-size:70px;">${icon}</div>`;
+            div.innerHTML = `<div style="font-size:70px;">${item.nft.icon}</div>`;
         } else {
             div.innerHTML = `<img src="${item.nft.image}" alt="${item.nft.name}" onerror="this.style.display='none'">`;
         }
-        
+
         track.appendChild(div);
     });
-    
+
     setTimeout(() => {
         const wrapper = document.querySelector('.roulette-wrapper');
         if (!wrapper) return;
-        
+
         const wrapperWidth = wrapper.offsetWidth;
         const itemWidth = 130;
         const gap = 20;
         const itemFullWidth = itemWidth + gap;
-        
+
         const winItemLeftEdge = winIndex * itemFullWidth;
         const winItemCenter = winItemLeftEdge + (itemWidth / 2);
         const containerCenter = wrapperWidth / 2;
         const offset = containerCenter - winItemCenter;
-        
+
         track.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
         track.style.transform = `translateX(${offset}px)`;
         title.textContent = '🎰 SPINNING...';
     }, 100);
-    
+
     setTimeout(() => {
-        playSound('win');
         showResult(winItem.nft);
-        
+
         openedCases++;
         localStorage.setItem('openedCases', openedCases);
-        updateDailyQuest('cases');
         checkAchievements();
     }, 4500);
 }
@@ -701,29 +839,28 @@ function getRandomItemByChance(items) {
 function showResult(nft) {
     const resultBox = document.getElementById('resultBox');
     resultBox.classList.add('active');
-    
+
     if (nft.isCurrency) {
         if (nft.name.includes('звезд')) {
             let currentBalance = parseInt(localStorage.getItem('gameStars') || '0');
             currentBalance += nft.amount;
             localStorage.setItem('gameStars', currentBalance);
             document.getElementById('balance').textContent = currentBalance;
-            
-            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">⭐</div>`;
+
+            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
             document.getElementById('resultName').textContent = `+${nft.amount} звёзд`;
             document.getElementById('resultRarity').textContent = 'ВАЛЮТА';
             document.getElementById('resultStars').innerHTML = `Баланс: ⭐ ${currentBalance}`;
             document.getElementById('resultTon').innerHTML = '';
-            
+
             addXP(nft.amount);
-            checkStarsAchievements(currentBalance);
         } else {
-            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">💝</div>`;
+            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
             document.getElementById('resultName').textContent = 'Подарок';
             document.getElementById('resultRarity').textContent = 'ОСОБОЕ';
             document.getElementById('resultStars').innerHTML = `🎁 Сюрприз!`;
             document.getElementById('resultTon').innerHTML = '';
-            
+
             addXP(10);
         }
         resultBox.style.borderColor = '#fbbf24';
@@ -732,24 +869,23 @@ function showResult(nft) {
         document.getElementById('resultIcon').innerHTML = `<img src="${nft.image}" alt="${nft.name}" style="width:140px; height:140px; object-fit:cover; border-radius:12px;" onerror="this.style.display='none'">`;
         document.getElementById('resultName').textContent = nft.name;
         document.getElementById('resultRarity').textContent = nft.rarity.toUpperCase();
-        
+
         const color = getRarityColor(nft.rarity);
         resultBox.style.borderColor = color;
         document.getElementById('resultRarity').style.background = color;
-        
+
         document.getElementById('resultStars').innerHTML = `⭐ ${nft.stars}`;
         document.getElementById('resultTon').innerHTML = `💎 ${nft.ton} TON`;
-        
+
         addXP(Math.floor(nft.stars / 5));
         addToInventory(nft);
         saveToHistory(nft);
-        checkRarityAchievements(nft.rarity);
-        
+
         if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
             createConfetti();
         }
     }
-    
+
     addToGlobalHistory(nft);
 }
 
@@ -771,7 +907,7 @@ function createConfetti() {
             --x: ${Math.random()};
         `;
         document.body.appendChild(confetti);
-        
+
         setTimeout(() => confetti.remove(), 3000);
     }
 }
@@ -785,7 +921,6 @@ function addToInventory(nft) {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
     inventory.unshift({...nft, time: new Date().toISOString()});
     localStorage.setItem('inventory', JSON.stringify(inventory));
-    checkInventoryAchievements();
 }
 
 function loadInventory() {
@@ -796,7 +931,7 @@ function loadInventory() {
 function renderInventory() {
     const container = document.getElementById('inventoryContainer');
     if (!container) return;
-    
+
     if (inventory.length === 0) {
         container.innerHTML = `
             <div style="padding: 60px 20px; text-align: center;">
@@ -807,11 +942,10 @@ function renderInventory() {
         `;
         return;
     }
-    
-    // Сортировка по редкости
+
     const rarityOrder = {mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1};
     const sorted = [...inventory].sort((a, b) => (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0));
-    
+
     container.innerHTML = `
         <div style="padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -822,15 +956,18 @@ function renderInventory() {
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                 ${sorted.map((nft, idx) => `
-                    <div class="inventory-item" onclick="showNFTDetails(${inventory.indexOf(nft)})">
-                        <div style="width: 100%; height: 150px; background: rgba(0,0,0,0.5); border-radius: 12px; overflow: hidden; border: 3px solid ${getRarityColor(nft.rarity)}; position: relative;">
-                            <img src="${nft.image}" alt="${nft.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
-                            <div style="position: absolute; top: 8px; right: 8px; background: ${getRarityColor(nft.rarity)}; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                    <div style="background: rgba(30,30,40,0.5); border-radius: 12px; padding: 12px; border: 2px solid ${getRarityColor(nft.rarity)};">
+                        <div style="width: 100%; height: 120px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative;">
+                            <img src="${nft.image}" alt="${nft.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; top: 5px; right: 5px; background: ${getRarityColor(nft.rarity)}; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase;">
                                 ${nft.rarity}
                             </div>
                         </div>
-                        <div style="margin-top: 8px; font-size: 14px; font-weight: 700;">${nft.name}</div>
-                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">💎 ${nft.ton} TON • ⭐ ${nft.stars}</div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">${nft.name}</div>
+                        <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">💎 ${nft.ton} TON • ⭐ ${nft.stars}</div>
+                        <button onclick="sellNFT(${inventory.indexOf(nft)})" style="width: 100%; padding: 8px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            Продать за ${Math.floor(nft.stars * 0.7)} ⭐
+                        </button>
                     </div>
                 `).join('')}
             </div>
@@ -838,49 +975,33 @@ function renderInventory() {
     `;
 }
 
-function showNFTDetails(idx) {
+function sellNFT(idx) {
     const nft = inventory[idx];
     if (!nft) return;
-    
+
     const sellPrice = Math.floor(nft.stars * 0.7);
-    
+
     tg.showPopup({
-        title: nft.name,
-        message: `Редкость: ${nft.rarity.toUpperCase()}\nЦена: ${nft.ton} TON\nЗвёзды: ${nft.stars} ⭐\n\nПродать за ${sellPrice} ⭐?`,
+        title: 'Продать NFT?',
+        message: `${nft.name}\n\nВы получите: ${sellPrice} ⭐`,
         buttons: [
             {id: 'sell', type: 'default', text: `Продать за ${sellPrice} ⭐`},
             {type: 'cancel'}
         ]
     }, (btnId) => {
         if (btnId === 'sell') {
-            sellNFT(idx);
+            let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+            gameStars += sellPrice;
+            localStorage.setItem('gameStars', gameStars);
+            document.getElementById('balance').textContent = gameStars;
+
+            inventory.splice(idx, 1);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            renderInventory();
+
+            tg.showAlert(`Продано за ${sellPrice} ⭐!`);
         }
     });
-}
-
-function sellNFT(idx) {
-    const nft = inventory[idx];
-    if (!nft) return;
-    
-    const sellPrice = Math.floor(nft.stars * 0.7);
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-    gameStars += sellPrice;
-    localStorage.setItem('gameStars', gameStars);
-    document.getElementById('balance').textContent = gameStars;
-    
-    inventory.splice(idx, 1);
-    localStorage.setItem('inventory', JSON.stringify(inventory));
-    renderInventory();
-    
-    totalSells++;
-    localStorage.setItem('totalSells', totalSells);
-    updateDailyQuest('sells');
-    
-    if (totalSells === 1 && !achievements.includes('sell_nft')) {
-        unlockAchievement('sell_nft');
-    }
-    
-    tg.showAlert(`Продано за ${sellPrice} ⭐!`);
 }
 
 function saveToHistory(nft) {
@@ -898,7 +1019,7 @@ function loadHistory() {
 function renderHistory(history) {
     const container = document.getElementById('historyContainer');
     if (!container) return;
-    
+
     if (history.length === 0) {
         container.innerHTML = `
             <div style="padding: 60px 20px; text-align: center;">
@@ -909,7 +1030,7 @@ function renderHistory(history) {
         `;
         return;
     }
-    
+
     container.innerHTML = `
         <div style="padding: 20px;">
             <h3 style="font-size: 18px; margin-bottom: 15px;">📜 История открытий (${history.length})</h3>
@@ -941,11 +1062,11 @@ function loadAchievements() {
 function renderAchievements() {
     const container = document.getElementById('achievementsContainer');
     if (!container) return;
-    
+
     const unlockedCount = achievements.length;
     const totalCount = ACHIEVEMENTS.length;
     const progress = Math.round((unlockedCount / totalCount) * 100);
-    
+
     container.innerHTML = `
         <div style="padding: 20px;">
             <div style="margin-bottom: 20px;">
@@ -980,202 +1101,59 @@ function renderAchievements() {
 }
 
 function checkAchievements() {
-    let unlocked = false;
-    
     if (openedCases >= 1 && !achievements.includes('first_case')) {
         unlockAchievement('first_case');
-        unlocked = true;
     }
     if (openedCases >= 5 && !achievements.includes('cases_5')) {
         unlockAchievement('cases_5');
-        unlocked = true;
     }
     if (openedCases >= 10 && !achievements.includes('cases_10')) {
         unlockAchievement('cases_10');
-        unlocked = true;
-    }
-    if (openedCases >= 25 && !achievements.includes('cases_25')) {
-        unlockAchievement('cases_25');
-        unlocked = true;
-    }
-    if (openedCases >= 50 && !achievements.includes('cases_50')) {
-        unlockAchievement('cases_50');
-        unlocked = true;
-    }
-    if (openedCases >= 100 && !achievements.includes('cases_100')) {
-        unlockAchievement('cases_100');
-        unlocked = true;
-    }
-    
-    if (unlocked) {
-        renderAchievements();
-    }
-}
-
-function checkRarityAchievements(rarity) {
-    if (rarity === 'rare' && !achievements.includes('rare_drop')) {
-        unlockAchievement('rare_drop');
-    }
-    if (rarity === 'epic' && !achievements.includes('epic_drop')) {
-        unlockAchievement('epic_drop');
-    }
-    if (rarity === 'legendary' && !achievements.includes('legendary_drop')) {
-        unlockAchievement('legendary_drop');
-    }
-    if (rarity === 'mythic' && !achievements.includes('mythic_drop')) {
-        unlockAchievement('mythic_drop');
-    }
-}
-
-function checkStarsAchievements(stars) {
-    if (stars >= 100 && !achievements.includes('stars_100')) {
-        unlockAchievement('stars_100');
-    }
-    if (stars >= 500 && !achievements.includes('stars_500')) {
-        unlockAchievement('stars_500');
-    }
-    if (stars >= 1000 && !achievements.includes('stars_1000')) {
-        unlockAchievement('stars_1000');
-    }
-}
-
-function checkInventoryAchievements() {
-    if (inventory.length >= 10 && !achievements.includes('inventory_10')) {
-        unlockAchievement('inventory_10');
-    }
-    if (inventory.length >= 25 && !achievements.includes('inventory_25')) {
-        unlockAchievement('inventory_25');
     }
 }
 
 function unlockAchievement(achId) {
     const ach = ACHIEVEMENTS.find(a => a.id === achId);
     if (!ach) return;
-    
+
     achievements.push(achId);
     localStorage.setItem('achievements', JSON.stringify(achievements));
-    
+
     let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
     gameStars += ach.reward;
     localStorage.setItem('gameStars', gameStars);
     document.getElementById('balance').textContent = gameStars;
-    
+
     tg.showPopup({
         title: '🏆 Достижение получено!',
         message: `${ach.icon} ${ach.name}\n\n${ach.desc}\n\n+${ach.reward} ⭐ звёзд!`,
         buttons: [{type: 'ok'}]
     });
-    
+
     renderAchievements();
-}
-
-// ЕЖЕДНЕВНЫЕ КВЕСТЫ
-function loadDailyQuests() {
-    const today = new Date().toDateString();
-    const savedDate = localStorage.getItem('questsDate');
-    
-    if (savedDate !== today) {
-        dailyQuests = {};
-        DAILY_QUESTS.forEach(quest => {
-            dailyQuests[quest.id] = {progress: 0, completed: false};
-        });
-        localStorage.setItem('questsDate', today);
-        localStorage.setItem('dailyQuests', JSON.stringify(dailyQuests));
-    } else {
-        dailyQuests = JSON.parse(localStorage.getItem('dailyQuests') || '{}');
-    }
-    
-    renderDailyQuests();
-}
-
-function renderDailyQuests() {
-    const container = document.getElementById('questsContainer');
-    if (!container) return;
-    
-    const completedCount = Object.values(dailyQuests).filter(q => q.completed).length;
-    const totalCount = DAILY_QUESTS.length;
-    
-    container.innerHTML = `
-        <div style="padding: 20px;">
-            <div style="margin-bottom: 20px;">
-                <h3 style="font-size: 18px; margin-bottom: 10px;">📋 Ежедневные задания</h3>
-                <div style="font-size: 14px; color: #6b7280;">Выполнено: ${completedCount}/${totalCount}</div>
-            </div>
-            ${DAILY_QUESTS.map(quest => {
-                const progress = dailyQuests[quest.id]?.progress || 0;
-                const completed = dailyQuests[quest.id]?.completed || false;
-                const percent = Math.min((progress / quest.target) * 100, 100);
-                
-                return `
-                    <div style="background: rgba(30,30,40,0.5); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 2px solid ${completed ? '#10b981' : 'rgba(255,255,255,0.1)'};">
-                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                            <div style="font-size: 32px;">${quest.icon}</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 16px; font-weight: 700;">${quest.name} ${completed ? '✅' : ''}</div>
-                                <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">${progress}/${quest.target}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 14px; color: #ffd700;">+${quest.reward} ⭐</div>
-                            </div>
-                        </div>
-                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                            <div style="width: ${percent}%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.3s;"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-}
-
-function updateDailyQuest(type) {
-    DAILY_QUESTS.forEach(quest => {
-        if (quest.type === type && !dailyQuests[quest.id]?.completed) {
-            if (!dailyQuests[quest.id]) {
-                dailyQuests[quest.id] = {progress: 0, completed: false};
-            }
-            
-            dailyQuests[quest.id].progress++;
-            
-            if (dailyQuests[quest.id].progress >= quest.target) {
-                dailyQuests[quest.id].completed = true;
-                
-                let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-                gameStars += quest.reward;
-                localStorage.setItem('gameStars', gameStars);
-                document.getElementById('balance').textContent = gameStars;
-                
-                tg.showPopup({
-                    title: '✅ Задание выполнено!',
-                    message: `${quest.icon} ${quest.name}\n\n+${quest.reward} ⭐ звёзд!`,
-                    buttons: [{type: 'ok'}]
-                });
-            }
-            
-            localStorage.setItem('dailyQuests', JSON.stringify(dailyQuests));
-            renderDailyQuests();
-        }
-    });
 }
 
 function updateFreeTimer() {
     const statusEl = document.getElementById('freeStatus');
     const timerEl = document.getElementById('freeTimer');
     if (!statusEl || !timerEl) return;
-    
+
     const lastOpen = localStorage.getItem('lastFreeCase');
     if (!lastOpen) {
         statusEl.textContent = 'ДОСТУПЕН';
+        statusEl.style.color = '#10b981';
         timerEl.textContent = '';
         return;
     }
-    
+
     const diff = 24 * 60 * 60 * 1000 - (new Date() - new Date(lastOpen));
     if (diff <= 0) {
         statusEl.textContent = 'ДОСТУПЕН';
+        statusEl.style.color = '#10b981';
         timerEl.textContent = '';
     } else {
         statusEl.textContent = 'НЕДОСТУПЕН';
+        statusEl.style.color = '#ef4444';
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         timerEl.textContent = `Через ${h}ч ${m}м`;
@@ -1186,48 +1164,33 @@ function switchTab(tab) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     event.currentTarget.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
+
     const tabs = {
         cases: 'tabCases',
         inventory: 'tabInventory',
         profile: 'tabProfile',
         history: 'tabHistory',
-        achievements: 'tabAchievements',
-        quests: 'tabQuests'
+        achievements: 'tabAchievements'
     };
-    
+
     document.getElementById(tabs[tab]).classList.add('active');
-    
+
     if (tab === 'inventory') renderInventory();
     if (tab === 'history') loadHistory();
     if (tab === 'achievements') renderAchievements();
-    if (tab === 'quests') renderDailyQuests();
 }
 
 function loadRefLink() {
     const userId = tg.initDataUnsafe?.user?.id || '123456789';
     const refCount = parseInt(localStorage.getItem('refCount') || '0');
-    
+
     document.getElementById('refLink').textContent = `https://t.me/gsdfsdfdsfbot?start=ref_${userId}`;
     document.getElementById('refCount').textContent = refCount;
-    
-    checkRefAchievements(refCount);
-}
-
-function checkRefAchievements(refCount) {
-    if (refCount >= 1 && !achievements.includes('ref_1')) {
-        unlockAchievement('ref_1');
-    }
-    if (refCount >= 5 && !achievements.includes('ref_5')) {
-        unlockAchievement('ref_5');
-    }
-    if (refCount >= 10 && !achievements.includes('ref_10')) {
-        unlockAchievement('ref_10');
-    }
 }
 
 function copyRefLink() {
-    navigator.clipboard.writeText(document.getElementById('refLink').textContent);
+    const link = document.getElementById('refLink').textContent;
+    navigator.clipboard.writeText(link);
     tg.showPopup({title: 'Успешно!', message: 'Ссылка скопирована', buttons: [{type: 'ok'}]});
 }
 
@@ -1237,40 +1200,36 @@ function activatePromo() {
         tg.showAlert('Введите промокод');
         return;
     }
-    
+
     const promoCodes = {
         'WELCOME': 100,
         'NEWYEAR2026': 200,
-        'LUCKY': 150,
-        'VIP': 500,
-        'CRYPTO': 250,
-        'NFT': 300,
-        'TELEGRAM': 175
+        'LUCKY': 150
     };
-    
+
     const usedPromos = JSON.parse(localStorage.getItem('usedPromos') || '[]');
-    
+
     if (usedPromos.includes(code)) {
         tg.showAlert('Промокод уже использован!');
         return;
     }
-    
+
     if (promoCodes[code]) {
         const reward = promoCodes[code];
         let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
         gameStars += reward;
         localStorage.setItem('gameStars', gameStars);
         document.getElementById('balance').textContent = gameStars;
-        
+
         usedPromos.push(code);
         localStorage.setItem('usedPromos', JSON.stringify(usedPromos));
-        
+
         tg.showPopup({
             title: '🎉 Промокод активирован!',
             message: `Вы получили ${reward} ⭐ звёзд!`,
             buttons: [{type: 'ok'}]
         });
-        
+
         document.getElementById('promoInput').value = '';
     } else {
         tg.showAlert('Неверный промокод!');
