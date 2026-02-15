@@ -635,24 +635,56 @@ function generateCases() {
 function showCaseInfo(caseKey) {
     currentCase = caseKey;
     const data = CASES_DATA[caseKey];
-
+    
     if (!data) {
         tg.showAlert('Ошибка: кейс не найден');
         return;
     }
-
+    
+    // ПРОВЕРКА КД ДЛЯ БЕСПЛАТНОГО КЕЙСА
+    if (data.price === 0 && !isAdmin) {
+        const lastOpen = localStorage.getItem('lastFreeCase');
+        if (lastOpen) {
+            const timePassed = new Date() - new Date(lastOpen);
+            const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+            
+            if (timeLeft > 0) {
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
+                tg.showAlert(`Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${h}ч ${m}м`);
+                return; // НЕ ОТКРЫВАЕМ ОКНО
+            }
+        }
+    }
+    
     document.getElementById('modalCaseTitle').textContent = data.name;
     document.getElementById('modalCaseIcon').textContent = data.icon;
     document.getElementById('modalCaseName').textContent = data.name.toUpperCase();
     document.getElementById('modalCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : `⭐ ${data.price}`;
-    document.getElementById('modalOpenBtn').textContent = data.price === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${data.price}`;
-
+    
+    // ОБНОВЛЯЕМ ТЕКСТ КНОПКИ
+    const openBtn = document.getElementById('modalOpenBtn');
+    if (data.price === 0) {
+        openBtn.textContent = 'Открыть бесплатно';
+    } else {
+        const gameStars = parseInt(localStorage.getItem('gameStars') || '0');
+        if (gameStars < data.price && !isAdmin) {
+            openBtn.textContent = `Недостаточно звёзд (есть ${gameStars} ⭐)`;
+            openBtn.style.opacity = '0.5';
+            openBtn.style.cursor = 'not-allowed';
+        } else {
+            openBtn.textContent = `Открыть за ⭐ ${data.price}`;
+            openBtn.style.opacity = '1';
+            openBtn.style.cursor = 'pointer';
+        }
+    }
+    
     const itemsList = document.getElementById('modalItemsList');
     itemsList.innerHTML = data.items.map(item => {
         const nft = item.nft;
-
+        
         if (!nft) return '';
-
+        
         if (nft.isCurrency) {
             return `
                 <div class="item-row">
@@ -687,10 +719,11 @@ function showCaseInfo(caseKey) {
             `;
         }
     }).join('');
-
+    
     document.getElementById('modalInfo').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
+
 
 function getRarityColor(rarity) {
     const colors = {
@@ -1237,3 +1270,4 @@ function activatePromo() {
 }
 
 init();
+
