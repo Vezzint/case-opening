@@ -699,7 +699,7 @@ body {
 
 .roulette-track {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     position: absolute;
     top: 0;
     left: 0;
