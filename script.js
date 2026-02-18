@@ -435,17 +435,15 @@ function startRoulette(caseKey) {
     title.textContent = '🎲 ОТКРЫВАЕМ...';
     document.body.style.overflow = 'hidden';
 
-    // Очищаем трек и сбрасываем позицию БЕЗ анимации
+    // Сбрасываем без анимации
     track.style.transition = 'none';
     track.style.transform  = 'translateX(0px)';
-    track.innerHTML = '';
+    track.innerHTML        = '';
 
-    // Выбираем победителя заранее
-    const winItem  = getRandomItemByChance(data.items);
-    const WIN_IDX  = 30; // победитель на позиции 30
-    const TOTAL    = 60;
+    const WIN_IDX = 35;
+    const TOTAL   = 60;
+    const winItem = getRandomItemByChance(data.items);
 
-    // Заполняем дорожку
     for (let i = 0; i < TOTAL; i++) {
         const item = (i === WIN_IDX)
             ? winItem
@@ -455,28 +453,38 @@ function startRoulette(caseKey) {
         div.className = 'roulette-item';
         div.style.borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
         div.innerHTML = item.nft.isCurrency
-            ? `<div style="font-size:65px;line-height:1;">${item.nft.icon}</div>`
-            : `<img src="${item.nft.image}" alt="${item.nft.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"
-                   onerror="this.parentElement.innerHTML='<div style=font-size:65px;line-height:1>💎</div>'">`;
+            ? `<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${item.nft.icon}</div>`
+            : `<img src="${item.nft.image}" alt="${item.nft.name}"
+                style="width:100%;height:100%;object-fit:cover;border-radius:8px;"
+                onerror="this.parentElement.innerHTML='<div style=font-size:60px>💎</div>'">`;
         track.appendChild(div);
     }
 
-    // Ждём один тик, чтобы браузер отрисовал элементы без анимации
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        const ITEM_W = 140; // ширина + gap из CSS
-        const wrapper = document.querySelector('.roulette-wrapper');
-        const center  = wrapper ? wrapper.offsetWidth / 2 : 185;
+    // Ждём 2 кадра — браузер РЕАЛЬНО отрисовывает элементы
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // Измеряем РЕАЛЬНУЮ ширину элемента из DOM
+            const firstItem = track.children[0];
+            if (!firstItem) return;
 
-        // Смещение: центр победного элемента должен совпасть с центром обёртки
-        const winCenter = WIN_IDX * ITEM_W + ITEM_W / 2;
-        const offset    = center - winCenter;
+            const itemW  = firstItem.getBoundingClientRect().width;
+            const gap    = 10; // ← укажи gap из своего style.css (.roulette-track gap: 10px)
+            const stepW  = itemW + gap;
 
-        track.style.transition = 'transform 5s cubic-bezier(0.12, 0.8, 0.2, 1)';
-        track.style.transform  = `translateX(${offset}px)`;
-        title.textContent = '🎰 КРУТИМ...';
-    }));
+            const wrapper = track.parentElement;
+            const wrapW   = wrapper ? wrapper.getBoundingClientRect().width : 370;
+            const center  = wrapW / 2;
 
-    // Показываем результат через 5.3 секунды
+            // Считаем смещение: центр победного элемента → центр экрана
+            const winCenterX = WIN_IDX * stepW + itemW / 2;
+            const offset     = center - winCenterX;
+
+            track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
+            track.style.transform  = `translateX(${offset}px)`;
+            title.textContent = '🎰 КРУТИМ...';
+        });
+    });
+
     setTimeout(() => {
         title.textContent = '🎉 РЕЗУЛЬТАТ!';
         showResult(winItem.nft, caseKey);
@@ -484,8 +492,9 @@ function startRoulette(caseKey) {
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
         generateCases();
-    }, 5300);
+    }, 5400);
 }
+
 
 function getRandomItemByChance(items) {
     const rand = Math.random() * 100;
@@ -953,3 +962,4 @@ function switchAdminTab(tab) {
 }
 
 init();
+
