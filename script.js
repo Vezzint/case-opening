@@ -12,16 +12,16 @@ const NFT_DATABASE = [
     {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",    icon:"⭐"},
     {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare",      icon:"⭐"},
     {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic",      icon:"⭐"},
-    {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"common"},
-    {id:6, name:"Artisan Brick", stars:35,  ton:0.18, image:"nft/Artisan Brick.jpg",rarity:"common"},
-    {id:7, name:"Astral Shard",  stars:45,  ton:0.25, image:"nft/Astral Shard.jpg", rarity:"rare"},
-    {id:8, name:"Backpack",      stars:60,  ton:0.35, image:"nft/Backpack.jpg",      rarity:"rare"},
-    {id:9, name:"Crystal Eagle", stars:90,  ton:0.55, image:"nft/Crystal Eagle.jpg",rarity:"rare"},
-    {id:10,name:"Durovs Cap",    stars:150, ton:0.90, image:"nft/Durovs Cap.jpg",    rarity:"epic"},
-    {id:11,name:"Faith Amulet",  stars:220, ton:1.40, image:"nft/Faith Amulet.jpg",  rarity:"epic"},
-    {id:12,name:"Happy Brownie", stars:350, ton:2.20, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
-    {id:13,name:"Instant Ramen", stars:500, ton:3.20, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
-    {id:14,name:"Jolly Chimp",   stars:800, ton:5.00, image:"nft/Jolly Chimp.jpg",   rarity:"mythic"}
+    {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
+    {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
+    {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
+    {id:8, name:"Backpack",      stars:500,  ton:0.35, image:"nft/Backpack.jpg",      rarity:"legendary"},
+    {id:9, name:"Crystal Eagle", stars:3881,  ton:41.25, image:"nft/Crystal Eagle.jpg",rarity:"mythic"},
+    {id:10,name:"Durovs Cap",    stars:78550, ton:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
+    {id:11,name:"Faith Amulet",  stars:650, ton:6, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
+    {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
+    {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
+    {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"}
 ];
 
 const CASES_DATA = {
@@ -962,4 +962,5 @@ function switchAdminTab(tab) {
 }
 
 init();
+
 
