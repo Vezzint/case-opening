@@ -6,7 +6,6 @@ tg.setBackgroundColor('#0a0a0f');
 
 const ADMIN_ID = 6584350034;
 
-// БАЗА NFT + ВАЛЮТА
 const NFT_DATABASE = [
     {id: 0, name: "Подарок", stars: 0, ton: 0, image: "nft/Gift.jpg", isCurrency: true, amount: 1, rarity: "special", icon: "💝"},
     {id: 1, name: "3 звезды", stars: 3, ton: 0, image: "nft/Stars.jpg", isCurrency: true, amount: 3, rarity: "common", icon: "⭐"},
@@ -31,6 +30,7 @@ const CASES_DATA = {
         icon: "🎁",
         price: 0,
         type: "free",
+        cooldown: true,
         items: [
             {nft: NFT_DATABASE[0], chance: 35},
             {nft: NFT_DATABASE[1], chance: 30},
@@ -46,6 +46,7 @@ const CASES_DATA = {
         icon: "📦",
         price: 50,
         type: "basic",
+        cooldown: false,
         items: [
             {nft: NFT_DATABASE[1], chance: 30},
             {nft: NFT_DATABASE[2], chance: 25},
@@ -61,6 +62,7 @@ const CASES_DATA = {
         icon: "💎",
         price: 150,
         type: "premium",
+        cooldown: false,
         items: [
             {nft: NFT_DATABASE[2], chance: 28},
             {nft: NFT_DATABASE[3], chance: 24},
@@ -78,8 +80,7 @@ const ACHIEVEMENTS = [
     {id: 'first_case', name: 'Первый кейс', desc: 'Открой свой первый кейс', icon: '🎁', reward: 10},
     {id: 'cases_5', name: 'Новичок', desc: 'Открой 5 кейсов', icon: '📦', reward: 25},
     {id: 'cases_10', name: 'Коллекционер', desc: 'Открой 10 кейсов', icon: '🎰', reward: 50},
-    {id: 'legendary_drop', name: 'Легендарная удача', desc: 'Получи легендарное NFT', icon: '⭐', reward: 200},
-    {id: 'ref_5', name: 'Социальный', desc: 'Пригласи 5 друзей', icon: '👥', reward: 150}
+    {id: 'legendary_drop', name: 'Легендарная удача', desc: 'Получи легендарное NFT', icon: '⭐', reward: 200}
 ];
 
 let currentFilter = 'all';
@@ -92,13 +93,43 @@ let openedCases = 0;
 let achievements = [];
 let globalHistory = [];
 
+// =============================================
+// ЕДИНСТВЕННАЯ ФУНКЦИЯ ПРОВЕРКИ - ДЛЯ ВСЕХ
+// =============================================
+function checkCanOpen(caseKey) {
+    const data = CASES_DATA[caseKey];
+    if (!data) return { ok: false, reason: 'Кейс не найден' };
+
+    // ПРОВЕРКА КД БЕСПЛАТНОГО - ДЛЯ ВСЕХ БЕЗ ИСКЛЮЧЕНИЙ
+    if (data.cooldown) {
+        const lastOpen = localStorage.getItem('lastFreeCase');
+        if (lastOpen) {
+            const timeLeft = 24 * 60 * 60 * 1000 - (new Date() - new Date(lastOpen));
+            if (timeLeft > 0) {
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
+                return { ok: false, reason: '⏰ Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ' + h + 'ч ' + m + 'м' };
+            }
+        }
+    }
+
+    // ПРОВЕРКА БАЛАНСА - ДЛЯ ВСЕХ БЕЗ ИСКЛЮЧЕНИЙ
+    if (data.price > 0) {
+        const stars = parseInt(localStorage.getItem('gameStars') || '0');
+        if (stars < data.price) {
+            return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
+        }
+    }
+
+    return { ok: true };
+}
+
 function initParticles() {
     const canvas = document.getElementById('particles');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     const particles = [];
     for (let i = 0; i < 50; i++) {
         particles.push({
@@ -110,12 +141,10 @@ function initParticles() {
             opacity: Math.random() * 0.5 + 0.2
         });
     }
-
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
+            p.x += p.vx; p.y += p.vy;
             if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
             if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
             ctx.beginPath();
@@ -135,85 +164,14 @@ function hideLoader() {
     }, 2000);
 }
 
-function generateFakeHistory() {
-    const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Иван', 'Елена'];
-
-    for (let i = 0; i < 15; i++) {
-        const randomCase = Object.values(CASES_DATA)[Math.floor(Math.random() * 3)];
-        const randomItem = getRandomItemByChance(randomCase.items);
-        const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-        const minutesAgo = Math.floor(Math.random() * 45) + 1;
-
-        globalHistory.push({
-            nft: randomItem.nft,
-            username: randomName,
-            time: `${minutesAgo} мин назад`
-        });
-    }
-
-    renderGlobalHistory();
-}
-
-function renderGlobalHistory() {
-    const slider = document.getElementById('nftScroll');
-    if (!slider) return;
-
-    const doubled = [...globalHistory, ...globalHistory, ...globalHistory];
-
-    slider.innerHTML = doubled.map(item => {
-        const nft = item.nft;
-        const color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        const displayIcon = nft.isCurrency ? nft.icon : '';
-
-        return `
-            <div class="nft-card" style="border: 2px solid ${color}; min-width: 160px; height: 200px;">
-                <div class="nft-image" style="border: 2px solid ${color}; width: 90px; height: 90px; margin: 0 auto;">
-                    ${nft.isCurrency 
-                        ? `<div style="font-size: 45px;">${displayIcon}</div>`
-                        : `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:45px>💎</div>'">`
-                    }
-                </div>
-                <div class="nft-value" style="color: ${color}; font-size: 13px; margin-top: 10px;">
-                    ${nft.isCurrency ? nft.name : `${nft.ton} TON`}
-                </div>
-                <div style="font-size: 11px; color: #fff; margin-top: 8px; text-align: center; font-weight: 600;">
-                    👤 ${item.username}
-                </div>
-                <div style="font-size: 10px; color: #6b7280; text-align: center; margin-top: 4px;">
-                    ${item.time}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function addToGlobalHistory(nft) {
-    const user = tg.initDataUnsafe?.user;
-    const username = user?.first_name || 'Игрок';
-
-    globalHistory.unshift({
-        nft: nft,
-        username: username,
-        time: 'только что'
-    });
-
-    if (globalHistory.length > 25) {
-        globalHistory = globalHistory.slice(0, 25);
-    }
-
-    renderGlobalHistory();
-}
-
 function init() {
     const user = tg.initDataUnsafe?.user;
     if (user) {
         document.getElementById('userName').textContent = user.first_name || 'Player';
-
         if (user.id === ADMIN_ID) {
             isAdmin = true;
             document.getElementById('adminBadge').classList.remove('hidden');
         }
-
         const avatarContainer = document.getElementById('avatarContainer');
         if (user.photo_url) {
             avatarContainer.innerHTML = `<img src="${user.photo_url}" alt="Avatar">`;
@@ -222,23 +180,20 @@ function init() {
         }
     }
 
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-    document.getElementById('balance').textContent = gameStars;
-
+    document.getElementById('balance').textContent = localStorage.getItem('gameStars') || '0';
     loadUserProgress();
     loadInventory();
     loadAchievements();
     generateFakeHistory();
     generateCases();
-    updateFreeTimer();
     loadRefLink();
     fetchOnlineCount();
     loadHistory();
     initParticles();
     hideLoader();
 
-    setInterval(() => fetchOnlineCount(), 15000);
-    setInterval(updateFreeTimer, 60000);
+    setInterval(fetchOnlineCount, 15000);
+    setInterval(generateCases, 60000); // Обновляем кейсы каждую минуту
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -266,70 +221,100 @@ function updateLevelDisplay() {
 function addXP(amount) {
     userXP += amount;
     const xpNeeded = userLevel * 100;
-
     if (userXP >= xpNeeded) {
         userXP -= xpNeeded;
         userLevel++;
-
         let reward = userLevel * 10;
-        let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-        gameStars += reward;
-        localStorage.setItem('gameStars', gameStars);
-        document.getElementById('balance').textContent = gameStars;
-
+        let stars = parseInt(localStorage.getItem('gameStars') || '0');
+        stars += reward;
+        localStorage.setItem('gameStars', stars);
+        document.getElementById('balance').textContent = stars;
         tg.showPopup({
             title: '🎉 LEVEL UP!',
             message: `Поздравляем! Вы достигли ${userLevel} уровня!\n\n+${reward} ⭐ звёзд в награду!`,
             buttons: [{type: 'ok'}]
         });
     }
-
     localStorage.setItem('userLevel', userLevel);
     localStorage.setItem('userXP', userXP);
     updateLevelDisplay();
 }
 
-// ============ ПРОВЕРКА ДОСТУПНОСТИ БЕСПЛАТНОГО КЕЙСА ============
-function canOpenFreeCase() {
-    if (isAdmin) return true; // Админ может всегда
-
-    const lastOpen = localStorage.getItem('lastFreeCase');
-    if (!lastOpen) return true; // Ещё не открывали
-
-    const timePassed = new Date() - new Date(lastOpen);
-    const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
-
-    return timeLeft <= 0;
+function getRarityColor(rarity) {
+    const colors = {
+        common: '#9e9e9e', rare: '#3b82f6', epic: '#a855f7',
+        legendary: '#fbbf24', mythic: '#ef4444', special: '#10b981'
+    };
+    return colors[rarity] || '#fff';
 }
 
-function getFreeTimerText() {
-    const lastOpen = localStorage.getItem('lastFreeCase');
-    if (!lastOpen) return null;
+// ============ ГЕНЕРАЦИЯ КЕЙСОВ ============
+function generateCases() {
+    const container = document.getElementById('casesContainer');
+    if (!container) return;
 
-    const timePassed = new Date() - new Date(lastOpen);
-    const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+    const cases = Object.entries(CASES_DATA).filter(([key, data]) => {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'free') return data.price === 0;
+        if (currentFilter === 'basic') return data.type === 'basic';
+        if (currentFilter === 'premium') return data.type === 'premium';
+        return true;
+    });
 
-    if (timeLeft <= 0) return null;
+    container.innerHTML = cases.map(([key, data]) => {
+        const check = checkCanOpen(key);
+        const isLocked = !check.ok;
 
-    const h = Math.floor(timeLeft / 3600000);
-    const m = Math.floor((timeLeft % 3600000) / 60000);
-    return `Через ${h}ч ${m}м`;
+        let statusHtml = '';
+        if (data.price === 0) {
+            if (isLocked) {
+                const lastOpen = localStorage.getItem('lastFreeCase');
+                const timeLeft = 24 * 60 * 60 * 1000 - (new Date() - new Date(lastOpen));
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
+                statusHtml = `
+                    <div>
+                        <div style="color:#ef4444;font-weight:700;font-size:14px;">🔒 ЗАБЛОКИРОВАН</div>
+                        <div style="color:#6b7280;font-size:12px;margin-top:4px;">Через ${h}ч ${m}м</div>
+                    </div>`;
+            } else {
+                statusHtml = `<div style="color:#10b981;font-weight:700;font-size:14px;">✅ ДОСТУПЕН</div>`;
+            }
+        } else {
+            const stars = parseInt(localStorage.getItem('gameStars') || '0');
+            const canAfford = stars >= data.price;
+            statusHtml = `
+                <div>
+                    <div style="color:${canAfford ? '#ffd700' : '#ef4444'};font-size:24px;font-weight:900;">⭐ ${data.price}</div>
+                    ${!canAfford ? `<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает ${data.price - stars} ⭐</div>` : ''}
+                </div>`;
+        }
+
+        return `
+            <div class="case-big" onclick="showCaseInfo('${key}')" style="opacity:${isLocked ? '0.6' : '1'}">
+                ${data.price === 0 ? '<div class="case-badge">FREE</div>' : ''}
+                <div class="case-image-section">
+                    <div class="case-main-image">${data.icon}</div>
+                </div>
+                <div class="case-info-section">
+                    <div class="case-title">${data.name}</div>
+                    <div class="case-footer">${statusHtml}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
-// ============ ПОКАЗ ИНФОРМАЦИИ О КЕЙСЕ ============
+// ============ ОТКРЫТИЕ ИНФО О КЕЙСЕ ============
 function showCaseInfo(caseKey) {
     const data = CASES_DATA[caseKey];
+    if (!data) return;
 
-    if (!data) {
-        tg.showAlert('Ошибка: кейс не найден');
-        return;
-    }
-
-    // ПРОВЕРКА КД ДЛЯ БЕСПЛАТНОГО - БЛОКИРУЕМ ОТКРЫТИЕ ОКНА
-    if (data.price === 0 && !canOpenFreeCase()) {
-        const timerText = getFreeTimerText();
-        tg.showAlert(`⏰ Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${timerText}`);
-        return; // НЕ ОТКРЫВАЕМ ОКНО ВООБЩЕ!!!
+    // ПРОВЕРКА — ДЛЯ ВСЕХ, ВКЛЮЧАЯ АДМИНА
+    const check = checkCanOpen(caseKey);
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        return; // СТОП — окно НЕ открывается
     }
 
     currentCase = caseKey;
@@ -340,168 +325,87 @@ function showCaseInfo(caseKey) {
     document.getElementById('modalCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : `⭐ ${data.price}`;
     document.getElementById('modalOpenBtn').textContent = data.price === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${data.price}`;
 
-    const itemsList = document.getElementById('modalItemsList');
-    itemsList.innerHTML = data.items.map(item => {
+    document.getElementById('modalItemsList').innerHTML = data.items.map(item => {
         const nft = item.nft;
-
         if (!nft) return '';
-
         if (nft.isCurrency) {
             return `
                 <div class="item-row">
-                    <div class="item-icon" style="border-color: #fbbf24;">
-                        <div style="font-size:40px;">${nft.icon}</div>
-                    </div>
+                    <div class="item-icon" style="border-color:#fbbf24;"><div style="font-size:40px;">${nft.icon}</div></div>
                     <div class="item-info">
                         <div class="item-name">${nft.name}</div>
-                        <div class="item-price-row">
-                            <span class="item-price-stars">Валюта</span>
-                        </div>
+                        <div class="item-price-row"><span class="item-price-stars">Валюта</span></div>
                     </div>
                     <div class="item-chance">${item.chance}%</div>
-                </div>
-            `;
-        } else {
-            return `
-                <div class="item-row">
-                    <div class="item-icon" style="border-color: ${getRarityColor(nft.rarity)};">
-                        <img src="${nft.image}" alt="${nft.name}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" onerror="this.style.display='none'">
-                    </div>
-                    <div class="item-info">
-                        <div class="item-name">${nft.name}</div>
-                        <div class="item-rarity" style="color: ${getRarityColor(nft.rarity)};">${nft.rarity.toUpperCase()}</div>
-                        <div class="item-price-row">
-                            <span class="item-price-stars">⭐ ${nft.stars}</span>
-                            <span class="item-price-ton">💎 ${nft.ton} TON</span>
-                        </div>
-                    </div>
-                    <div class="item-chance">${item.chance}%</div>
-                </div>
-            `;
+                </div>`;
         }
+        return `
+            <div class="item-row">
+                <div class="item-icon" style="border-color:${getRarityColor(nft.rarity)};">
+                    <img src="${nft.image}" alt="${nft.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'">
+                </div>
+                <div class="item-info">
+                    <div class="item-name">${nft.name}</div>
+                    <div class="item-rarity" style="color:${getRarityColor(nft.rarity)};">${nft.rarity.toUpperCase()}</div>
+                    <div class="item-price-row">
+                        <span class="item-price-stars">⭐ ${nft.stars}</span>
+                        <span class="item-price-ton">💎 ${nft.ton} TON</span>
+                    </div>
+                </div>
+                <div class="item-chance">${item.chance}%</div>
+            </div>`;
     }).join('');
 
     document.getElementById('modalInfo').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-function getRarityColor(rarity) {
-    const colors = {
-        common: '#9e9e9e',
-        rare: '#3b82f6',
-        epic: '#a855f7',
-        legendary: '#fbbf24',
-        mythic: '#ef4444',
-        special: '#10b981'
-    };
-    return colors[rarity] || '#fff';
-}
-
 function closeInfoModal() {
     document.getElementById('modalInfo').classList.remove('active');
     document.body.style.overflow = '';
+    currentCase = null;
 }
 
-// ============ ОТКРЫТИЕ КЕЙСА С ДВОЙНОЙ ПРОВЕРКОЙ ============
+// ============ КНОПКА "ОТКРЫТЬ" В МОДАЛКЕ ============
 function openCaseFromModal() {
     if (!currentCase) return;
 
     const data = CASES_DATA[currentCase];
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
 
-    if (data.price === 0) {
-        // ПОВТОРНАЯ ПРОВЕРКА КД ПЕРЕД ОТКРЫТИЕМ!!!
-        if (!canOpenFreeCase()) {
-            const timerText = getFreeTimerText();
-            tg.showAlert(`⏰ Ещё рано! Бесплатный кейс можно открыть раз в 24 часа!\n\nОсталось: ${timerText}`);
-            closeInfoModal();
-            return;
-        }
+    // ФИНАЛЬНАЯ ПРОВЕРКА — ДЛЯ ВСЕХ, ВКЛЮЧАЯ АДМИНА
+    const check = checkCanOpen(currentCase);
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        closeInfoModal();
+        return; // СТОП — рулетка НЕ запускается
+    }
 
+    // Списываем звёзды (для платных)
+    if (data.price > 0) {
+        let stars = parseInt(localStorage.getItem('gameStars') || '0');
+        stars -= data.price;
+        localStorage.setItem('gameStars', stars);
+        document.getElementById('balance').textContent = stars;
+    }
+
+    // Сохраняем время бесплатного кейса
+    if (data.cooldown) {
         localStorage.setItem('lastFreeCase', new Date().toISOString());
-        closeInfoModal();
-        setTimeout(() => startRoulette(currentCase), 300);
-
-    } else {
-        // ПРОВЕРКА БАЛАНСА
-        if (gameStars < data.price && !isAdmin) {
-            tg.showAlert(`❌ Недостаточно звёзд!\n\nУ вас: ${gameStars} ⭐\nНужно: ${data.price} ⭐\n\nОткройте бесплатный кейс или пригласите друзей!`);
-            return;
-        }
-
-        if (!isAdmin) {
-            gameStars -= data.price;
-            localStorage.setItem('gameStars', gameStars);
-            document.getElementById('balance').textContent = gameStars;
-        }
-
-        closeInfoModal();
-        setTimeout(() => startRoulette(currentCase), 300);
     }
+
+    closeInfoModal();
+    setTimeout(() => startRoulette(currentCase), 300);
 }
 
-function fetchOnlineCount() {
-    const online = 150 + Math.floor(Math.random() * 50) - 25;
-    document.getElementById('onlineCount').textContent = `${online} Online`;
-}
-
-function generateCases() {
-    const container = document.getElementById('casesContainer');
-    if (!container) return;
-
-    const cases = Object.entries(CASES_DATA).filter(([key, data]) => {
-        if (currentFilter === 'all') return true;
-        return data.type === currentFilter;
-    });
-
-    container.innerHTML = cases.map(([key, data]) => {
-        const isFree = data.price === 0;
-        const isAvailable = isFree ? canOpenFreeCase() : true;
-        const timerText = isFree ? getFreeTimerText() : null;
-
-        return `
-            <div class="case-big" onclick="showCaseInfo('${key}')" style="${!isAvailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
-                ${isFree ? '<div class="case-badge">FREE</div>' : ''}
-                <div class="case-image-section">
-                    <div class="case-main-image">${data.icon}</div>
-                </div>
-                <div class="case-info-section">
-                    <div class="case-title">${data.name}</div>
-                    <div class="case-footer">
-                        ${isFree ? `
-                            <div>
-                                <div class="case-status" style="color: ${isAvailable ? '#10b981' : '#ef4444'};">
-                                    ${isAvailable ? '✅ ДОСТУПЕН' : '🔒 ЗАБЛОКИРОВАН'}
-                                </div>
-                                ${timerText ? `<div class="case-timer">${timerText}</div>` : ''}
-                            </div>
-                        ` : `
-                            <div class="case-price">⭐ ${data.price}</div>
-                        `}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function updateFreeTimer() {
-    generateCases(); // Перегенерируем все кейсы с обновлённым таймером
-}
-
+// ============ РУЛЕТКА ============
 function startRoulette(caseKey) {
-    if (!CASES_DATA[caseKey]) {
-        tg.showAlert('Ошибка кейса');
-        return;
-    }
-
     const data = CASES_DATA[caseKey];
+    if (!data) return;
+
     const modal = document.getElementById('modalRoulette');
     const track = document.getElementById('rouletteTrack');
     const resultBox = document.getElementById('resultBox');
     const title = document.getElementById('rouletteTitle');
-
-    if (!modal || !track) return;
 
     modal.classList.add('active');
     resultBox.classList.remove('active');
@@ -514,52 +418,37 @@ function startRoulette(caseKey) {
 
     const items = [];
     for (let i = 0; i < 51; i++) {
-        const randomItem = data.items[Math.floor(Math.random() * data.items.length)];
-        items.push(randomItem);
+        items.push(data.items[Math.floor(Math.random() * data.items.length)]);
     }
 
     const winItem = getRandomItemByChance(data.items);
-    const winIndex = 25;
-    items[winIndex] = winItem;
+    items[25] = winItem;
 
-    items.forEach((item) => {
+    items.forEach(item => {
         const div = document.createElement('div');
         div.className = 'roulette-item';
-
-        if (item.nft.isCurrency) {
-            div.innerHTML = `<div style="font-size:70px;">${item.nft.icon}</div>`;
-        } else {
-            div.innerHTML = `<img src="${item.nft.image}" alt="${item.nft.name}" onerror="this.style.display='none'">`;
-        }
-
+        div.innerHTML = item.nft.isCurrency
+            ? `<div style="font-size:70px;">${item.nft.icon}</div>`
+            : `<img src="${item.nft.image}" alt="${item.nft.name}" onerror="this.style.display='none'">`;
         track.appendChild(div);
     });
 
     setTimeout(() => {
         const wrapper = document.querySelector('.roulette-wrapper');
         if (!wrapper) return;
-
-        const wrapperWidth = wrapper.offsetWidth;
-        const itemWidth = 130;
-        const gap = 20;
-        const itemFullWidth = itemWidth + gap;
-
-        const winItemLeftEdge = winIndex * itemFullWidth;
-        const winItemCenter = winItemLeftEdge + (itemWidth / 2);
-        const containerCenter = wrapperWidth / 2;
-        const offset = containerCenter - winItemCenter;
-
+        const itemFullWidth = 150;
+        const offset = (wrapper.offsetWidth / 2) - (25 * itemFullWidth) - 75;
         track.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
         track.style.transform = `translateX(${offset}px)`;
         title.textContent = '🎰 SPINNING...';
     }, 100);
 
     setTimeout(() => {
-        showResult(winItem.nft);
-
+        showResult(winItem.nft, caseKey);
         openedCases++;
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
+        generateCases(); // Обновляем карточки кейсов после открытия
     }, 4500);
 }
 
@@ -573,54 +462,46 @@ function getRandomItemByChance(items) {
     return items[items.length - 1];
 }
 
-function showResult(nft) {
+function showResult(nft, caseKey) {
     const resultBox = document.getElementById('resultBox');
     resultBox.classList.add('active');
 
-    if (nft.isCurrency) {
-        if (nft.name.includes('звезд')) {
-            let currentBalance = parseInt(localStorage.getItem('gameStars') || '0');
-            currentBalance += nft.amount;
-            localStorage.setItem('gameStars', currentBalance);
-            document.getElementById('balance').textContent = currentBalance;
+    if (nft.isCurrency && nft.name.includes('звезд')) {
+        let balance = parseInt(localStorage.getItem('gameStars') || '0');
+        balance += nft.amount;
+        localStorage.setItem('gameStars', balance);
+        document.getElementById('balance').textContent = balance;
 
-            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
-            document.getElementById('resultName').textContent = `+${nft.amount} звёзд`;
-            document.getElementById('resultRarity').textContent = 'ВАЛЮТА';
-            document.getElementById('resultStars').innerHTML = `Баланс: ⭐ ${currentBalance}`;
-            document.getElementById('resultTon').innerHTML = '';
-
-            addXP(nft.amount);
-        } else {
-            document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
-            document.getElementById('resultName').textContent = 'Подарок';
-            document.getElementById('resultRarity').textContent = 'ОСОБОЕ';
-            document.getElementById('resultStars').innerHTML = `🎁 Сюрприз!`;
-            document.getElementById('resultTon').innerHTML = '';
-
-            addXP(10);
-        }
+        document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
+        document.getElementById('resultName').textContent = `+${nft.amount} звёзд`;
+        document.getElementById('resultRarity').textContent = 'ВАЛЮТА';
+        document.getElementById('resultStars').innerHTML = `Баланс: ⭐ ${balance}`;
+        document.getElementById('resultTon').innerHTML = '';
         resultBox.style.borderColor = '#fbbf24';
         document.getElementById('resultRarity').style.background = '#fbbf24';
+        addXP(nft.amount);
+    } else if (nft.isCurrency) {
+        document.getElementById('resultIcon').innerHTML = `<div style="font-size:100px;">${nft.icon}</div>`;
+        document.getElementById('resultName').textContent = 'Подарок';
+        document.getElementById('resultRarity').textContent = 'ОСОБОЕ';
+        document.getElementById('resultStars').innerHTML = '🎁 Сюрприз!';
+        document.getElementById('resultTon').innerHTML = '';
+        resultBox.style.borderColor = '#fbbf24';
+        document.getElementById('resultRarity').style.background = '#fbbf24';
+        addXP(10);
     } else {
-        document.getElementById('resultIcon').innerHTML = `<img src="${nft.image}" alt="${nft.name}" style="width:140px; height:140px; object-fit:cover; border-radius:12px;" onerror="this.style.display='none'">`;
+        document.getElementById('resultIcon').innerHTML = `<img src="${nft.image}" alt="${nft.name}" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display='none'">`;
         document.getElementById('resultName').textContent = nft.name;
         document.getElementById('resultRarity').textContent = nft.rarity.toUpperCase();
-
         const color = getRarityColor(nft.rarity);
         resultBox.style.borderColor = color;
         document.getElementById('resultRarity').style.background = color;
-
         document.getElementById('resultStars').innerHTML = `⭐ ${nft.stars}`;
         document.getElementById('resultTon').innerHTML = `💎 ${nft.ton} TON`;
-
         addXP(Math.floor(nft.stars / 5));
         addToInventory(nft);
         saveToHistory(nft);
-
-        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
-            createConfetti();
-        }
+        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') createConfetti();
     }
 
     addToGlobalHistory(nft);
@@ -628,24 +509,11 @@ function showResult(nft) {
 
 function createConfetti() {
     for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement('div');
-        const colors = ['#10b981', '#fbbf24', '#ef4444', '#3b82f6', '#a855f7'];
-        confetti.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 10px;
-            height: 10px;
-            background: ${colors[Math.floor(Math.random() * colors.length)]};
-            border-radius: 50%;
-            z-index: 9999;
-            pointer-events: none;
-            animation: confettiFall ${Math.random() * 2 + 1}s linear forwards;
-            --x: ${Math.random()};
-        `;
-        document.body.appendChild(confetti);
-
-        setTimeout(() => confetti.remove(), 3000);
+        const el = document.createElement('div');
+        const colors = ['#10b981','#fbbf24','#ef4444','#3b82f6','#a855f7'];
+        el.style.cssText = `position:fixed;top:50%;left:50%;width:10px;height:10px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${Math.random()*2+1}s linear forwards;--x:${Math.random()};`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3000);
     }
 }
 
@@ -670,87 +538,68 @@ function renderInventory() {
     if (!container) return;
 
     if (inventory.length === 0) {
-        container.innerHTML = `
-            <div style="padding: 60px 20px; text-align: center;">
-                <div style="font-size: 80px; margin-bottom: 20px; opacity: 0.3;">📦</div>
-                <h3 style="font-size: 22px; margin-bottom: 10px;">Инвентарь пуст</h3>
-                <p style="color: #6b7280;">Откройте кейсы, чтобы получить NFT</p>
-            </div>
-        `;
+        container.innerHTML = `<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📦</div><h3>Инвентарь пуст</h3><p style="color:#6b7280;">Откройте кейсы, чтобы получить NFT</p></div>`;
         return;
     }
 
-    const rarityOrder = {mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1};
-    const sorted = [...inventory].sort((a, b) => (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0));
+    const order = {mythic:5,legendary:4,epic:3,rare:2,common:1};
+    const sorted = [...inventory].sort((a,b) => (order[b.rarity]||0)-(order[a.rarity]||0));
 
     container.innerHTML = `
-        <div style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 18px;">📦 Мои NFT (${inventory.length})</h3>
-                <div style="font-size: 14px; color: #6b7280;">
-                    Общая ценность: <span style="color: #10b981; font-weight: 700;">${inventory.reduce((sum, nft) => sum + nft.ton, 0).toFixed(2)} TON</span>
-                </div>
+        <div style="padding:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3>📦 Мои NFT (${inventory.length})</h3>
+                <div style="font-size:14px;color:#6b7280;">Ценность: <span style="color:#10b981;font-weight:700;">${inventory.reduce((s,n)=>s+n.ton,0).toFixed(2)} TON</span></div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
-                ${sorted.map((nft, idx) => `
-                    <div style="background: rgba(30,30,40,0.5); border-radius: 12px; padding: 12px; border: 2px solid ${getRarityColor(nft.rarity)};">
-                        <div style="width: 100%; height: 120px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative;">
-                            <img src="${nft.image}" alt="${nft.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                            <div style="position: absolute; top: 5px; right: 5px; background: ${getRarityColor(nft.rarity)}; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase;">
-                                ${nft.rarity}
-                            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">
+                ${sorted.map((nft,idx) => `
+                    <div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:12px;border:2px solid ${getRarityColor(nft.rarity)};">
+                        <div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;">
+                            <img src="${nft.image}" alt="${nft.name}" style="width:100%;height:100%;object-fit:cover;">
+                            <div style="position:absolute;top:5px;right:5px;background:${getRarityColor(nft.rarity)};padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">${nft.rarity.toUpperCase()}</div>
                         </div>
-                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">${nft.name}</div>
-                        <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">💎 ${nft.ton} TON • ⭐ ${nft.stars}</div>
-                        <button onclick="sellNFT(${inventory.indexOf(nft)})" style="width: 100%; padding: 8px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            Продать за ${Math.floor(nft.stars * 0.7)} ⭐
+                        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${nft.name}</div>
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ${nft.ton} TON • ⭐ ${nft.stars}</div>
+                        <button onclick="sellNFT(${inventory.indexOf(nft)})" style="width:100%;padding:8px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
+                            Продать ${Math.floor(nft.stars*0.7)} ⭐
                         </button>
                     </div>
                 `).join('')}
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 function sellNFT(idx) {
     const nft = inventory[idx];
     if (!nft) return;
-
     const sellPrice = Math.floor(nft.stars * 0.7);
-
     tg.showPopup({
         title: 'Продать NFT?',
         message: `${nft.name}\n\nВы получите: ${sellPrice} ⭐`,
-        buttons: [
-            {id: 'sell', type: 'default', text: `Продать за ${sellPrice} ⭐`},
-            {type: 'cancel'}
-        ]
+        buttons: [{id:'sell',type:'default',text:`Продать за ${sellPrice} ⭐`},{type:'cancel'}]
     }, (btnId) => {
         if (btnId === 'sell') {
-            let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-            gameStars += sellPrice;
-            localStorage.setItem('gameStars', gameStars);
-            document.getElementById('balance').textContent = gameStars;
-
+            let stars = parseInt(localStorage.getItem('gameStars') || '0');
+            stars += sellPrice;
+            localStorage.setItem('gameStars', stars);
+            document.getElementById('balance').textContent = stars;
             inventory.splice(idx, 1);
             localStorage.setItem('inventory', JSON.stringify(inventory));
             renderInventory();
-
             tg.showAlert(`Продано за ${sellPrice} ⭐!`);
         }
     });
 }
 
 function saveToHistory(nft) {
-    let history = JSON.parse(localStorage.getItem('caseHistory') || '[]');
-    history.unshift({...nft, time: new Date().toLocaleString('ru-RU')});
-    if (history.length > 50) history = history.slice(0, 50);
-    localStorage.setItem('caseHistory', JSON.stringify(history));
+    let h = JSON.parse(localStorage.getItem('caseHistory') || '[]');
+    h.unshift({...nft, time: new Date().toLocaleString('ru-RU')});
+    if (h.length > 50) h = h.slice(0, 50);
+    localStorage.setItem('caseHistory', JSON.stringify(h));
 }
 
 function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('caseHistory') || '[]');
-    renderHistory(history);
+    renderHistory(JSON.parse(localStorage.getItem('caseHistory') || '[]'));
 }
 
 function renderHistory(history) {
@@ -758,37 +607,29 @@ function renderHistory(history) {
     if (!container) return;
 
     if (history.length === 0) {
-        container.innerHTML = `
-            <div style="padding: 60px 20px; text-align: center;">
-                <div style="font-size: 80px; margin-bottom: 20px; opacity: 0.3;">📜</div>
-                <h3 style="font-size: 22px; margin-bottom: 10px;">История пуста</h3>
-                <p style="color: #6b7280;">Откройте кейс, чтобы увидеть историю</p>
-            </div>
-        `;
+        container.innerHTML = `<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📜</div><h3>История пуста</h3><p style="color:#6b7280;">Откройте кейс, чтобы увидеть историю</p></div>`;
         return;
     }
 
     container.innerHTML = `
-        <div style="padding: 20px;">
-            <h3 style="font-size: 18px; margin-bottom: 15px;">📜 История открытий (${history.length})</h3>
+        <div style="padding:20px;">
+            <h3 style="margin-bottom:15px;">📜 История (${history.length})</h3>
             ${history.map(item => `
-                <div style="background: rgba(30,30,40,0.5); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 2px solid ${getRarityColor(item.rarity)}; flex-shrink: 0;">
-                        <img src="${item.image}" alt="${item.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+                <div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;">
+                    <div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ${getRarityColor(item.rarity)};flex-shrink:0;">
+                        <img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
                     </div>
-                    <div style="flex: 1;">
-                        <div style="font-size: 16px; font-weight: 700;">${item.name}</div>
-                        <div style="font-size: 12px; color: ${getRarityColor(item.rarity)}; margin-top: 4px;">${item.rarity?.toUpperCase() || 'COMMON'}</div>
-                        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">${item.time}</div>
+                    <div style="flex:1;">
+                        <div style="font-size:16px;font-weight:700;">${item.name}</div>
+                        <div style="font-size:12px;color:${getRarityColor(item.rarity)};margin-top:4px;">${item.rarity?.toUpperCase()}</div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:4px;">${item.time}</div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 14px; color: #ffd700;">⭐ ${item.stars}</div>
-                        <div style="font-size: 12px; color: #0088cc; margin-top: 4px;">💎 ${item.ton} TON</div>
+                    <div style="text-align:right;">
+                        <div style="font-size:14px;color:#ffd700;">⭐ ${item.stars}</div>
+                        <div style="font-size:12px;color:#0088cc;">💎 ${item.ton} TON</div>
                     </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
+                </div>`).join('')}
+        </div>`;
 }
 
 function loadAchievements() {
@@ -799,92 +640,112 @@ function loadAchievements() {
 function renderAchievements() {
     const container = document.getElementById('achievementsContainer');
     if (!container) return;
-
-    const unlockedCount = achievements.length;
-    const totalCount = ACHIEVEMENTS.length;
-    const progress = Math.round((unlockedCount / totalCount) * 100);
-
+    const progress = Math.round((achievements.length / ACHIEVEMENTS.length) * 100);
     container.innerHTML = `
-        <div style="padding: 20px;">
-            <div style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h3 style="font-size: 18px;">🏆 Достижения</h3>
-                    <div style="font-size: 14px; font-weight: 700; color: #10b981;">${unlockedCount}/${totalCount}</div>
+        <div style="padding:20px;">
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                    <h3>🏆 Достижения</h3>
+                    <div style="color:#10b981;font-weight:700;">${achievements.length}/${ACHIEVEMENTS.length}</div>
                 </div>
-                <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${progress}%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.3s;"></div>
+                <div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                    <div style="width:${progress}%;height:100%;background:linear-gradient(90deg,#10b981,#059669);"></div>
                 </div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center;">${progress}% выполнено</div>
             </div>
             ${ACHIEVEMENTS.map(ach => {
                 const unlocked = achievements.includes(ach.id);
                 return `
-                    <div style="background: rgba(30,30,40,0.5); border-radius: 12px; padding: 15px; margin-bottom: 12px; opacity: ${unlocked ? '1' : '0.5'}; border: 2px solid ${unlocked ? '#10b981' : 'rgba(255,255,255,0.1)'};">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="font-size: 40px; filter: grayscale(${unlocked ? 0 : 1});">${ach.icon}</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 16px; font-weight: 700;">${ach.name} ${unlocked ? '✅' : ''}</div>
-                                <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">${ach.desc}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 14px; color: ${unlocked ? '#10b981' : '#ffd700'};">+${ach.reward} ⭐</div>
-                            </div>
+                    <div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;opacity:${unlocked?1:0.5};border:2px solid ${unlocked?'#10b981':'rgba(255,255,255,0.1)'};display:flex;align-items:center;gap:15px;">
+                        <div style="font-size:40px;filter:grayscale(${unlocked?0:1});">${ach.icon}</div>
+                        <div style="flex:1;">
+                            <div style="font-size:16px;font-weight:700;">${ach.name} ${unlocked?'✅':''}</div>
+                            <div style="font-size:13px;color:#6b7280;">${ach.desc}</div>
                         </div>
-                    </div>
-                `;
+                        <div style="color:${unlocked?'#10b981':'#ffd700'};font-weight:700;">+${ach.reward} ⭐</div>
+                    </div>`;
             }).join('')}
-        </div>
-    `;
+        </div>`;
 }
 
 function checkAchievements() {
-    if (openedCases >= 1 && !achievements.includes('first_case')) {
-        unlockAchievement('first_case');
-    }
-    if (openedCases >= 5 && !achievements.includes('cases_5')) {
-        unlockAchievement('cases_5');
-    }
-    if (openedCases >= 10 && !achievements.includes('cases_10')) {
-        unlockAchievement('cases_10');
-    }
+    const check = (id, condition) => {
+        if (condition && !achievements.includes(id)) unlockAchievement(id);
+    };
+    check('first_case', openedCases >= 1);
+    check('cases_5', openedCases >= 5);
+    check('cases_10', openedCases >= 10);
 }
 
-function unlockAchievement(achId) {
-    const ach = ACHIEVEMENTS.find(a => a.id === achId);
+function unlockAchievement(id) {
+    const ach = ACHIEVEMENTS.find(a => a.id === id);
     if (!ach) return;
-
-    achievements.push(achId);
+    achievements.push(id);
     localStorage.setItem('achievements', JSON.stringify(achievements));
-
-    let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-    gameStars += ach.reward;
-    localStorage.setItem('gameStars', gameStars);
-    document.getElementById('balance').textContent = gameStars;
-
+    let stars = parseInt(localStorage.getItem('gameStars') || '0');
+    stars += ach.reward;
+    localStorage.setItem('gameStars', stars);
+    document.getElementById('balance').textContent = stars;
     tg.showPopup({
-        title: '🏆 Достижение получено!',
-        message: `${ach.icon} ${ach.name}\n\n${ach.desc}\n\n+${ach.reward} ⭐ звёзд!`,
-        buttons: [{type: 'ok'}]
+        title: '🏆 Достижение!',
+        message: `${ach.icon} ${ach.name}\n\n${ach.desc}\n\n+${ach.reward} ⭐`,
+        buttons: [{type:'ok'}]
     });
-
     renderAchievements();
+}
+
+function fetchOnlineCount() {
+    document.getElementById('onlineCount').textContent = `${150 + Math.floor(Math.random()*50)-25} Online`;
+}
+
+function generateFakeHistory() {
+    const names = ['Алексей','Мария','Дмитрий','Анна','Иван','Елена'];
+    for (let i = 0; i < 15; i++) {
+        const rCase = Object.values(CASES_DATA)[Math.floor(Math.random()*3)];
+        const item = getRandomItemByChance(rCase.items);
+        globalHistory.push({
+            nft: item.nft,
+            username: names[Math.floor(Math.random()*names.length)],
+            time: `${Math.floor(Math.random()*45)+1} мин назад`
+        });
+    }
+    renderGlobalHistory();
+}
+
+function renderGlobalHistory() {
+    const slider = document.getElementById('nftScroll');
+    if (!slider) return;
+    const all = [...globalHistory, ...globalHistory, ...globalHistory];
+    slider.innerHTML = all.map(item => {
+        const nft = item.nft;
+        const color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+        return `
+            <div class="nft-card" style="border:2px solid ${color};min-width:160px;height:200px;">
+                <div class="nft-image" style="border:2px solid ${color};width:90px;height:90px;margin:0 auto;">
+                    ${nft.isCurrency
+                        ? `<div style="font-size:45px;">${nft.icon}</div>`
+                        : `<img src="${nft.image}" onerror="this.parentElement.innerHTML='<div style=font-size:45px>💎</div>'">`
+                    }
+                </div>
+                <div class="nft-value" style="color:${color};font-size:13px;margin-top:10px;">${nft.isCurrency ? nft.name : `${nft.ton} TON`}</div>
+                <div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ${item.username}</div>
+                <div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">${item.time}</div>
+            </div>`;
+    }).join('');
+}
+
+function addToGlobalHistory(nft) {
+    const user = tg.initDataUnsafe?.user;
+    globalHistory.unshift({nft, username: user?.first_name || 'Игрок', time: 'только что'});
+    if (globalHistory.length > 25) globalHistory = globalHistory.slice(0,25);
+    renderGlobalHistory();
 }
 
 function switchTab(tab) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     event.currentTarget.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-    const tabs = {
-        cases: 'tabCases',
-        inventory: 'tabInventory',
-        profile: 'tabProfile',
-        history: 'tabHistory',
-        achievements: 'tabAchievements'
-    };
-
+    const tabs = {cases:'tabCases',inventory:'tabInventory',profile:'tabProfile',history:'tabHistory',achievements:'tabAchievements'};
     document.getElementById(tabs[tab]).classList.add('active');
-
     if (tab === 'inventory') renderInventory();
     if (tab === 'history') loadHistory();
     if (tab === 'achievements') renderAchievements();
@@ -892,95 +753,206 @@ function switchTab(tab) {
 
 function loadRefLink() {
     const userId = tg.initDataUnsafe?.user?.id || '123456789';
-    const refCount = parseInt(localStorage.getItem('refCount') || '0');
-
     document.getElementById('refLink').textContent = `https://t.me/gsdfsdfdsfbot?start=ref_${userId}`;
-    document.getElementById('refCount').textContent = refCount;
+    document.getElementById('refCount').textContent = localStorage.getItem('refCount') || '0';
 }
 
 function copyRefLink() {
-    const link = document.getElementById('refLink').textContent;
-    navigator.clipboard.writeText(link);
-    tg.showPopup({title: 'Успешно!', message: 'Ссылка скопирована', buttons: [{type: 'ok'}]});
+    navigator.clipboard.writeText(document.getElementById('refLink').textContent);
+    tg.showPopup({title:'Успешно!',message:'Ссылка скопирована',buttons:[{type:'ok'}]});
 }
 
 function activatePromo() {
     const code = document.getElementById('promoInput').value.trim().toUpperCase();
-    if (!code) {
-        tg.showAlert('Введите промокод');
-        return;
-    }
-
-    const promoCodes = {
-        'WELCOME': 100,
-        'NEWYEAR2026': 200,
-        'LUCKY': 150
-    };
-
-    const usedPromos = JSON.parse(localStorage.getItem('usedPromos') || '[]');
-
-    if (usedPromos.includes(code)) {
-        tg.showAlert('Промокод уже использован!');
-        return;
-    }
-
-    if (promoCodes[code]) {
-        const reward = promoCodes[code];
-        let gameStars = parseInt(localStorage.getItem('gameStars') || '0');
-        gameStars += reward;
-        localStorage.setItem('gameStars', gameStars);
-        document.getElementById('balance').textContent = gameStars;
-
-        usedPromos.push(code);
-        localStorage.setItem('usedPromos', JSON.stringify(usedPromos));
-
-        tg.showPopup({
-            title: '🎉 Промокод активирован!',
-            message: `Вы получили ${reward} ⭐ звёзд!`,
-            buttons: [{type: 'ok'}]
-        });
-
+    if (!code) { tg.showAlert('Введите промокод'); return; }
+    const codes = {'WELCOME':100,'NEWYEAR2026':200,'LUCKY':150};
+    const used = JSON.parse(localStorage.getItem('usedPromos') || '[]');
+    if (used.includes(code)) { tg.showAlert('Промокод уже использован!'); return; }
+    if (codes[code]) {
+        let stars = parseInt(localStorage.getItem('gameStars') || '0');
+        stars += codes[code];
+        localStorage.setItem('gameStars', stars);
+        document.getElementById('balance').textContent = stars;
+        used.push(code);
+        localStorage.setItem('usedPromos', JSON.stringify(used));
+        tg.showPopup({title:'🎉 Активировано!',message:`Вы получили ${codes[code]} ⭐ звёзд!`,buttons:[{type:'ok'}]});
         document.getElementById('promoInput').value = '';
     } else {
         tg.showAlert('Неверный промокод!');
     }
 }
 
-// АДМИН ПАНЕЛЬ (упрощённая версия)
+// АДМИН ПАНЕЛЬ
 function openAdminPanel() {
     if (!isAdmin) return;
+    document.getElementById('adminPanel').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    loadAdminStats();
+    loadAllUsers();
+}
+
+function closeAdminPanel() {
+    document.getElementById('adminPanel').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function loadAdminStats() {
+    const stars = parseInt(localStorage.getItem('gameStars') || '0');
+    const cases = parseInt(localStorage.getItem('openedCases') || '0');
+    const nfts = JSON.parse(localStorage.getItem('inventory') || '[]').length;
+    const achs = JSON.parse(localStorage.getItem('achievements') || '[]').length;
+    document.getElementById('adminStats').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;">
+            <div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">${stars}</div><div class="admin-stat-label">Звёзд</div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">${cases}</div><div class="admin-stat-label">Кейсов открыто</div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">${nfts}</div><div class="admin-stat-label">NFT собрано</div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">${achs}</div><div class="admin-stat-label">Достижений</div></div>
+        </div>`;
+}
+
+function loadAllUsers() {
+    const user = tg.initDataUnsafe?.user;
+    const me = {
+        id: user?.id || 0,
+        username: user?.username || 'admin',
+        first_name: user?.first_name || 'Admin',
+        stars: parseInt(localStorage.getItem('gameStars') || '0'),
+        level: parseInt(localStorage.getItem('userLevel') || '1'),
+        cases: parseInt(localStorage.getItem('openedCases') || '0'),
+        nfts: JSON.parse(localStorage.getItem('inventory') || '[]').length
+    };
+
+    document.getElementById('adminUsersList').innerHTML = `
+        <div class="admin-user-row">
+            <div style="display:flex;align-items:center;gap:15px;flex:1;">
+                <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">${me.first_name.charAt(0)}</div>
+                <div>
+                    <div style="font-size:16px;font-weight:700;">${me.first_name} <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div>
+                    <div style="font-size:13px;color:#6b7280;">@${me.username} • ID: ${me.id}</div>
+                    <div style="display:flex;gap:15px;margin-top:8px;font-size:12px;color:#6b7280;">
+                        <span>⭐ ${me.stars}</span><span>📊 Lvl ${me.level}</span><span>📦 ${me.cases}</span><span>💎 ${me.nfts}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(${me.id},'${me.username}',${me.stars})">💰</button>
+                <button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress(${me.id},'${me.username}')">🗑️</button>
+            </div>
+        </div>
+        <div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;">
+            <div style="font-size:40px;margin-bottom:10px;">👥</div>
+            Для просмотра всех пользователей нужен backend.<br>
+            <span style="color:#10b981;cursor:pointer;" onclick="tg.showAlert('Напишите разработчику для подключения базы данных!')">Подключить базу данных →</span>
+        </div>`;
+}
+
+function manageUserBalance(userId, username, currentStars) {
+    const modal = document.createElement('div');
+    modal.className = 'admin-modal';
+    modal.innerHTML = `
+        <div class="admin-modal-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:20px;font-weight:800;">💰 Управление балансом</h3>
+                <div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest('.admin-modal').remove()">✕</div>
+            </div>
+            <div style="background:rgba(30,30,40,0.5);padding:15px;border-radius:12px;margin-bottom:20px;">
+                <div style="font-size:18px;font-weight:700;">@${username}</div>
+                <div style="font-size:14px;color:#6b7280;margin-top:8px;">Текущий баланс: <span style="color:#10b981;font-weight:700;">${currentStars} ⭐</span></div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:14px;font-weight:600;margin-bottom:10px;">Количество звёзд</label>
+                <input type="number" id="starsAmount" placeholder="Введите количество" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button class="admin-btn admin-btn-success" onclick="giveStars(${userId},'${username}')">➕ Выдать</button>
+                <button class="admin-btn admin-btn-danger" onclick="takeStars(${userId},'${username}')">➖ Забрать</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px;">
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=100">100</button>
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=500">500</button>
+                <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=1000">1000</button>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+}
+
+function giveStars(userId, username) {
+    const amount = parseInt(document.getElementById('starsAmount').value);
+    if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
+    let stars = parseInt(localStorage.getItem('gameStars') || '0');
+    stars += amount;
+    localStorage.setItem('gameStars', stars);
+    document.getElementById('balance').textContent = stars;
+    document.querySelector('.admin-modal').remove();
+    tg.showPopup({title:'✅ Выдано!',message:`+${amount} ⭐ → @${username}\nНовый баланс: ${stars} ⭐`,buttons:[{type:'ok'}]});
+    loadAllUsers();
+    loadAdminStats();
+}
+
+function takeStars(userId, username) {
+    const amount = parseInt(document.getElementById('starsAmount').value);
+    if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
+    let stars = parseInt(localStorage.getItem('gameStars') || '0');
+    stars = Math.max(0, stars - amount);
+    localStorage.setItem('gameStars', stars);
+    document.getElementById('balance').textContent = stars;
+    document.querySelector('.admin-modal').remove();
+    tg.showPopup({title:'✅ Забрано!',message:`-${amount} ⭐ у @${username}\nНовый баланс: ${stars} ⭐`,buttons:[{type:'ok'}]});
+    loadAllUsers();
+    loadAdminStats();
+}
+
+function resetUserProgress(userId, username) {
     tg.showPopup({
-        title: '👑 ADMIN',
-        message: 'Админ панель\n\nВаш баланс: ' + localStorage.getItem('gameStars') + ' ⭐',
-        buttons: [
-            {id: 'give1000', type: 'default', text: 'Выдать +1000 ⭐'},
-            {id: 'reset', type: 'destructive', text: 'Сбросить прогресс'},
-            {type: 'cancel'}
-        ]
-    }, (btnId) => {
-        if (btnId === 'give1000') {
-            let stars = parseInt(localStorage.getItem('gameStars') || '0');
-            stars += 1000;
-            localStorage.setItem('gameStars', stars);
-            document.getElementById('balance').textContent = stars;
-            tg.showAlert('Выдано +1000 ⭐');
-        } else if (btnId === 'reset') {
-            localStorage.clear();
-            location.reload();
+        title:'⚠️ ВНИМАНИЕ!',
+        message:`Сбросить ВСЕ данные @${username}?\n\n• Звёзды\n• Уровень\n• Инвентарь\n• Достижения\n\nНЕОБРАТИМО!`,
+        buttons:[{id:'yes',type:'destructive',text:'Сбросить'},{type:'cancel'}]
+    }, (btn) => {
+        if (btn === 'yes') {
+            ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'].forEach(k => localStorage.removeItem(k));
+            document.getElementById('balance').textContent = '0';
+            userLevel = 1; userXP = 0; openedCases = 0;
+            updateLevelDisplay();
+            generateCases();
+            tg.showAlert('Прогресс сброшен!');
+            loadAllUsers();
+            loadAdminStats();
         }
     });
 }
 
-function closeAdminPanel() {}
-function loadAdminStats() {}
-function loadAllUsers() {}
-function manageUserBalance() {}
-function giveStars() {}
-function takeStars() {}
-function resetUserProgress() {}
-function sendGlobalNotification() {}
-function createPromoCode() {}
-function exportUserData() {}
-function switchAdminTab() {}
+function sendGlobalNotification() {
+    tg.showPopup({title:'📢 Уведомление',message:'Требует backend для реальной отправки',buttons:[{type:'ok'}]});
+}
+
+function createPromoCode() {
+    tg.showPopup({title:'🎟️ Промокоды',message:'Активные:\nWELCOME → 100 ⭐\nNEWYEAR2026 → 200 ⭐\nLUCKY → 150 ⭐',buttons:[{type:'ok'}]});
+}
+
+function exportUserData() {
+    const data = {
+        stars: localStorage.getItem('gameStars'),
+        level: localStorage.getItem('userLevel'),
+        xp: localStorage.getItem('userXP'),
+        cases: localStorage.getItem('openedCases'),
+        inventory: JSON.parse(localStorage.getItem('inventory') || '[]'),
+        achievements: JSON.parse(localStorage.getItem('achievements') || '[]')
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'export.json';
+    a.click();
+    tg.showAlert('Данные экспортированы!');
+}
+
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`adminTab${tab.charAt(0).toUpperCase()+tab.slice(1)}`).classList.add('active');
+    if (tab === 'stats') loadAdminStats();
+    if (tab === 'users') loadAllUsers();
+}
 
 init();
