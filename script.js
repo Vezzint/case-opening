@@ -670,6 +670,9 @@ function renderInventory() {
                 }).join('')}
             </div>
         </div>`;
+}
+
+
 function sellNFT(safeUid) {
     const uid = decodeURIComponent(safeUid);
 
@@ -716,7 +719,6 @@ function sellNFT(safeUid) {
         }
     });
 }
-
 // ===========================================================
 // ИСТОРИЯ
 // ===========================================================
@@ -1044,6 +1046,7 @@ function switchAdminTab(tab) {
 }
 
 init();
+
 
 
 
