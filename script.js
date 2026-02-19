@@ -64,7 +64,7 @@ const CASES_DATA = {
   premium: {
     name: "💎 Premium Case",
     icon: "💎",
-    price: 150,
+    price: 500,
     type: "premium",
     cooldown: false,
     items: [
@@ -981,6 +981,7 @@ function switchAdminTab(tab) {
 }
 
 init();
+
 
 
 
