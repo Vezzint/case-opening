@@ -595,9 +595,14 @@ function closeRouletteModal() {
 // ===========================================================
 function addToInventory(nft) {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
-    inventory.unshift({...nft, time: new Date().toISOString()});
+    inventory.unshift({
+        ...nft,
+        uid: Date.now() + '_' + Math.random().toString(36).slice(2), // уникальный id
+        time: new Date().toISOString()
+    });
     localStorage.setItem('inventory', JSON.stringify(inventory));
 }
+
 
 function loadInventory() {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
@@ -607,47 +612,105 @@ function loadInventory() {
 function renderInventory() {
     const c = document.getElementById('inventoryContainer');
     if (!c) return;
+
+    // Всегда читаем свежие данные из localStorage
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+
     if (!inventory.length) {
-        c.innerHTML = `<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📦</div><h3>Инвентарь пуст</h3><p style="color:#6b7280;">Открой кейсы, чтобы получить NFT</p></div>`;
+        c.innerHTML = `<div style="padding:60px 20px;text-align:center;">
+            <div style="font-size:80px;opacity:0.3;">📦</div>
+            <h3>Инвентарь пуст</h3>
+            <p style="color:#6b7280;">Открой кейсы, чтобы получить NFT</p>
+        </div>`;
         return;
     }
-    const order = {mythic:5,legendary:4,epic:3,rare:2,common:1};
-    const sorted = [...inventory].sort((a,b)=>(order[b.rarity]||0)-(order[a.rarity]||0));
+
+    const order = { mythic:5, legendary:4, epic:3, rare:2, common:1 };
+    const sorted = [...inventory].sort((a, b) => (order[b.rarity]||0) - (order[a.rarity]||0));
+
     c.innerHTML = `
         <div style="padding:20px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
                 <h3>📦 Мои NFT (${inventory.length})</h3>
-                <div style="font-size:14px;color:#6b7280;">💎 <span style="color:#10b981;font-weight:700;">${inventory.reduce((s,n)=>s+n.ton,0).toFixed(2)} TON</span></div>
+                <div style="font-size:14px;color:#6b7280;">
+                    💎 <span style="color:#10b981;font-weight:700;">
+                        ${inventory.reduce((s,n) => s + (n.ton||0), 0).toFixed(2)} TON
+                    </span>
+                </div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">
-                ${sorted.map((nft,i) => `
-                    <div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:12px;border:2px solid ${getRarityColor(nft.rarity)};">
-                        <div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;">
-                            <img src="${nft.image}" alt="${nft.name}" style="width:100%;height:100%;object-fit:cover;">
-                            <div style="position:absolute;top:5px;right:5px;background:${getRarityColor(nft.rarity)};padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">${nft.rarity.toUpperCase()}</div>
+                ${sorted.map(nft => {
+                    // uid для надёжного поиска, или fallback на JSON-строку
+                    const uid = nft.uid || JSON.stringify(nft);
+                    const safeUid = encodeURIComponent(uid);
+                    return `
+                    <div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:12px;
+                                border:2px solid ${getRarityColor(nft.rarity)};">
+                        <div style="width:100%;height:120px;border-radius:8px;overflow:hidden;
+                                    margin-bottom:8px;position:relative;">
+                            <img src="${nft.image}" alt="${nft.name}"
+                                 style="width:100%;height:100%;object-fit:cover;">
+                            <div style="position:absolute;top:5px;right:5px;
+                                        background:${getRarityColor(nft.rarity)};
+                                        padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">
+                                ${nft.rarity.toUpperCase()}
+                            </div>
                         </div>
                         <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${nft.name}</div>
-                        <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ${nft.ton} TON • ⭐ ${nft.stars}</div>
-                        <button onclick="sellNFT(${inventory.indexOf(nft)})" style="width:100%;padding:8px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
-                            Продать ${Math.floor(nft.stars*0.7)} ⭐
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">
+                            💎 ${nft.ton} TON • ⭐ ${nft.stars}
+                        </div>
+                        <button onclick="sellNFT('${safeUid}')"
+                            style="width:100%;padding:8px;background:linear-gradient(135deg,#10b981,#059669);
+                                   border:none;border-radius:8px;color:#fff;font-size:12px;
+                                   font-weight:700;cursor:pointer;">
+                            Продать ${Math.floor((nft.stars||0) * 0.7)} ⭐
                         </button>
-                    </div>`).join('')}
+                    </div>`;
+                }).join('')}
             </div>
         </div>`;
-}
+function sellNFT(safeUid) {
+    const uid = decodeURIComponent(safeUid);
 
-function sellNFT(idx) {
+    // Читаем свежий инвентарь из localStorage
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+
+    // Ищем предмет по uid
+    const idx = inventory.findIndex(item => {
+        const itemUid = item.uid || JSON.stringify(item);
+        return itemUid === uid;
+    });
+
+    if (idx === -1) {
+        tg.showAlert('Предмет не найден!');
+        return;
+    }
+
     const nft = inventory[idx];
-    if (!nft) return;
-    const sp = Math.floor(nft.stars * 0.7);
+    const sp  = Math.floor((nft.stars||0) * 0.7);
+
     tg.showPopup({
-        title:'Продать NFT?', message:`${nft.name}\nВы получите: ${sp} ⭐`,
-        buttons:[{id:'sell',type:'default',text:`Продать за ${sp} ⭐`},{type:'cancel'}]
+        title: 'Продать NFT?',
+        message: `${nft.name}\nВы получите: ${sp} ⭐`,
+        buttons: [
+            { id: 'sell', type: 'default', text: `Продать за ${sp} ⭐` },
+            { type: 'cancel' }
+        ]
     }, btn => {
         if (btn === 'sell') {
-            setStars(getStars() + sp);
-            inventory.splice(idx, 1);
+            // Снова читаем свежий инвентарь (мог измениться пока popup был открыт)
+            inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+            const freshIdx = inventory.findIndex(item => (item.uid||JSON.stringify(item)) === uid);
+
+            if (freshIdx === -1) {
+                tg.showAlert('Предмет уже продан!');
+                return;
+            }
+
+            inventory.splice(freshIdx, 1);
             localStorage.setItem('inventory', JSON.stringify(inventory));
+            setStars(getStars() + sp);
             renderInventory();
             tg.showAlert(`Продано за ${sp} ⭐!`);
         }
@@ -981,6 +1044,7 @@ function switchAdminTab(tab) {
 }
 
 init();
+
 
 
 
