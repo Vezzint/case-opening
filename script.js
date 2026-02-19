@@ -25,45 +25,64 @@ const NFT_DATABASE = [
 ];
 
 const CASES_DATA = {
-    free: {
-        name:"🎁 Бесплатный кейс", icon:"🎁", price:0, type:"free", cooldown:true,
-        items:[
-            {nft:NFT_DATABASE[0],chance:35},
-            {nft:NFT_DATABASE[1],chance:30},
-            {nft:NFT_DATABASE[2],chance:20},
-            {nft:NFT_DATABASE[3],chance:10},
-            {nft:NFT_DATABASE[4],chance:4},
-            {nft:NFT_DATABASE[12],chance:0.8},
-            {nft:NFT_DATABASE[13],chance:0.2}
-        ]
-    },
-    basic: {
-        name:"📦 Basic Case", icon:"📦", price:50, type:"basic", cooldown:false,
-        items:[
-            {nft:NFT_DATABASE[1],chance:30},
-            {nft:NFT_DATABASE[2],chance:25},
-            {nft:NFT_DATABASE[3],chance:20},
-            {nft:NFT_DATABASE[7],chance:12},
-            {nft:NFT_DATABASE[8],chance:8},
-            {nft:NFT_DATABASE[9],chance:4},
-            {nft:NFT_DATABASE[10],chance:1}
-        ]
-    },
-    premium: {
-        name:"💎 Premium Case", icon:"💎", price:150, type:"premium", cooldown:false,
-        items:[
-            {nft:NFT_DATABASE[2],chance:28},
-            {nft:NFT_DATABASE[3],chance:24},
-            {nft:NFT_DATABASE[4],chance:18},
-            {nft:NFT_DATABASE[10],chance:15},
-            {nft:NFT_DATABASE[11],chance:8},
-            {nft:NFT_DATABASE[12],chance:5},
-            {nft:NFT_DATABASE[13],chance:1.5},
-            {nft:NFT_DATABASE[14],chance:0.5}
-        ]
-    }
-};
+  free: {
+    name: "🎁 Бесплатный кейс",
+    icon: "🎁",
+    price: 0,
+    type: "free",
+    cooldown: true,
+    items: [
+      { nft: NFT_DATABASE[0],  chance: 40.0 }, // 💝 Подарок
+      { nft: NFT_DATABASE[1],  chance: 30.0 }, // ⭐ 3 звезды
+      { nft: NFT_DATABASE[2],  chance: 15.0 }, // ⭐ 5 звёзд
+      { nft: NFT_DATABASE[3],  chance: 10.0 }, // ⭐ 15 звёзд
+      { nft: NFT_DATABASE[4],  chance: 4.5  }, // ⭐ 50 звёзд
+      { nft: NFT_DATABASE[12], chance: 0.4  }, // Happy Brownie (legendary)
+      { nft: NFT_DATABASE[13], chance: 0.1  }  // Instant Ramen (legendary)
+    ]
+  },
 
+  basic: {
+    name: "📦 Basic Case",
+    icon: "📦",
+    price: 50,
+    type: "basic",
+    cooldown: false,
+    items: [
+      { nft: NFT_DATABASE[1],  chance: 55.0 }, // ⭐ 3 звезды
+      { nft: NFT_DATABASE[2],  chance: 25.0 }, // ⭐ 5 звёзд
+      { nft: NFT_DATABASE[3],  chance: 12.0 }, // ⭐ 15 звёзд
+      { nft: NFT_DATABASE[4],  chance: 7.0  }, // ⭐ 50 звёзд
+
+      { nft: NFT_DATABASE[8],  chance: 0.8  }, // Backpack (legendary)
+      { nft: NFT_DATABASE[9],  chance: 0.15 }, // Crystal Eagle (mythic)
+      { nft: NFT_DATABASE[7],  chance: 0.04 }, // Astral Shard (mythic)
+      { nft: NFT_DATABASE[10], chance: 0.01 }  // Durovs Cap (mythic)
+    ]
+  },
+
+  premium: {
+    name: "💎 Premium Case",
+    icon: "💎",
+    price: 150,
+    type: "premium",
+    cooldown: false,
+    items: [
+      { nft: NFT_DATABASE[2],  chance: 30.0 }, // ⭐ 5 звёзд
+      { nft: NFT_DATABASE[3],  chance: 25.0 }, // ⭐ 15 звёзд
+      { nft: NFT_DATABASE[4],  chance: 20.0 }, // ⭐ 50 звёзд
+
+      { nft: NFT_DATABASE[11], chance: 8.0  }, // Faith Amulet (legendary)
+      { nft: NFT_DATABASE[12], chance: 5.0  }, // Happy Brownie (legendary)
+      { nft: NFT_DATABASE[13], chance: 2.0  }, // Instant Ramen (legendary)
+      { nft: NFT_DATABASE[14], chance: 8.0  }, // Jolly Chimp (legendary)
+
+      { nft: NFT_DATABASE[9],  chance: 1.5  }, // Crystal Eagle (mythic)
+      { nft: NFT_DATABASE[7],  chance: 0.4  }, // Astral Shard (mythic)
+      { nft: NFT_DATABASE[10], chance: 0.1  }  // Durovs Cap (mythic)
+    ]
+  }
+};
 const ACHIEVEMENTS = [
     {id:'first_case', name:'Первый кейс',   desc:'Открой свой первый кейс',   icon:'🎁', reward:10},
     {id:'cases_5',    name:'Новичок',        desc:'Открой 5 кейсов',            icon:'📦', reward:25},
@@ -962,5 +981,6 @@ function switchAdminTab(tab) {
 }
 
 init();
+
 
 
