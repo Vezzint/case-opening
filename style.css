@@ -7,12 +7,24 @@
 
 body {
     font-family: 'Inter', -apple-system, sans-serif;
-    background: transparent; /* Убираем черный фон */
+    background: transparent;
     color: #fff;
     min-height: 100vh;
     padding-bottom: 80px;
     overflow-x: hidden;
     position: relative;
+}
+
+/* ========== СЛОИ ФОНА ========== */
+.animated-bg-circles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 #particles {
@@ -21,9 +33,23 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2; /* Над затемнением */
+    z-index: 1;
     pointer-events: none;
 }
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(10, 10, 15, 0.3), rgba(10, 10, 15, 0.85));
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ========== ЛОАДЕР ========== */
 .loader-container {
     position: fixed;
     top: 0;
@@ -114,6 +140,7 @@ body {
     100% { width: 100%; }
 }
 
+/* ========== ХЕДЕР ========== */
 .profile-header {
     position: sticky;
     top: 0;
@@ -195,6 +222,7 @@ body {
     color: #10b981;
 }
 
+/* ========== СТАТУС БАР ========== */
 .status-bar {
     padding: 12px 20px;
     font-size: 13px;
@@ -220,9 +248,10 @@ body {
     animation: pulse 2s infinite;
 }
 
+/* ========== NFT СЛАЙДЕР ========== */
 .nft-slider {
     padding: 20px 0;
-    background: rgba(15, 15, 20, 0.6);
+    background: rgba(15, 15, 20, 0.4);
     backdrop-filter: blur(10px);
     overflow: hidden;
     position: relative;
@@ -309,6 +338,7 @@ body {
     position: relative;
 }
 
+/* ========== ФИЛЬТРЫ ========== */
 .filters {
     padding: 15px 20px;
     display: flex;
@@ -316,7 +346,7 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
-    background: rgba(15, 15, 20, 0.6);
+    background: rgba(15, 15, 20, 0.5);
     backdrop-filter: blur(10px);
     -webkit-overflow-scrolling: touch;
 }
@@ -343,12 +373,13 @@ body {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
+/* ========== КЕЙСЫ ========== */
 .cases-container {
     padding: 15px 20px 20px;
 }
 
 .case-big {
-    background: linear-gradient(135deg, rgba(26, 26, 36, 0.8), rgba(21, 21, 31, 0.8));
+    background: linear-gradient(135deg, rgba(26, 26, 36, 0.85), rgba(21, 21, 31, 0.85));
     backdrop-filter: blur(15px);
     border-radius: 20px;
     overflow: hidden;
@@ -433,6 +464,95 @@ body {
     text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
+/* ========== ВКЛАДКИ ========== */
+.tab-content {
+    display: none;
+    background: transparent;
+    position: relative;
+    z-index: 5;
+}
+
+.tab-content.active {
+    display: block;
+    padding-bottom: 20px;
+}
+
+/* ========== НАВИГАЦИЯ (ФИКСИРОВАННАЯ) ========== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 20px;
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.nav-item.active {
+    color: #10b981;
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    border-radius: 2px;
+}
+
+.nav-icon {
+    font-size: 24px;
+    transition: transform 0.3s;
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.2);
+}
+
+.nav-label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ========== АДМИН БЕЙДЖ ========== */
+.admin-badge {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #000;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========== МОДАЛКИ ========== */
 .modal-info {
     display: none;
     position: fixed;
@@ -441,7 +561,7 @@ body {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     z-index: 2000;
     overflow-y: auto;
 }
@@ -616,6 +736,7 @@ body {
     color: #10b981;
 }
 
+/* ========== РУЛЕТКА ========== */
 .modal-roulette {
     display: none;
     position: fixed;
@@ -811,66 +932,7 @@ body {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-.bottom-nav {
-    background: rgba(15, 15, 20, 0.8); /* Оставляем только навигацию с прозрачностью */
-    backdrop-filter: blur(20px);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    color: #6b7280;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.nav-item.active {
-    color: #10b981;
-}
-
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    top: -12px;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #10b981, transparent);
-    border-radius: 2px;
-}
-
-.nav-icon {
-    font-size: 24px;
-    transition: transform 0.3s;
-}
-
-.nav-item.active .nav-icon {
-    transform: scale(1.2);
-}
-
-.nav-label {
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.admin-badge {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 800;
-    color: #000;
-    cursor: pointer;
-    z-index: 200;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-    animation: pulse 2s infinite;
-}
-
+/* ========== АДМИН ПАНЕЛЬ ========== */
 .admin-panel-modal {
     display: none;
     position: fixed;
@@ -880,9 +942,8 @@ body {
     bottom: 0;
     background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(20px);
-    z-index: 10000; /* Очень высокий z-index */
+    z-index: 10000;
     overflow-y: auto;
-    overflow-x: hidden;
 }
 
 .admin-panel-modal.active {
@@ -897,13 +958,6 @@ body {
     border: 2px solid rgba(251, 191, 36, 0.3);
     box-shadow: 0 0 40px rgba(251, 191, 36, 0.2);
     position: relative;
-    z-index: 10001;
-}
-
-body.admin-panel-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
 }
 
 .admin-panel-header {
@@ -961,8 +1015,8 @@ body.admin-panel-open {
     padding: 25px;
     max-height: 60vh;
     overflow-y: auto;
-    overflow-x: hidden;
 }
+
 .admin-tab-content.active {
     display: block;
 }
@@ -1038,45 +1092,6 @@ body.admin-panel-open {
     cursor: pointer;
 }
 
-.admin-btn-quick {
-    padding: 10px;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 8px;
-    color: #fbbf24;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.admin-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 6000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.admin-modal-content {
-    background: linear-gradient(135deg, #1a1d35, #0f1020);
-    border-radius: 16px;
-    padding: 30px;
-    max-width: 500px;
-    width: 100%;
-    border: 2px solid rgba(251, 191, 36, 0.3);
-}
-
-.admin-panel-modal * {
-    pointer-events: auto;
-}
-
 .admin-action-btn {
     display: flex;
     align-items: center;
@@ -1088,6 +1103,8 @@ body.admin-panel-open {
     cursor: pointer;
     transition: all 0.3s;
     text-align: left;
+    width: 100%;
+    margin-bottom: 12px;
 }
 
 .admin-action-icon {
@@ -1112,6 +1129,31 @@ body.admin-panel-open {
     color: #6b7280;
 }
 
+.admin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal-content {
+    background: linear-gradient(135deg, #1a1d35, #0f1020);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    border: 2px solid rgba(251, 191, 36, 0.3);
+}
+
+/* ========== АНИМАЦИИ ========== */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-15px); }
@@ -1141,31 +1183,7 @@ body.admin-panel-open {
     }
 }
 
-.tab-content {
-    /* background: rgba(15, 15, 20, 0.9); - УБРАТЬ или заменить на: */
-    background: transparent;
-}
-
-.tab-content.active {
-    display: block;
-    padding-bottom: 20px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* ========== АНИМИРОВАННЫЕ ФОНОВЫЕ КРУГИ ========== */
-.animated-bg-circles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0; /* Самый низ */
-    pointer-events: none;
-    overflow: hidden;
-}
+/* ========== ФОНОВЫЕ КРУГИ ========== */
 .bg-circle {
     position: absolute;
     border-radius: 50%;
@@ -1174,7 +1192,6 @@ body.admin-panel-open {
     animation: floatCircle 25s infinite ease-in-out;
 }
 
-/* Круг 1 - зеленый */
 .bg-circle-1 {
     width: 600px;
     height: 600px;
@@ -1185,7 +1202,6 @@ body.admin-panel-open {
     animation-duration: 20s;
 }
 
-/* Круг 2 - синий */
 .bg-circle-2 {
     width: 500px;
     height: 500px;
@@ -1196,7 +1212,6 @@ body.admin-panel-open {
     animation-duration: 25s;
 }
 
-/* Круг 3 - фиолетовый */
 .bg-circle-3 {
     width: 450px;
     height: 450px;
@@ -1208,7 +1223,6 @@ body.admin-panel-open {
     animation-duration: 30s;
 }
 
-/* Круг 4 - желтый */
 .bg-circle-4 {
     width: 350px;
     height: 350px;
@@ -1219,7 +1233,6 @@ body.admin-panel-open {
     animation-duration: 22s;
 }
 
-/* Круг 5 - красный */
 .bg-circle-5 {
     width: 400px;
     height: 400px;
@@ -1230,7 +1243,6 @@ body.admin-panel-open {
     animation-duration: 28s;
 }
 
-/* Круг 6 - пульсирующий большой */
 .bg-circle-pulse {
     width: 800px;
     height: 800px;
@@ -1242,36 +1254,17 @@ body.admin-panel-open {
 }
 
 @keyframes floatCircle {
-    0%, 100% {
-        transform: translate(0, 0) scale(1);
-        opacity: 0.3;
-    }
-    25% {
-        transform: translate(30px, -40px) scale(1.05);
-        opacity: 0.45;
-    }
-    50% {
-        transform: translate(-20px, 30px) scale(0.95);
-        opacity: 0.35;
-    }
-    75% {
-        transform: translate(40px, 20px) scale(1.02);
-        opacity: 0.4;
-    }
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+    25% { transform: translate(30px, -40px) scale(1.05); opacity: 0.45; }
+    50% { transform: translate(-20px, 30px) scale(0.95); opacity: 0.35; }
+    75% { transform: translate(40px, 20px) scale(1.02); opacity: 0.4; }
 }
 
 @keyframes pulseCircle {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.2;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.35;
-    }
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.2); opacity: 0.35; }
 }
 
-/* Медленно движущиеся мелкие круги */
 .bg-circle-small {
     position: absolute;
     border-radius: 50%;
@@ -1310,46 +1303,16 @@ body.admin-panel-open {
 }
 
 @keyframes floatSmall {
-    0% {
-        transform: translate(0, 0);
-    }
-    25% {
-        transform: translate(50px, -30px);
-    }
-    50% {
-        transform: translate(-40px, 50px);
-    }
-    75% {
-        transform: translate(30px, 40px);
-    }
-    100% {
-        transform: translate(0, 0);
-    }
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(50px, -30px); }
+    50% { transform: translate(-40px, 50px); }
+    75% { transform: translate(30px, 40px); }
+    100% { transform: translate(0, 0); }
 }
 
-/* Затемнение для читаемости текста поверх кругов */
-body::before {
-    content: '';
+/* Блокировка скролла при открытой админке */
+body.admin-panel-open {
+    overflow: hidden;
     position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    background: radial-gradient(ellipse at center, rgba(10, 10, 15, 0.3), rgba(10, 10, 15, 0.85));
-    z-index: 1; /* Над кругами */
-    pointer-events: none;
-}
-
-/* Убедимся, что контент поверх фона */
-.profile-header,
-.status-bar,
-.nft-slider,
-.filters,
-.tab-content,
-.bottom-nav,
-.modal-info,
-.modal-roulette,
-.admin-panel-modal {
-    position: relative;
-    z-index: 10; /* Самый верх */
 }
