@@ -83,6 +83,7 @@ const CASES_DATA = {
     ]
   }
 };
+
 const ACHIEVEMENTS = [
     {id:'first_case', name:'Первый кейс',   desc:'Открой свой первый кейс',   icon:'🎁', reward:10},
     {id:'cases_5',    name:'Новичок',        desc:'Открой 5 кейсов',            icon:'📦', reward:25},
@@ -99,7 +100,26 @@ let inventory      = [];
 let openedCases    = 0;
 let achievements   = [];
 let globalHistory  = [];
-let freeTimerInterval = null;  // интервал живого счётчика
+let freeTimerInterval = null;
+
+// ===========================================================
+// ДОБАВЛЯЕМ НЕДОСТАЮЩИЕ СТИЛИ (блокировка скролла при админке)
+// ===========================================================
+(function addMissingStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        body.admin-panel-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        /* убедимся, что навигация всегда поверх */
+        .bottom-nav {
+            z-index: 1000 !important;
+        }
+    `;
+    document.head.appendChild(style);
+})();
 
 // ===========================================================
 // ПОЛУЧЕНИЕ БАЛАНСА — всегда свежий из localStorage
@@ -167,7 +187,6 @@ function startFreeTimer() {
             freeTimerInterval = null;
             if (statusEl) { statusEl.textContent = '✅ ДОСТУПЕН'; statusEl.style.color = '#10b981'; }
             timerEl.textContent = '';
-            // Снимаем затемнение с карточки
             const card = document.getElementById('freeCard');
             if (card) card.style.opacity = '1';
         } else {
@@ -418,10 +437,9 @@ function openCaseFromModal() {
         return;
     }
 
-    // Списываем звёзды ДО закрытия окна — баланс сразу обновится
     if (data.price > 0) {
         setStars(getStars() - data.price);
-        generateCases(); // обновляем "не хватает" на карточке
+        generateCases();
     }
 
     if (data.cooldown) {
@@ -454,7 +472,6 @@ function startRoulette(caseKey) {
     title.textContent = '🎲 ОТКРЫВАЕМ...';
     document.body.style.overflow = 'hidden';
 
-    // Сбрасываем без анимации
     track.style.transition = 'none';
     track.style.transform  = 'translateX(0px)';
     track.innerHTML        = '';
@@ -479,22 +496,19 @@ function startRoulette(caseKey) {
         track.appendChild(div);
     }
 
-    // Ждём 2 кадра — браузер РЕАЛЬНО отрисовывает элементы
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            // Измеряем РЕАЛЬНУЮ ширину элемента из DOM
             const firstItem = track.children[0];
             if (!firstItem) return;
 
             const itemW  = firstItem.getBoundingClientRect().width;
-            const gap    = 10; // ← укажи gap из своего style.css (.roulette-track gap: 10px)
+            const gap    = 10;
             const stepW  = itemW + gap;
 
             const wrapper = track.parentElement;
             const wrapW   = wrapper ? wrapper.getBoundingClientRect().width : 370;
             const center  = wrapW / 2;
 
-            // Считаем смещение: центр победного элемента → центр экрана
             const winCenterX = WIN_IDX * stepW + itemW / 2;
             const offset     = center - winCenterX;
 
@@ -597,7 +611,7 @@ function addToInventory(nft) {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
     inventory.unshift({
         ...nft,
-        uid: Date.now() + '_' + Math.random().toString(36).slice(2), // уникальный id
+        uid: Date.now() + '_' + Math.random().toString(36).slice(2),
         time: new Date().toISOString()
     });
     localStorage.setItem('inventory', JSON.stringify(inventory));
@@ -613,7 +627,6 @@ function renderInventory() {
     const c = document.getElementById('inventoryContainer');
     if (!c) return;
 
-    // Всегда читаем свежие данные из localStorage
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
     if (!inventory.length) {
@@ -640,7 +653,6 @@ function renderInventory() {
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">
                 ${sorted.map(nft => {
-                    // uid для надёжного поиска, или fallback на JSON-строку
                     const uid = nft.uid || JSON.stringify(nft);
                     const safeUid = encodeURIComponent(uid);
                     return `
@@ -676,10 +688,8 @@ function renderInventory() {
 function sellNFT(safeUid) {
     const uid = decodeURIComponent(safeUid);
 
-    // Читаем свежий инвентарь из localStorage
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
-    // Ищем предмет по uid
     const idx = inventory.findIndex(item => {
         const itemUid = item.uid || JSON.stringify(item);
         return itemUid === uid;
@@ -702,7 +712,6 @@ function sellNFT(safeUid) {
         ]
     }, btn => {
         if (btn === 'sell') {
-            // Снова читаем свежий инвентарь (мог измениться пока popup был открыт)
             inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
             const freshIdx = inventory.findIndex(item => (item.uid||JSON.stringify(item)) === uid);
 
@@ -719,6 +728,7 @@ function sellNFT(safeUid) {
         }
     });
 }
+
 // ===========================================================
 // ИСТОРИЯ
 // ===========================================================
@@ -730,12 +740,14 @@ function saveToHistory(nft) {
 }
 
 function loadHistory() {
-    renderHistory(JSON.parse(localStorage.getItem('caseHistory') || '[]'));
+    const history = JSON.parse(localStorage.getItem('caseHistory') || '[]');
+    renderHistory(history);
 }
 
-function renderHistory(history) {
+function renderHistory(history = null) {
     const c = document.getElementById('historyContainer');
     if (!c) return;
+    if (history === null) history = JSON.parse(localStorage.getItem('caseHistory') || '[]');
     if (!history.length) {
         c.innerHTML = `<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📜</div><h3>История пуста</h3></div>`;
         return;
@@ -857,17 +869,40 @@ function addToGlobalHistory(nft) {
 }
 
 // ===========================================================
-// НАВИГАЦИЯ
+// НАВИГАЦИЯ (исправлена)
 // ===========================================================
 function switchTab(tab) {
-    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    const map = {cases:'tabCases',inventory:'tabInventory',profile:'tabProfile',history:'tabHistory',achievements:'tabAchievements'};
-    document.getElementById(map[tab]).classList.add('active');
-    if (tab==='inventory')    renderInventory();
-    if (tab==='history')      loadHistory();
-    if (tab==='achievements') renderAchievements();
+    // Скрываем все вкладки
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Показываем выбранную
+    const activeTab = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+    
+    // Обновляем активную кнопку в навигации
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    // Находим кнопку по data-атрибуту (можно добавить в HTML, но сейчас проще по индексу)
+    const navMap = { cases:0, inventory:1, history:2, achievements:3, profile:4 };
+    const idx = navMap[tab];
+    if (idx !== undefined) {
+        const navItems = document.querySelectorAll('.nav-item');
+        if (navItems[idx]) navItems[idx].classList.add('active');
+    }
+    
+    // Рендерим контент если нужно
+    if (tab === 'inventory') {
+        renderInventory();
+    } else if (tab === 'history') {
+        loadHistory(); // перезагружаем из localStorage
+    } else if (tab === 'achievements') {
+        renderAchievements();
+    }
 }
 
 // ===========================================================
@@ -896,38 +931,75 @@ function activatePromo() {
     localStorage.setItem('usedPromos', JSON.stringify(used));
     tg.showPopup({title:'🎉 Активировано!',message:`+${codes[code]} ⭐ звёзд!`,buttons:[{type:'ok'}]});
     document.getElementById('promoInput').value = '';
-    generateCases(); // обновляем кнопки кейсов
+    generateCases();
 }
 
 // ===========================================================
-// АДМИН ПАНЕЛЬ
+// АДМИН ПАНЕЛЬ (исправлена)
 // ===========================================================
 function openAdminPanel() {
-    if (!isAdmin) return;
-    document.getElementById('adminPanel').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    console.log('Opening admin panel...');
+    const adminPanel = document.getElementById('adminPanel');
+    if (!adminPanel) {
+        console.error('Admin panel element not found!');
+        return;
+    }
+    
+    // Блокируем скролл body
+    document.body.classList.add('admin-panel-open');
+    
+    // Открываем панель
+    adminPanel.classList.add('active');
+    
+    // Обновляем данные в админке (используем существующие функции)
     loadAdminStats();
     loadAllUsers();
+    
+    console.log('Admin panel opened');
 }
 
 function closeAdminPanel() {
-    document.getElementById('adminPanel').classList.remove('active');
-    document.body.style.overflow = '';
+    console.log('Closing admin panel...');
+    const adminPanel = document.getElementById('adminPanel');
+    if (adminPanel) {
+        adminPanel.classList.remove('active');
+    }
+    
+    // Разблокируем скролл body
+    document.body.classList.remove('admin-panel-open');
 }
 
 function loadAdminStats() {
-    document.getElementById('adminStats').innerHTML = `
+    const statsContainer = document.getElementById('adminStats');
+    if (!statsContainer) return;
+    statsContainer.innerHTML = `
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;">
             <div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">${getStars()}</div><div class="admin-stat-label">Звёзд</div></div>
             <div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">${openedCases}</div><div class="admin-stat-label">Кейсов</div></div>
             <div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">${inventory.length}</div><div class="admin-stat-label">NFT</div></div>
             <div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">${achievements.length}</div><div class="admin-stat-label">Ачивок</div></div>
-        </div>`;
+        </div>
+        <div style="margin-top:20px;">
+            <button class="admin-btn admin-btn-danger" style="width:100%;" onclick="resetUserProgress()">🗑️ СБРОСИТЬ ВЕСЬ ПРОГРЕСС</button>
+        </div>
+        <div style="margin-top:15px;">
+            <div style="background:rgba(30,30,40,0.5);padding:15px;border-radius:12px;">
+                <h4 style="margin-bottom:10px;">💰 Управление балансом</h4>
+                <div style="display:flex;gap:10px;">
+                    <input type="number" id="adminBalanceAmount" placeholder="Сумма" style="flex:1; padding:10px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;">
+                    <button onclick="adminAddStars()" class="admin-btn-small" style="background:#10b981;">+⭐</button>
+                    <button onclick="adminRemoveStars()" class="admin-btn-small" style="background:#ef4444;">-⭐</button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function loadAllUsers() {
     const user = tg.initDataUnsafe?.user;
-    document.getElementById('adminUsersList').innerHTML = `
+    const usersContainer = document.getElementById('adminUsersList');
+    if (!usersContainer) return;
+    usersContainer.innerHTML = `
         <div class="admin-user-row">
             <div style="display:flex;align-items:center;gap:15px;flex:1;">
                 <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">${(user?.first_name||'A').charAt(0)}</div>
@@ -943,7 +1015,7 @@ function loadAllUsers() {
                 </div>
             </div>
             <div style="display:flex;gap:8px;">
-                <button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(${user?.id||0},'${user?.username||'admin'}',${getStars()})">💰</button>
+                <button class="admin-btn-small admin-btn-success" onclick="manageUserBalance()">💰</button>
                 <button class="admin-btn-small admin-btn-danger"  onclick="resetUserProgress()">🗑️</button>
             </div>
         </div>
@@ -953,7 +1025,36 @@ function loadAllUsers() {
         </div>`;
 }
 
-function manageUserBalance(userId, username, curStars) {
+function adminAddStars() {
+    const amount = parseInt(document.getElementById('adminBalanceAmount')?.value);
+    if (amount && amount > 0) {
+        setStars(getStars() + amount);
+        loadAdminStats();
+        generateCases();
+        tg.showAlert(`✅ Добавлено ${amount} ⭐`);
+    } else {
+        tg.showAlert('Введите корректную сумму');
+    }
+}
+
+function adminRemoveStars() {
+    const amount = parseInt(document.getElementById('adminBalanceAmount')?.value);
+    if (amount && amount > 0) {
+        const newBalance = getStars() - amount;
+        if (newBalance < 0) {
+            tg.showAlert('Баланс не может быть отрицательным');
+            return;
+        }
+        setStars(newBalance);
+        loadAdminStats();
+        generateCases();
+        tg.showAlert(`❌ Снято ${amount} ⭐`);
+    } else {
+        tg.showAlert('Введите корректную сумму');
+    }
+}
+
+function manageUserBalance() {
     const modal = document.createElement('div');
     modal.className = 'admin-modal';
     modal.innerHTML = `
@@ -963,14 +1064,14 @@ function manageUserBalance(userId, username, curStars) {
                 <div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest('.admin-modal').remove()">✕</div>
             </div>
             <div style="background:rgba(30,30,40,0.5);padding:15px;border-radius:12px;margin-bottom:20px;">
-                <div style="font-size:18px;font-weight:700;">@${username}</div>
-                <div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span id="modalCurStars" style="color:#10b981;font-weight:700;">${curStars} ⭐</span></div>
+                <div style="font-size:18px;font-weight:700;">@${tg.initDataUnsafe?.user?.username || 'admin'}</div>
+                <div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span style="color:#10b981;font-weight:700;">${getStars()} ⭐</span></div>
             </div>
             <input type="number" id="starsAmount" placeholder="Количество звёзд" min="1"
                 style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;margin-bottom:15px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <button class="admin-btn admin-btn-success" onclick="giveStars('${username}')">➕ Выдать</button>
-                <button class="admin-btn admin-btn-danger"  onclick="takeStars('${username}')">➖ Забрать</button>
+                <button class="admin-btn admin-btn-success" onclick="giveStarsFromModal()">➕ Выдать</button>
+                <button class="admin-btn admin-btn-danger"  onclick="takeStarsFromModal()">➖ Забрать</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
                 <button class="admin-btn-quick" onclick="document.getElementById('starsAmount').value=100">100</button>
@@ -981,26 +1082,26 @@ function manageUserBalance(userId, username, curStars) {
     document.body.appendChild(modal);
 }
 
-function giveStars(username) {
+function giveStarsFromModal() {
     const amount = parseInt(document.getElementById('starsAmount').value);
     if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
     setStars(getStars() + amount);
-    document.querySelector('.admin-modal').remove();
-    generateCases(); // сразу обновляем кнопки кейсов
-    loadAllUsers();
+    document.querySelector('.admin-modal')?.remove();
     loadAdminStats();
-    tg.showPopup({title:'✅ Выдано!', message:`+${amount} ⭐\nНовый баланс: ${getStars()} ⭐`, buttons:[{type:'ok'}]});
+    generateCases();
+    tg.showAlert(`✅ Выдано ${amount} ⭐`);
 }
 
-function takeStars(username) {
+function takeStarsFromModal() {
     const amount = parseInt(document.getElementById('starsAmount').value);
     if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
-    setStars(getStars() - amount);
-    document.querySelector('.admin-modal').remove();
-    generateCases();
-    loadAllUsers();
+    const newBalance = getStars() - amount;
+    if (newBalance < 0) { tg.showAlert('Баланс не может быть отрицательным'); return; }
+    setStars(newBalance);
+    document.querySelector('.admin-modal')?.remove();
     loadAdminStats();
-    tg.showPopup({title:'✅ Забрано!', message:`-${amount} ⭐\nНовый баланс: ${getStars()} ⭐`, buttons:[{type:'ok'}]});
+    generateCases();
+    tg.showAlert(`❌ Забрано ${amount} ⭐`);
 }
 
 function resetUserProgress() {
@@ -1012,7 +1113,7 @@ function resetUserProgress() {
         if (btn==='yes') {
             ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'].forEach(k=>localStorage.removeItem(k));
             userLevel=1; userXP=0; openedCases=0; inventory=[]; achievements=[];
-            document.getElementById('balance').textContent='0';
+            setStars(0);
             updateLevelDisplay();
             generateCases();
             closeAdminPanel();
@@ -1046,9 +1147,3 @@ function switchAdminTab(tab) {
 }
 
 init();
-
-
-
-
-
-
