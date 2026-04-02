@@ -1150,3 +1150,210 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* ========== АНИМИРОВАННЫЕ ФОНОВЫЕ КРУГИ ========== */
+.animated-bg-circles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: floatCircle 25s infinite ease-in-out;
+}
+
+/* Круг 1 - зеленый */
+.bg-circle-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0));
+    top: -200px;
+    left: -200px;
+    animation-delay: 0s;
+    animation-duration: 20s;
+}
+
+/* Круг 2 - синий */
+.bg-circle-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0));
+    bottom: -150px;
+    right: -150px;
+    animation-delay: 5s;
+    animation-duration: 25s;
+}
+
+/* Круг 3 - фиолетовый */
+.bg-circle-3 {
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0));
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 10s;
+    animation-duration: 30s;
+}
+
+/* Круг 4 - желтый */
+.bg-circle-4 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0));
+    bottom: 20%;
+    left: 10%;
+    animation-delay: 15s;
+    animation-duration: 22s;
+}
+
+/* Круг 5 - красный */
+.bg-circle-5 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0));
+    top: 20%;
+    right: 5%;
+    animation-delay: 8s;
+    animation-duration: 28s;
+}
+
+/* Круг 6 - пульсирующий большой */
+.bg-circle-pulse {
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0));
+    top: -300px;
+    right: -300px;
+    animation: pulseCircle 8s ease-in-out infinite;
+    filter: blur(100px);
+}
+
+@keyframes floatCircle {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translate(30px, -40px) scale(1.05);
+        opacity: 0.45;
+    }
+    50% {
+        transform: translate(-20px, 30px) scale(0.95);
+        opacity: 0.35;
+    }
+    75% {
+        transform: translate(40px, 20px) scale(1.02);
+        opacity: 0.4;
+    }
+}
+
+@keyframes pulseCircle {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.35;
+    }
+}
+
+/* Медленно движущиеся мелкие круги */
+.bg-circle-small {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.25;
+    animation: floatSmall 40s infinite linear;
+}
+
+.bg-small-1 {
+    width: 150px;
+    height: 150px;
+    background: #10b981;
+    top: 15%;
+    left: 80%;
+    animation-duration: 35s;
+}
+
+.bg-small-2 {
+    width: 120px;
+    height: 120px;
+    background: #3b82f6;
+    bottom: 25%;
+    left: 85%;
+    animation-duration: 45s;
+    animation-delay: 10s;
+}
+
+.bg-small-3 {
+    width: 100px;
+    height: 100px;
+    background: #a855f7;
+    top: 70%;
+    left: 5%;
+    animation-duration: 38s;
+    animation-delay: 5s;
+}
+
+@keyframes floatSmall {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(50px, -30px);
+    }
+    50% {
+        transform: translate(-40px, 50px);
+    }
+    75% {
+        transform: translate(30px, 40px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* Затемнение для читаемости текста поверх кругов */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(10, 10, 15, 0.3), rgba(10, 10, 15, 0.8));
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Убедимся, что контент поверх фона */
+.profile-header,
+.status-bar,
+.nft-slider,
+.filters,
+.tab-content,
+.bottom-nav,
+.modal-info,
+.modal-roulette,
+.admin-panel-modal {
+    position: relative;
+    z-index: 2;
+}
+
+/* Оверлей для модалок делаем плотнее */
+.modal-info,
+.modal-roulette,
+.admin-panel-modal {
+    background: rgba(0, 0, 0, 0.92);
+}
