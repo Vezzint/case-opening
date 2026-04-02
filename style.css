@@ -7,24 +7,12 @@
 
 body {
     font-family: 'Inter', -apple-system, sans-serif;
-    background: transparent;
+    background: #0a0a0f;
     color: #fff;
     min-height: 100vh;
     padding-bottom: 80px;
     overflow-x: hidden;
     position: relative;
-}
-
-/* ========== СЛОИ ФОНА ========== */
-.animated-bg-circles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
 }
 
 #particles {
@@ -33,23 +21,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(ellipse at center, rgba(10, 10, 15, 0.3), rgba(10, 10, 15, 0.85));
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* ========== ЛОАДЕР ========== */
 .loader-container {
     position: fixed;
     top: 0;
@@ -140,7 +115,6 @@ body::before {
     100% { width: 100%; }
 }
 
-/* ========== ХЕДЕР ========== */
 .profile-header {
     position: sticky;
     top: 0;
@@ -222,7 +196,6 @@ body::before {
     color: #10b981;
 }
 
-/* ========== СТАТУС БАР ========== */
 .status-bar {
     padding: 12px 20px;
     font-size: 13px;
@@ -248,10 +221,9 @@ body::before {
     animation: pulse 2s infinite;
 }
 
-/* ========== NFT СЛАЙДЕР ========== */
 .nft-slider {
     padding: 20px 0;
-    background: rgba(15, 15, 20, 0.4);
+    background: rgba(15, 15, 20, 0.6);
     backdrop-filter: blur(10px);
     overflow: hidden;
     position: relative;
@@ -338,7 +310,6 @@ body::before {
     position: relative;
 }
 
-/* ========== ФИЛЬТРЫ ========== */
 .filters {
     padding: 15px 20px;
     display: flex;
@@ -346,7 +317,7 @@ body::before {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
-    background: rgba(15, 15, 20, 0.5);
+    background: rgba(15, 15, 20, 0.6);
     backdrop-filter: blur(10px);
     -webkit-overflow-scrolling: touch;
 }
@@ -373,13 +344,12 @@ body::before {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-/* ========== КЕЙСЫ ========== */
 .cases-container {
     padding: 15px 20px 20px;
 }
 
 .case-big {
-    background: linear-gradient(135deg, rgba(26, 26, 36, 0.85), rgba(21, 21, 31, 0.85));
+    background: linear-gradient(135deg, rgba(26, 26, 36, 0.8), rgba(21, 21, 31, 0.8));
     backdrop-filter: blur(15px);
     border-radius: 20px;
     overflow: hidden;
@@ -464,95 +434,6 @@ body::before {
     text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
-/* ========== ВКЛАДКИ ========== */
-.tab-content {
-    display: none;
-    background: transparent;
-    position: relative;
-    z-index: 5;
-}
-
-.tab-content.active {
-    display: block;
-    padding-bottom: 20px;
-}
-
-/* ========== НАВИГАЦИЯ (ФИКСИРОВАННАЯ) ========== */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(15, 15, 20, 0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 20px;
-    z-index: 1000;
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    color: #6b7280;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.nav-item.active {
-    color: #10b981;
-}
-
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    top: -12px;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #10b981, transparent);
-    border-radius: 2px;
-}
-
-.nav-icon {
-    font-size: 24px;
-    transition: transform 0.3s;
-}
-
-.nav-item.active .nav-icon {
-    transform: scale(1.2);
-}
-
-.nav-label {
-    font-size: 11px;
-    font-weight: 700;
-}
-
-/* ========== АДМИН БЕЙДЖ ========== */
-.admin-badge {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 800;
-    color: #000;
-    cursor: pointer;
-    z-index: 200;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-    animation: pulse 2s infinite;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* ========== МОДАЛКИ ========== */
 .modal-info {
     display: none;
     position: fixed;
@@ -561,7 +442,7 @@ body::before {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
     z-index: 2000;
     overflow-y: auto;
 }
@@ -736,7 +617,6 @@ body::before {
     color: #10b981;
 }
 
-/* ========== РУЛЕТКА ========== */
 .modal-roulette {
     display: none;
     position: fixed;
@@ -932,7 +812,75 @@ body::before {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-/* ========== АДМИН ПАНЕЛЬ ========== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 20px;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.nav-item.active {
+    color: #10b981;
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    border-radius: 2px;
+}
+
+.nav-icon {
+    font-size: 24px;
+    transition: transform 0.3s;
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.2);
+}
+
+.nav-label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.admin-badge {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #000;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    animation: pulse 2s infinite;
+}
+
 .admin-panel-modal {
     display: none;
     position: fixed;
@@ -940,14 +888,14 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.98);
-    backdrop-filter: blur(20px);
-    z-index: 10000;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 5000;
     overflow-y: auto;
 }
 
 .admin-panel-modal.active {
-    display: block !important;
+    display: block;
 }
 
 .admin-panel-container {
@@ -957,7 +905,6 @@ body::before {
     border-radius: 20px;
     border: 2px solid rgba(251, 191, 36, 0.3);
     box-shadow: 0 0 40px rgba(251, 191, 36, 0.2);
-    position: relative;
 }
 
 .admin-panel-header {
@@ -1013,6 +960,7 @@ body::before {
 .admin-tab-content {
     display: none;
     padding: 25px;
+    min-height: 400px;
     max-height: 60vh;
     overflow-y: auto;
 }
@@ -1092,6 +1040,41 @@ body::before {
     cursor: pointer;
 }
 
+.admin-btn-quick {
+    padding: 10px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 8px;
+    color: #fbbf24;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 6000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal-content {
+    background: linear-gradient(135deg, #1a1d35, #0f1020);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    border: 2px solid rgba(251, 191, 36, 0.3);
+}
+
 .admin-action-btn {
     display: flex;
     align-items: center;
@@ -1103,8 +1086,6 @@ body::before {
     cursor: pointer;
     transition: all 0.3s;
     text-align: left;
-    width: 100%;
-    margin-bottom: 12px;
 }
 
 .admin-action-icon {
@@ -1129,31 +1110,6 @@ body::before {
     color: #6b7280;
 }
 
-.admin-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 11000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.admin-modal-content {
-    background: linear-gradient(135deg, #1a1d35, #0f1020);
-    border-radius: 16px;
-    padding: 30px;
-    max-width: 500px;
-    width: 100%;
-    border: 2px solid rgba(251, 191, 36, 0.3);
-}
-
-/* ========== АНИМАЦИИ ========== */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-15px); }
@@ -1183,136 +1139,14 @@ body::before {
     }
 }
 
-/* ========== ФОНОВЫЕ КРУГИ ========== */
-.bg-circle {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.4;
-    animation: floatCircle 25s infinite ease-in-out;
+.tab-content {
+    display: none;
 }
 
-.bg-circle-1 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0));
-    top: -200px;
-    left: -200px;
-    animation-delay: 0s;
-    animation-duration: 20s;
+.tab-content.active {
+    display: block;
 }
 
-.bg-circle-2 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0));
-    bottom: -150px;
-    right: -150px;
-    animation-delay: 5s;
-    animation-duration: 25s;
-}
-
-.bg-circle-3 {
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0));
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: 10s;
-    animation-duration: 30s;
-}
-
-.bg-circle-4 {
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0));
-    bottom: 20%;
-    left: 10%;
-    animation-delay: 15s;
-    animation-duration: 22s;
-}
-
-.bg-circle-5 {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0));
-    top: 20%;
-    right: 5%;
-    animation-delay: 8s;
-    animation-duration: 28s;
-}
-
-.bg-circle-pulse {
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0));
-    top: -300px;
-    right: -300px;
-    animation: pulseCircle 8s ease-in-out infinite;
-    filter: blur(100px);
-}
-
-@keyframes floatCircle {
-    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-    25% { transform: translate(30px, -40px) scale(1.05); opacity: 0.45; }
-    50% { transform: translate(-20px, 30px) scale(0.95); opacity: 0.35; }
-    75% { transform: translate(40px, 20px) scale(1.02); opacity: 0.4; }
-}
-
-@keyframes pulseCircle {
-    0%, 100% { transform: scale(1); opacity: 0.2; }
-    50% { transform: scale(1.2); opacity: 0.35; }
-}
-
-.bg-circle-small {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(30px);
-    opacity: 0.25;
-    animation: floatSmall 40s infinite linear;
-}
-
-.bg-small-1 {
-    width: 150px;
-    height: 150px;
-    background: #10b981;
-    top: 15%;
-    left: 80%;
-    animation-duration: 35s;
-}
-
-.bg-small-2 {
-    width: 120px;
-    height: 120px;
-    background: #3b82f6;
-    bottom: 25%;
-    left: 85%;
-    animation-duration: 45s;
-    animation-delay: 10s;
-}
-
-.bg-small-3 {
-    width: 100px;
-    height: 100px;
-    background: #a855f7;
-    top: 70%;
-    left: 5%;
-    animation-duration: 38s;
-    animation-delay: 5s;
-}
-
-@keyframes floatSmall {
-    0% { transform: translate(0, 0); }
-    25% { transform: translate(50px, -30px); }
-    50% { transform: translate(-40px, 50px); }
-    75% { transform: translate(30px, 40px); }
-    100% { transform: translate(0, 0); }
-}
-
-/* Блокировка скролла при открытой админке */
-body.admin-panel-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+.hidden {
+    display: none !important;
 }
