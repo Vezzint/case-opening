@@ -823,7 +823,7 @@ body {
     display: flex;
     justify-content: space-around;
     padding: 12px 20px;
-    z-index: 100;
+    z-index: 1000; /* Увеличил z-index */
 }
 
 .nav-item {
@@ -888,14 +888,15 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 5000;
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    z-index: 10000; /* Очень высокий z-index */
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .admin-panel-modal.active {
-    display: block;
+    display: block !important;
 }
 
 .admin-panel-container {
@@ -905,6 +906,14 @@ body {
     border-radius: 20px;
     border: 2px solid rgba(251, 191, 36, 0.3);
     box-shadow: 0 0 40px rgba(251, 191, 36, 0.2);
+    position: relative;
+    z-index: 10001;
+}
+
+body.admin-panel-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
 }
 
 .admin-panel-header {
@@ -960,11 +969,10 @@ body {
 .admin-tab-content {
     display: none;
     padding: 25px;
-    min-height: 400px;
     max-height: 60vh;
     overflow-y: auto;
+    overflow-x: hidden;
 }
-
 .admin-tab-content.active {
     display: block;
 }
@@ -1075,6 +1083,10 @@ body {
     border: 2px solid rgba(251, 191, 36, 0.3);
 }
 
+.admin-panel-modal * {
+    pointer-events: auto;
+}
+
 .admin-action-btn {
     display: flex;
     align-items: center;
@@ -1141,10 +1153,13 @@ body {
 
 .tab-content {
     display: none;
+    position: relative;
+    z-index: 1;
 }
 
 .tab-content.active {
     display: block;
+    padding-bottom: 20px;
 }
 
 .hidden {
@@ -1346,11 +1361,7 @@ body::before {
 .bottom-nav,
 .modal-info,
 .modal-roulette,
-.admin-panel-modal {
-    position: relative;
-    z-index: 2;
-}
-
+.admin-panel-modal 
 /* Оверлей для модалок делаем плотнее */
 .modal-info,
 .modal-roulette,
