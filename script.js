@@ -25,6 +25,7 @@ var NFT_DATABASE = [
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"}
 ];
 
+// script.js - исправленный блок CASES_DATA с измененными шансами
 var CASES_DATA = {
   free: {
     name: "🎁 Бесплатный кейс",
@@ -50,14 +51,14 @@ var CASES_DATA = {
     type: "basic",
     cooldown: false,
     items: [
-      { nft: NFT_DATABASE[1],  chance: 55.0 },
+      { nft: NFT_DATABASE[1],  chance: 40.0 },
       { nft: NFT_DATABASE[2],  chance: 25.0 },
-      { nft: NFT_DATABASE[3],  chance: 12.0 },
-      { nft: NFT_DATABASE[4],  chance: 7.0  },
-      { nft: NFT_DATABASE[8],  chance: 0.8  },
-      { nft: NFT_DATABASE[9],  chance: 0.15 },
-      { nft: NFT_DATABASE[7],  chance: 0.04 },
-      { nft: NFT_DATABASE[10], chance: 0.01 }
+      { nft: NFT_DATABASE[3],  chance: 15.0 },
+      { nft: NFT_DATABASE[4],  chance: 8.0  },
+      { nft: NFT_DATABASE[8],  chance: 6.0  },
+      { nft: NFT_DATABASE[9],  chance: 3.0 },
+      { nft: NFT_DATABASE[7],  chance: 2.0 },
+      { nft: NFT_DATABASE[10], chance: 1.0 }
     ]
   },
 
@@ -68,18 +69,19 @@ var CASES_DATA = {
     type: "premium",
     cooldown: false,
     items: [
-      { nft: NFT_DATABASE[2],  chance: 30.0 },
-      { nft: NFT_DATABASE[3],  chance: 25.0 },
-      { nft: NFT_DATABASE[4],  chance: 20.0 },
-      { nft: NFT_DATABASE[11], chance: 8.0  },
-      { nft: NFT_DATABASE[12], chance: 5.0  },
-      { nft: NFT_DATABASE[13], chance: 2.0  },
-      { nft: NFT_DATABASE[14], chance: 8.0  },
-      { nft: NFT_DATABASE[9],  chance: 1.5  },
-      { nft: NFT_DATABASE[7],  chance: 0.4  },
-      { nft: NFT_DATABASE[10], chance: 0.1  }
+      { nft: NFT_DATABASE[2],  chance: 18.0 },
+      { nft: NFT_DATABASE[3],  chance: 15.0 },
+      { nft: NFT_DATABASE[4],  chance: 10.0 },
+      { nft: NFT_DATABASE[11], chance: 12.0 },
+      { nft: NFT_DATABASE[12], chance: 10.0 },
+      { nft: NFT_DATABASE[13], chance: 8.0  },
+      { nft: NFT_DATABASE[14], chance: 12.0 },
+      { nft: NFT_DATABASE[9],  chance: 8.0  },
+      { nft: NFT_DATABASE[7],  chance: 5.0  },
+      { nft: NFT_DATABASE[10], chance: 2.0  }
     ]
   }
+};
 };
 
 var ACHIEVEMENTS = [
