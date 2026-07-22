@@ -1,64 +1,1332 @@
 // script.js
-var tg=window.Telegram.WebApp;tg.expand();tg.enableClosingConfirmation();tg.setHeaderColor('#0a0a0f');tg.setBackgroundColor('#0a0a0f');
-var ADMIN_ID=6584350034;
-var NFT_DATABASE=[{id:0,name:"Подарок",stars:0,ton:0,image:"nft/Gift.jpg",isCurrency:true,amount:1,rarity:"special",icon:"💝"},{id:1,name:"3 звезды",stars:3,ton:0,image:"nft/Stars.jpg",isCurrency:true,amount:3,rarity:"common",icon:"⭐"},{id:2,name:"5 звёзд",stars:5,ton:0,image:"nft/Stars.jpg",isCurrency:true,amount:5,rarity:"common",icon:"⭐"},{id:3,name:"15 звёзд",stars:15,ton:0,image:"nft/Stars.jpg",isCurrency:true,amount:15,rarity:"rare",icon:"⭐"},{id:4,name:"50 звёзд",stars:50,ton:0,image:"nft/Stars.jpg",isCurrency:true,amount:50,rarity:"epic",icon:"⭐"},{id:5,name:"1 may",stars:20,ton:.1,image:"nft/1 may.jpg",rarity:"legendary"},{id:6,name:"Artisan Brick",stars:9400,ton:100,image:"nft/Artisan Brick.jpg",rarity:"legendary"},{id:7,name:"Astral Shard",stars:21000,ton:220,image:"nft/Astral Shard.jpg",rarity:"mythic"},{id:8,name:"Backpack",stars:500,ton:.35,image:"nft/Backpack.jpg",rarity:"legendary"},{id:9,name:"Crystal Eagle",stars:3881,ton:41.25,image:"nft/Crystal Eagle.jpg",rarity:"mythic"},{id:10,name:"Durovs Cap",stars:78550,ton:800,image:"nft/Durovs Cap.jpg",rarity:"mythic"},{id:11,name:"Faith Amulet",stars:650,ton:6,image:"nft/Faith Amulet.jpg",rarity:"legendary"},{id:12,name:"Happy Brownie",stars:500,ton:5,image:"nft/Happy Brownie.jpg",rarity:"legendary"},{id:13,name:"Instant Ramen",stars:540,ton:3,image:"nft/Instant Ramen.jpg",rarity:"legendary"},{id:14,name:"Jolly Chimp",stars:756,ton:8,image:"nft/Jolly Chimp.jpg",rarity:"legendary"}];
-var CASES_DATA={free:{name:"🎁 Бесплатный кейс",icon:"🎁",price:0,type:"free",cooldown:true,items:[{nft:NFT_DATABASE[0],chance:40},{nft:NFT_DATABASE[1],chance:30},{nft:NFT_DATABASE[2],chance:15},{nft:NFT_DATABASE[3],chance:10},{nft:NFT_DATABASE[4],chance:4.5},{nft:NFT_DATABASE[12],chance:.4},{nft:NFT_DATABASE[13],chance:.1}]},basic:{name:"📦 Basic Case",icon:"📦",price:50,type:"basic",cooldown:false,items:[{nft:NFT_DATABASE[1],chance:40},{nft:NFT_DATABASE[2],chance:25},{nft:NFT_DATABASE[3],chance:15},{nft:NFT_DATABASE[4],chance:8},{nft:NFT_DATABASE[8],chance:6},{nft:NFT_DATABASE[9],chance:3},{nft:NFT_DATABASE[7],chance:2},{nft:NFT_DATABASE[10],chance:1}]},premium:{name:"💎 Premium Case",icon:"💎",price:500,type:"premium",cooldown:false,items:[{nft:NFT_DATABASE[2],chance:18},{nft:NFT_DATABASE[3],chance:15},{nft:NFT_DATABASE[4],chance:10},{nft:NFT_DATABASE[11],chance:12},{nft:NFT_DATABASE[12],chance:10},{nft:NFT_DATABASE[13],chance:8},{nft:NFT_DATABASE[14],chance:12},{nft:NFT_DATABASE[9],chance:8},{nft:NFT_DATABASE[7],chance:5},{nft:NFT_DATABASE[10],chance:2}]}};
-var ACHIEVEMENTS=[{id:'first_case',name:'Первый кейс',desc:'Открой свой первый кейс',icon:'🎁',reward:10},{id:'cases_5',name:'Новичок',desc:'Открой 5 кейсов',icon:'📦',reward:25},{id:'cases_10',name:'Коллекционер',desc:'Открой 10 кейсов',icon:'🎰',reward:50},{id:'mythic',name:'Мифическая удача',desc:'Получи Mythic NFT',icon:'💎',reward:500}];
-var currentFilter='all',currentCase=null,userLevel=1,userXP=0,isAdmin=false,inventory=[],openedCases=0,achievements=[],globalHistory=[],freeTimerInterval=null,currentWinItem=null,isRouletteSpinning=false,rouletteTimeout=null;
+let tg = window.Telegram.WebApp;
+tg.expand();
+tg.enableClosingConfirmation();
+tg.setHeaderColor('#0a0a0f');
+tg.setBackgroundColor('#0a0a0f');
 
-function getStars(){return parseInt(localStorage.getItem('gameStars')||'0',10)}
-function setStars(v){v=Math.max(0,v);localStorage.setItem('gameStars',v);var e=document.getElementById('balance');if(e)e.textContent=v}
-function checkCanOpen(k){var d=CASES_DATA[k];if(!d)return{ok:false,reason:'Кейс не найден'};if(d.cooldown){var ms=getFreeMsLeft();if(ms>0)return{ok:false,reason:'⏰ Бесплатный кейс раз в 24 часа!\n\nОсталось: '+msToHM(ms)}}if(d.price>0){var s=getStars();if(s<d.price)return{ok:false,reason:'❌ Недостаточно звёзд!\n\nУ вас: '+s+' ⭐\nНужно: '+d.price+' ⭐'}}return{ok:true}}
-function getFreeMsLeft(){var l=localStorage.getItem('lastFreeCase');if(!l)return 0;var left=86400000-(Date.now()-new Date(l).getTime());return left>0?left:0}
-function msToHM(m){var h=Math.floor(m/3600000),mn=Math.floor((m%3600000)/60000),s=Math.floor((m%60000)/1000);return h>0?h+'ч '+mn+'м':mn+'м '+s+'с'}
-function startFreeTimer(){if(freeTimerInterval)clearInterval(freeTimerInterval);freeTimerInterval=setInterval(function(){var ms=getFreeMsLeft(),te=document.getElementById('freeCountdown'),se=document.getElementById('freeStatus');if(!te)return;if(ms<=0){clearInterval(freeTimerInterval);freeTimerInterval=null;if(se){se.textContent='✅ ДОСТУПЕН';se.style.color='#10b981'}te.textContent='';var c=document.getElementById('freeCard');if(c)c.style.opacity='1'}else{if(se){se.textContent='🔒 ЗАБЛОКИРОВАН';se.style.color='#ef4444'}te.textContent=msToHM(ms)}},1000)}
-function initParticles(){var c=document.getElementById('particles');if(!c)return;var ctx=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;var pts=[];for(var i=0;i<50;i++)pts.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+1,vx:Math.random()*.5-.25,vy:Math.random()*.5-.25,o:Math.random()*.5+.2});(function loop(){ctx.clearRect(0,0,c.width,c.height);for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(139,92,246,'+p.o+')';ctx.fill()}requestAnimationFrame(loop)})()}
-function hideLoader(){var l=document.getElementById('loader');if(l)l.classList.add('hidden')}
-function init(){var u=tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u){var ne=document.getElementById('userName');if(ne)ne.textContent=u.first_name||'Player';if(u.id===ADMIN_ID){isAdmin=true;var b=document.getElementById('adminBadge');if(b)b.classList.remove('hidden')}var av=document.getElementById('avatarContainer');if(av){if(u.photo_url)av.innerHTML='<img src="'+u.photo_url+'" alt="Avatar">';else if(u.username)av.textContent=u.username.charAt(0).toUpperCase()}}var be=document.getElementById('balance');if(be)be.textContent=getStars();loadUserProgress();loadInventory();loadAchievements();generateFakeHistory();generateCases();loadRefLink();fetchOnlineCount();loadHistory();initParticles();hideLoader();startFreeTimer();setInterval(fetchOnlineCount,15000);var btns=document.querySelectorAll('.filter-btn');for(var i=0;i<btns.length;i++){btns[i].addEventListener('click',function(){var bs=document.querySelectorAll('.filter-btn');for(var j=0;j<bs.length;j++)bs[j].classList.remove('active');this.classList.add('active');currentFilter=this.getAttribute('data-filter');generateCases()})}}
-function loadUserProgress(){userLevel=parseInt(localStorage.getItem('userLevel')||'1',10);userXP=parseInt(localStorage.getItem('userXP')||'0',10);openedCases=parseInt(localStorage.getItem('openedCases')||'0',10);updateLevelDisplay()}
-function updateLevelDisplay(){var need=userLevel*100,le=document.getElementById('userLevel'),xe=document.getElementById('userXP');if(le)le.textContent='Level '+userLevel;if(xe)xe.textContent=userXP+'/'+need+' XP'}
-function addXP(a){userXP+=a;var need=userLevel*100;if(userXP>=need){userXP-=need;userLevel++;var bonus=userLevel*10;setStars(getStars()+bonus);tg.showPopup({title:'🎉 LEVEL UP!',message:'Уровень '+userLevel+'!\n+'+bonus+' ⭐',buttons:[{type:'ok'}]})}localStorage.setItem('userLevel',userLevel);localStorage.setItem('userXP',userXP);updateLevelDisplay()}
-function getRarityColor(r){var c={common:'#9e9e9e',rare:'#3b82f6',epic:'#a855f7',legendary:'#fbbf24',mythic:'#ef4444',special:'#10b981'};return c[r]||'#fff'}
-function generateCases(){var container=document.getElementById('casesContainer');if(!container)return;var entries=Object.keys(CASES_DATA).filter(function(k){var d=CASES_DATA[k];if(currentFilter==='all')return true;if(currentFilter==='free')return d.price===0;if(currentFilter==='basic')return d.type==='basic';if(currentFilter==='premium')return d.type==='premium';return true});var html='';for(var i=0;i<entries.length;i++){var key=entries[i],data=CASES_DATA[key],locked=data.cooldown?getFreeMsLeft()>0:false,ms=locked?getFreeMsLeft():0,stars=getStars(),canAfford=data.price===0||stars>=data.price;var footer='';if(data.price===0){var st=locked?'🔒 ЗАБЛОКИРОВАН':'✅ ДОСТУПЕН',sc=locked?'#ef4444':'#10b981',tm=locked?msToHM(ms):'';footer='<div><div id="freeStatus" style="font-weight:700;font-size:14px;color:'+sc+';">'+st+'</div><div id="freeCountdown" style="color:#6b7280;font-size:12px;margin-top:4px;">'+tm+'</div></div>'}else{var pc=canAfford?'#ffd700':'#ef4444',stxt=canAfford?'':'<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает '+(data.price-stars)+' ⭐</div>';footer='<div><div style="color:'+pc+';font-size:24px;font-weight:900;">⭐ '+data.price+'</div>'+stxt+'</div>'}var cid=key==='free'?'freeCard':'',op=locked?'0.6':'1',bd=data.price===0?'<div class="case-badge">FREE</div>':'';html+='<div class="case-big" id="'+cid+'" onclick="showPreview(\''+key+'\')" style="opacity:'+op+';">'+bd+'<div class="case-image-section"><div class="case-main-image">'+data.icon+'</div></div><div class="case-info-section"><div class="case-title">'+data.name+'</div><div class="case-footer">'+footer+'</div></div></div>'}container.innerHTML=html;startFreeTimer()}
-function showPreview(k){var d=CASES_DATA[k];if(!d)return;var ch=checkCanOpen(k);if(!ch.ok){tg.showAlert(ch.reason);return}currentCase=k;var te=document.getElementById('previewCaseTitle'),ie=document.getElementById('previewCaseIcon'),ne=document.getElementById('previewCaseName'),pe=document.getElementById('previewCasePrice'),btn=document.getElementById('previewOpenBtn');if(te)te.textContent=d.name;if(ie)ie.textContent=d.icon;if(ne)ne.textContent=d.name.toUpperCase();if(pe)pe.textContent=d.price===0?'БЕСПЛАТНО':'⭐ '+d.price;if(btn){btn.textContent=d.price===0?'Открыть бесплатно':'Открыть за ⭐ '+d.price;btn.disabled=false;btn.style.opacity='1'}var track=document.getElementById('previewRollingTrack');if(track){track.innerHTML='';var items=d.items.concat(d.items).concat(d.items);for(var i=0;i<items.length;i++){var it=items[i],nft=it.nft,div=document.createElement('div');div.className='preview-rolling-item';var color=nft.isCurrency?'#fbbf24':getRarityColor(nft.rarity);div.style.borderColor=color;if(nft.isCurrency){div.innerHTML='<div class="item-icon">'+nft.icon+'</div><div class="item-name">'+nft.name+'</div><div class="item-rarity-label" style="color:'+color+';">'+nft.rarity+'</div>'}else{div.innerHTML='<img src="'+nft.image+'" alt="'+nft.name+'" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">'+nft.name+'</div><div class="item-rarity-label" style="color:'+color+';">'+nft.rarity+'</div>'}track.appendChild(div)}}var list=document.getElementById('previewItemsList');if(list){var lhtml='<div class="preview-items-title">💎 Возможные награды</div>';for(var j=0;j<d.items.length;j++){var it=d.items[j],nft=it.nft;if(!nft)continue;if(nft.isCurrency){lhtml+='<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">'+nft.icon+'</div></div><div class="preview-item-info"><div class="preview-item-name">'+nft.name+'</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">'+it.chance+'%</div></div>'}else{var col=getRarityColor(nft.rarity);lhtml+='<div class="preview-item-row"><div class="preview-item-icon" style="border-color:'+col+';"><img src="'+nft.image+'" alt="'+nft.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">'+nft.name+'</div><div class="preview-item-rarity" style="color:'+col+';">'+nft.rarity.toUpperCase()+'</div><div class="preview-item-price">⭐ '+nft.stars+' • 💎 '+nft.ton+' TON</div></div><div class="preview-item-chance">'+it.chance+'%</div></div>'}}list.innerHTML=lhtml}var modal=document.getElementById('modalPreview');if(modal)modal.classList.add('active');document.body.style.overflow='hidden'}
-function closePreviewModal(){var m=document.getElementById('modalPreview');if(m)m.classList.remove('active');document.body.style.overflow='';currentCase=null}
-function openCaseFromPreview(){if(!currentCase)return;var d=CASES_DATA[currentCase],ch=checkCanOpen(currentCase);if(!ch.ok){tg.showAlert(ch.reason);closePreviewModal();generateCases();return}if(d.price>0){setStars(getStars()-d.price);generateCases()}if(d.cooldown){localStorage.setItem('lastFreeCase',new Date().toISOString());generateCases();startFreeTimer()}var k=currentCase;closePreviewModal();setTimeout(function(){startRoulette(k)},300)}
-function startRoulette(k){if(isRouletteSpinning)return;isRouletteSpinning=true;var d=CASES_DATA[k];if(!d){isRouletteSpinning=false;return}var modal=document.getElementById('modalRoulette'),track=document.getElementById('rouletteTrack'),result=document.getElementById('resultBox'),title=document.getElementById('rouletteTitle'),skip=document.getElementById('skipBtn');if(!modal||!track){isRouletteSpinning=false;return}modal.classList.add('active');if(result)result.classList.remove('active');if(title)title.textContent='🎲 ОТКРЫВАЕМ...';if(skip)skip.style.display='block';document.body.style.overflow='hidden';track.style.transition='none';track.style.transform='translateX(0px)';track.innerHTML='';var WIN=35,TOTAL=60,winItem=getRandomItemByChance(d.items);currentWinItem=winItem;for(var i=0;i<TOTAL;i++){var item=(i===WIN)?winItem:d.items[Math.floor(Math.random()*d.items.length)],div=document.createElement('div');div.className='roulette-item';var bc=item.nft.isCurrency?'#fbbf24':getRarityColor(item.nft.rarity);div.style.borderColor=bc;if(item.nft.isCurrency){div.innerHTML='<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">'+item.nft.icon+'</div>'}else{div.innerHTML='<img src="'+item.nft.image+'" alt="'+item.nft.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">'}track.appendChild(div)}requestAnimationFrame(function(){requestAnimationFrame(function(){var first=track.children[0];if(!first){isRouletteSpinning=false;return}var iw=first.getBoundingClientRect().width,gap=10,step=iw+gap,wrapper=track.parentElement,ww=wrapper?wrapper.getBoundingClientRect().width:370,center=ww/2,winX=WIN*step+iw/2,offset=center-winX;track.style.transition='transform 5s cubic-bezier(0.05,0.85,0.15,1)';track.style.transform='translateX('+offset+'px)';if(title)title.textContent='🎰 КРУТИМ...';if(rouletteTimeout)clearTimeout(rouletteTimeout);rouletteTimeout=setTimeout(function(){if(title)title.textContent='🎉 РЕЗУЛЬТАТ!';showResult(winItem.nft,k);openedCases++;localStorage.setItem('openedCases',openedCases);checkAchievements();generateCases();if(skip)skip.style.display='none';isRouletteSpinning=false;rouletteTimeout=null},5500)})})}
-function skipRoulette(){if(!currentWinItem||!isRouletteSpinning)return;var track=document.getElementById('rouletteTrack'),title=document.getElementById('rouletteTitle'),skip=document.getElementById('skipBtn');if(rouletteTimeout){clearTimeout(rouletteTimeout);rouletteTimeout=null}if(track)track.style.transition='transform 0.3s cubic-bezier(0.05,0.85,0.15,1)';if(title)title.textContent='🎉 РЕЗУЛЬТАТ!';var WIN=35;if(track){var first=track.children[0];if(first){var iw=first.getBoundingClientRect().width,gap=10,step=iw+gap,wrapper=track.parentElement,ww=wrapper?wrapper.getBoundingClientRect().width:370,center=ww/2,winX=WIN*step+iw/2,offset=center-winX;track.style.transform='translateX('+offset+')'}}setTimeout(function(){if(skip)skip.style.display='none';showResult(currentWinItem.nft,currentCase);openedCases++;localStorage.setItem('openedCases',openedCases);checkAchievements();generateCases();isRouletteSpinning=false},400)}
-function closeRouletteModal(){var modal=document.getElementById('modalRoulette'),track=document.getElementById('rouletteTrack'),skip=document.getElementById('skipBtn');if(rouletteTimeout){clearTimeout(rouletteTimeout);rouletteTimeout=null}if(modal)modal.classList.remove('active');document.body.style.overflow='';isRouletteSpinning=false;if(track){track.style.display='flex';track.style.transition='none';track.style.transform='translateX(0px)';track.innerHTML=''}if(skip)skip.style.display='block'}
-function getRandomItemByChance(items){var r=Math.random()*100,c=0;for(var i=0;i<items.length;i++){c+=items[i].chance;if(r<=c)return items[i]}return items[items.length-1]}
-function showResult(nft,k){var box=document.getElementById('resultBox');if(box)box.classList.add('active');if(nft.isCurrency){var isStars=nft.name.indexOf('звезд')!==-1||nft.name.indexOf('звёзд')!==-1;if(isStars){var nb=getStars()+nft.amount;setStars(nb);var ie=document.getElementById('resultIcon'),ne=document.getElementById('resultName'),re=document.getElementById('resultRarity'),se=document.getElementById('resultStars'),te=document.getElementById('resultTon');if(ie)ie.innerHTML='<div style="font-size:100px;">'+nft.icon+'</div>';if(ne)ne.textContent='+'+nft.amount+' звёзд';if(re)re.textContent='ВАЛЮТА';if(se)se.innerHTML='Баланс: ⭐ '+nb;if(te)te.innerHTML='';addXP(nft.amount)}else{var ie2=document.getElementById('resultIcon'),ne2=document.getElementById('resultName'),re2=document.getElementById('resultRarity'),se2=document.getElementById('resultStars'),te2=document.getElementById('resultTon');if(ie2)ie2.innerHTML='<div style="font-size:100px;">'+nft.icon+'</div>';if(ne2)ne2.textContent='Подарок';if(re2)re2.textContent='ОСОБОЕ';if(se2)se2.innerHTML='🎁 Сюрприз!';if(te2)te2.innerHTML='';addXP(10)}if(box)box.style.borderColor='#fbbf24';var re3=document.getElementById('resultRarity');if(re3)re3.style.background='#fbbf24'}else{var ie3=document.getElementById('resultIcon'),ne3=document.getElementById('resultName'),re4=document.getElementById('resultRarity'),se3=document.getElementById('resultStars'),te3=document.getElementById('resultTon');if(ie3)ie3.innerHTML='<img src="'+nft.image+'" alt="'+nft.name+'" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display=\'none\'">';if(ne3)ne3.textContent=nft.name;if(re4)re4.textContent=nft.rarity.toUpperCase();var col=getRarityColor(nft.rarity);if(box)box.style.borderColor=col;if(re4)re4.style.background=col;if(se3)se3.innerHTML='⭐ '+nft.stars;if(te3)te3.innerHTML='💎 '+nft.ton+' TON';addXP(Math.floor(nft.stars/5));addToInventory(nft);saveToHistory(nft);if(nft.rarity==='legendary'||nft.rarity==='mythic')createConfetti()}addToGlobalHistory(nft)}
-function createConfetti(){var colors=['#10b981','#fbbf24','#ef4444','#3b82f6','#a855f7'];for(var i=0;i<120;i++){var el=document.createElement('div');el.style.cssText='position:fixed;top:50%;left:50%;width:10px;height:10px;background:'+colors[i%colors.length]+';border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall '+(Math.random()*2+1)+'s linear forwards;--x:'+Math.random()+';';document.body.appendChild(el);(function(e){setTimeout(function(){e.remove()},3000)})(el)}}
-function addToInventory(nft){inventory=JSON.parse(localStorage.getItem('inventory')||'[]');var item={id:nft.id,name:nft.name,stars:nft.stars,ton:nft.ton,image:nft.image,isCurrency:nft.isCurrency||false,amount:nft.amount||0,rarity:nft.rarity,icon:nft.icon||'',uid:Date.now()+'_'+Math.random().toString(36).slice(2),time:new Date().toISOString()};inventory.unshift(item);localStorage.setItem('inventory',JSON.stringify(inventory))}
-function loadInventory(){inventory=JSON.parse(localStorage.getItem('inventory')||'[]');renderInventory()}
-function renderInventory(){var c=document.getElementById('inventoryContainer');if(!c)return;inventory=JSON.parse(localStorage.getItem('inventory')||'[]');if(!inventory.length){c.innerHTML='<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📦</div><h3>Инвентарь пуст</h3><p style="color:#6b7280;">Открой кейсы, чтобы получить NFT</p></div>';return}var order={mythic:5,legendary:4,epic:3,rare:2,common:1},sorted=inventory.slice().sort(function(a,b){return(order[b.rarity]||0)-(order[a.rarity]||0)}),total=0;for(var i=0;i<inventory.length;i++)total+=inventory[i].ton||0;var html='<div style="padding:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>📦 Мои NFT ('+inventory.length+')</h3><div style="font-size:14px;color:#6b7280;">💎 <span style="color:#8b5cf6;font-weight:700;">'+total.toFixed(2)+' TON</span></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">';for(var j=0;j<sorted.length;j++){var nft=sorted[j],uid=nft.uid||JSON.stringify(nft),suid=encodeURIComponent(uid);html+='<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:12px;border:2px solid '+getRarityColor(nft.rarity)+';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="'+nft.image+'" alt="'+nft.name+'" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:'+getRarityColor(nft.rarity)+';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">'+nft.rarity.toUpperCase()+'</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">'+nft.name+'</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 '+nft.ton+' TON • ⭐ '+nft.stars+'</div><button onclick="sellNFT(\''+suid+'\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать '+Math.floor((nft.stars||0)*.7)+' ⭐</button></div>'}html+='</div></div>';c.innerHTML=html}
-function sellNFT(suid){var uid=decodeURIComponent(suid);inventory=JSON.parse(localStorage.getItem('inventory')||'[]');var idx=-1;for(var i=0;i<inventory.length;i++){var iu=inventory[i].uid||JSON.stringify(inventory[i]);if(iu===uid){idx=i;break}}if(idx===-1){tg.showAlert('Предмет не найден!');return}var nft=inventory[idx],sp=Math.floor((nft.stars||0)*.7);tg.showPopup({title:'Продать NFT?',message:nft.name+'\nВы получите: '+sp+' ⭐',buttons:[{id:'sell',type:'default',text:'Продать за '+sp+' ⭐'},{type:'cancel'}]},function(b){if(b==='sell'){inventory=JSON.parse(localStorage.getItem('inventory')||'[]');var fi=-1;for(var j=0;j<inventory.length;j++){var iu=inventory[j].uid||JSON.stringify(inventory[j]);if(iu===uid){fi=j;break}}if(fi===-1){tg.showAlert('Предмет уже продан!');return}inventory.splice(fi,1);localStorage.setItem('inventory',JSON.stringify(inventory));setStars(getStars()+sp);loadInventory();tg.showAlert('Продано за '+sp+' ⭐!')}})}
-function saveToHistory(nft){var h=JSON.parse(localStorage.getItem('caseHistory')||'[]');var item={id:nft.id,name:nft.name,stars:nft.stars,ton:nft.ton,image:nft.image,rarity:nft.rarity,time:new Date().toLocaleString('ru-RU')};h.unshift(item);if(h.length>50)h=h.slice(0,50);localStorage.setItem('caseHistory',JSON.stringify(h))}
-function loadHistory(){renderHistory(JSON.parse(localStorage.getItem('caseHistory')||'[]'))}
-function renderHistory(h){var c=document.getElementById('historyContainer');if(!c)return;if(!h.length){c.innerHTML='<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📜</div><h3>История пуста</h3></div>';return}var html='<div style="padding:20px;"><h3 style="margin-bottom:15px;">📜 История ('+h.length+')</h3>';for(var i=0;i<h.length;i++){var item=h[i];html+='<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid '+getRarityColor(item.rarity)+';flex-shrink:0;"><img src="'+item.image+'" alt="'+item.name+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">'+item.name+'</div><div style="font-size:12px;color:'+getRarityColor(item.rarity)+';margin-top:4px;">'+(item.rarity?item.rarity.toUpperCase():'')+'</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">'+item.time+'</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ '+item.stars+'</div><div style="font-size:12px;color:#0088cc;">💎 '+item.ton+' TON</div></div></div>'}html+='</div>';c.innerHTML=html}
-function loadAchievements(){achievements=JSON.parse(localStorage.getItem('achievements')||'[]');renderAchievements()}
-function renderAchievements(){var c=document.getElementById('achievementsContainer');if(!c)return;var prog=Math.round((achievements.length/ACHIEVEMENTS.length)*100),html='<div style="padding:20px;"><div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>🏆 Достижения</h3><div style="color:#8b5cf6;font-weight:700;">'+achievements.length+'/'+ACHIEVEMENTS.length+'</div></div><div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;"><div style="width:'+prog+'%;height:100%;background:linear-gradient(90deg,#8b5cf6,#6366f1);"></div></div></div>';for(var i=0;i<ACHIEVEMENTS.length;i++){var a=ACHIEVEMENTS[i],done=achievements.indexOf(a.id)!==-1;html+='<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;opacity:'+(done?1:.5)+';border:2px solid '+(done?'#8b5cf6':'rgba(255,255,255,0.1)')+';display:flex;align-items:center;gap:15px;"><div style="font-size:40px;filter:grayscale('+(done?0:1)+');">'+a.icon+'</div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">'+a.name+(done?' ✅':'')+'</div><div style="font-size:13px;color:#6b7280;">'+a.desc+'</div></div><div style="color:'+(done?'#8b5cf6':'#ffd700')+';font-weight:700;">+'+a.reward+' ⭐</div></div>'}html+='</div>';c.innerHTML=html}
-function checkAchievements(){var map={first_case:1,cases_5:5,cases_10:10};var keys=Object.keys(map);for(var i=0;i<keys.length;i++){var id=keys[i],n=map[id];if(openedCases>=n&&achievements.indexOf(id)===-1)unlockAchievement(id)}if(openedCases>=1){var hasMythic=false;for(var j=0;j<inventory.length;j++){if(inventory[j].rarity==='mythic'){hasMythic=true;break}}if(hasMythic&&achievements.indexOf('mythic')===-1)unlockAchievement('mythic')}}
-function unlockAchievement(id){var a=null;for(var i=0;i<ACHIEVEMENTS.length;i++){if(ACHIEVEMENTS[i].id===id){a=ACHIEVEMENTS[i];break}}if(!a)return;achievements.push(id);localStorage.setItem('achievements',JSON.stringify(achievements));setStars(getStars()+a.reward);tg.showPopup({title:'🏆 Достижение!',message:a.icon+' '+a.name+'\n'+a.desc+'\n+'+a.reward+' ⭐',buttons:[{type:'ok'}]});renderAchievements()}
-function fetchOnlineCount(){var e=document.getElementById('onlineCount');if(e)e.textContent=(150+Math.floor(Math.random()*50)-25)+' Online'}
-function generateFakeHistory(){var names=['Алексей','Мария','Дмитрий','Анна','Иван','Елена'],keys=Object.keys(CASES_DATA);for(var i=0;i<15;i++){var rc=CASES_DATA[keys[Math.floor(Math.random()*keys.length)]],item=getRandomItemByChance(rc.items);globalHistory.push({nft:item.nft,username:names[Math.floor(Math.random()*names.length)],time:(Math.floor(Math.random()*45)+1)+' мин назад'})}renderGlobalHistory()}
-function renderGlobalHistory(){var slider=document.getElementById('nftScroll');if(!slider)return;var all=globalHistory.concat(globalHistory).concat(globalHistory),html='';for(var i=0;i<all.length;i++){var item=all[i],nft=item.nft,color=nft.isCurrency?'#fbbf24':getRarityColor(nft.rarity);html+='<div class="nft-card" style="border:2px solid '+color+';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid '+color+';width:90px;height:90px;margin:0 auto;">'+(nft.isCurrency?'<div style="font-size:45px;">'+nft.icon+'</div>':'<img src="'+nft.image+'" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'">')+'</div><div class="nft-value" style="color:'+color+';font-size:13px;margin-top:10px;">'+(nft.isCurrency?nft.name:nft.ton+' TON')+'</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 '+item.username+'</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">'+item.time+'</div></div>'}slider.innerHTML=html}
-function addToGlobalHistory(nft){var u=tg.initDataUnsafe&&tg.initDataUnsafe.user,un=u?(u.first_name||'Игрок'):'Игрок';globalHistory.unshift({nft:nft,username:un,time:'только что'});if(globalHistory.length>25)globalHistory=globalHistory.slice(0,25);renderGlobalHistory()}
-function switchTab(tab){var items=document.querySelectorAll('.nav-item');for(var i=0;i<items.length;i++)items[i].classList.remove('active');if(event&&event.currentTarget)event.currentTarget.classList.add('active');var contents=document.querySelectorAll('.tab-content');for(var j=0;j<contents.length;j++)contents[j].classList.remove('active');var map={cases:'tabCases',inventory:'tabInventory',profile:'tabProfile',history:'tabHistory',achievements:'tabAchievements'},target=document.getElementById(map[tab]);if(target)target.classList.add('active');if(tab==='inventory')renderInventory();if(tab==='history')loadHistory();if(tab==='achievements')renderAchievements();if(tab==='profile')renderProfile()}
-function renderProfile(){var c=document.getElementById('profileContainer');if(!c)return;var u=tg.initDataUnsafe&&tg.initDataUnsafe.user,name=u?u.first_name||'Player':'Player',username=u?u.username||'player':'player';c.innerHTML='<div class="profile-card"><div class="profile-card-header"><div class="profile-card-avatar">'+(u&&u.photo_url?'<img src="'+u.photo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'🎰')+'</div><div><div class="profile-card-name">'+name+'</div><div class="profile-card-level">📊 Уровень '+userLevel+'</div></div></div><div class="profile-stats"><div class="profile-stat-item"><div class="profile-stat-value">'+getStars()+'</div><div class="profile-stat-label">⭐ Звёзд</div></div><div class="profile-stat-item"><div class="profile-stat-value">'+openedCases+'</div><div class="profile-stat-label">📦 Кейсов</div></div><div class="profile-stat-item"><div class="profile-stat-value">'+inventory.length+'</div><div class="profile-stat-label">💎 NFT</div></div><div class="profile-stat-item"><div class="profile-stat-value">'+userXP+'/'+userLevel*100+'</div><div class="profile-stat-label">📈 Опыт</div></div></div></div><div class="profile-ref-section"><div class="profile-ref-title">👥 Реферальная программа</div><div class="profile-ref-link" id="refLink">Загрузка...</div><div class="profile-ref-count"><div class="profile-ref-count-value" id="refCount">0</div><div class="profile-ref-count-label">Приглашённых друзей</div></div><button class="profile-btn-copy" onclick="copyRefLink()">📋 Копировать ссылку</button></div><div class="profile-promo-section"><div class="profile-promo-title">🎟️ Промокод</div><input type="text" id="promoInput" class="profile-promo-input" placeholder="Введите промокод"><button class="profile-btn" onclick="activatePromo()">Активировать</button></div>';loadRefLink()}
-function loadRefLink(){var uid=(tg.initDataUnsafe&&tg.initDataUnsafe.user)?tg.initDataUnsafe.user.id:'000',re=document.getElementById('refLink'),ce=document.getElementById('refCount');if(re)re.textContent='https://t.me/gsdfsdfdsfbot?start=ref_'+uid;if(ce)ce.textContent=localStorage.getItem('refCount')||'0'}
-function copyRefLink(){var re=document.getElementById('refLink');if(re){navigator.clipboard.writeText(re.textContent);tg.showPopup({title:'Скопировано!',message:'Ссылка в буфере',buttons:[{type:'ok'}]})}}
-function activatePromo(){var input=document.getElementById('promoInput');if(!input)return;var code=input.value.trim().toUpperCase();if(!code){tg.showAlert('Введите промокод');return}var codes={WELCOME:100,NEWYEAR2026:200,LUCKY:150},used=JSON.parse(localStorage.getItem('usedPromos')||'[]');if(used.indexOf(code)!==-1){tg.showAlert('Промокод уже использован!');return}if(!codes[code]){tg.showAlert('Неверный промокод!');return}setStars(getStars()+codes[code]);used.push(code);localStorage.setItem('usedPromos',JSON.stringify(used));tg.showPopup({title:'🎉 Активировано!',message:'+'+codes[code]+' ⭐ звёзд!',buttons:[{type:'ok'}]});input.value='';generateCases()}
-function openAdminPanel(){if(!isAdmin)return;var p=document.getElementById('adminPanel');if(p)p.classList.add('active');document.body.style.overflow='hidden';loadAdminStats();loadAllUsers()}
-function closeAdminPanel(){var p=document.getElementById('adminPanel');if(p)p.classList.remove('active');document.body.style.overflow=''}
-function loadAdminStats(){var e=document.getElementById('adminStats');if(!e)return;e.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">'+getStars()+'</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">'+openedCases+'</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">'+inventory.length+'</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">'+achievements.length+'</div><div class="admin-stat-label">Ачивок</div></div></div>'}
-function loadAllUsers(){var u=tg.initDataUnsafe&&tg.initDataUnsafe.user,e=document.getElementById('adminUsersList');if(!e)return;var name=u?u.first_name||'Admin':'Admin',un=u?u.username||'admin':'admin',id=u?u.id:0,av=name.charAt(0);e.innerHTML='<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">'+av+'</div><div><div style="font-size:16px;font-weight:700;">'+name+' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@'+un+' • ID: '+id+'</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ '+getStars()+'</span><span>📊 Lvl '+userLevel+'</span><span>📦 '+openedCases+'</span><span>💎 '+inventory.length+'</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance('+id+',\''+un+'\','+getStars()+')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>'}
-function manageUserBalance(id,un,cs){var m=document.createElement('div');m.className='admin-modal';m.innerHTML='<div class="admin-modal-content"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3 style="font-size:20px;font-weight:800;">💰 Управление балансом</h3><div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest(\'.admin-modal\').remove()">✕</div></div><div style="background:rgba(30,20,50,0.5);padding:15px;border-radius:12px;margin-bottom:20px;"><div style="font-size:18px;font-weight:700;">@'+un+'</div><div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span id="modalCurStars" style="color:#8b5cf6;font-weight:700;">'+cs+' ⭐</span></div></div><input type="number" id="starsAmount" placeholder="Количество звёзд" min="1" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;margin-bottom:15px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><button class="admin-btn admin-btn-success" onclick="giveStars(\''+un+'\')">➕ Выдать</button><button class="admin-btn admin-btn-danger" onclick="takeStars(\''+un+'\')">➖ Забрать</button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;"><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=100">100</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=500">500</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=1000">1000</button></div></div>';document.body.appendChild(m)}
-function giveStars(un){var input=document.getElementById('starsAmount');if(!input)return;var a=parseInt(input.value,10);if(!a||a<=0){tg.showAlert('Введите количество!');return}setStars(getStars()+a);var m=document.querySelector('.admin-modal');if(m)m.remove();generateCases();loadAllUsers();loadAdminStats();tg.showPopup({title:'✅ Выдано!',message:'+'+a+' ⭐\nНовый баланс: '+getStars()+' ⭐',buttons:[{type:'ok'}]})}
-function takeStars(un){var input=document.getElementById('starsAmount');if(!input)return;var a=parseInt(input.value,10);if(!a||a<=0){tg.showAlert('Введите количество!');return}setStars(getStars()-a);var m=document.querySelector('.admin-modal');if(m)m.remove();generateCases();loadAllUsers();loadAdminStats();tg.showPopup({title:'✅ Забрано!',message:'-'+a+' ⭐\nНовый баланс: '+getStars()+' ⭐',buttons:[{type:'ok'}]})}
-function resetUserProgress(){tg.showPopup({title:'⚠️ Сброс!',message:'Сбросить ВСЕ данные?\n(необратимо)',buttons:[{id:'yes',type:'destructive',text:'Сбросить'},{type:'cancel'}]},function(b){if(b==='yes'){var keys=['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'];for(var i=0;i<keys.length;i++)localStorage.removeItem(keys[i]);userLevel=1;userXP=0;openedCases=0;inventory=[];achievements=[];var be=document.getElementById('balance');if(be)be.textContent='0';updateLevelDisplay();generateCases();closeAdminPanel();tg.showAlert('Прогресс сброшен!')}})}
-function sendGlobalNotification(){tg.showPopup({title:'📢',message:'Требует backend',buttons:[{type:'ok'}]})}
-function createPromoCode(){tg.showPopup({title:'🎟️ Промокоды',message:'WELCOME → 100 ⭐\nNEWYEAR2026 → 200 ⭐\nLUCKY → 150 ⭐',buttons:[{type:'ok'}]})}
-function exportUserData(){var data={stars:getStars(),level:userLevel,cases:openedCases,inventory:inventory,achievements:achievements};var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='export.json';a.click();tg.showAlert('Данные экспортированы!')}
-function switchAdminTab(tab){var tabs=document.querySelectorAll('.admin-tab-vertical');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');var sel='[data-tab="'+tab+'"]',target=document.querySelector(sel);if(target)target.classList.add('active');var contents=document.querySelectorAll('.admin-tab-content');for(var j=0;j<contents.length;j++)contents[j].classList.remove('active');var id='adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1),content=document.getElementById(id);if(content)content.classList.add('active');if(tab==='stats')loadAdminStats();if(tab==='users')loadAllUsers()}
-document.addEventListener('DOMContentLoaded',function(){init()});
+const ADMIN_ID = 6584350034;
+
+const NFT_DATABASE = [
+    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"💝"},
+    {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common",    icon:"⭐"},
+    {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",    icon:"⭐"},
+    {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare",      icon:"⭐"},
+    {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic",      icon:"⭐"},
+    {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
+    {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
+    {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
+    {id:8, name:"Backpack",      stars:500,  ton:0.35, image:"nft/Backpack.jpg",      rarity:"legendary"},
+    {id:9, name:"Crystal Eagle", stars:3881,  ton:41.25, image:"nft/Crystal Eagle.jpg",rarity:"mythic"},
+    {id:10,name:"Durovs Cap",    stars:78550, ton:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
+    {id:11,name:"Faith Amulet",  stars:650, ton:6, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
+    {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
+    {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
+    {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"}
+];
+
+const CASES_DATA = {
+    free: {
+        name: "🎁 Бесплатный кейс",
+        icon: "🎁",
+        price: 0,
+        type: "free",
+        cooldown: true,
+        items: [
+            { nft: NFT_DATABASE[0],  chance: 40.0 },
+            { nft: NFT_DATABASE[1],  chance: 30.0 },
+            { nft: NFT_DATABASE[2],  chance: 15.0 },
+            { nft: NFT_DATABASE[3],  chance: 10.0 },
+            { nft: NFT_DATABASE[4],  chance: 4.5  },
+            { nft: NFT_DATABASE[12], chance: 0.4  },
+            { nft: NFT_DATABASE[13], chance: 0.1  }
+        ]
+    },
+    basic: {
+        name: "📦 Basic Case",
+        icon: "📦",
+        price: 50,
+        type: "basic",
+        cooldown: false,
+        items: [
+            { nft: NFT_DATABASE[1],  chance: 40.0 },
+            { nft: NFT_DATABASE[2],  chance: 25.0 },
+            { nft: NFT_DATABASE[3],  chance: 15.0 },
+            { nft: NFT_DATABASE[4],  chance: 8.0  },
+            { nft: NFT_DATABASE[8],  chance: 6.0  },
+            { nft: NFT_DATABASE[9],  chance: 3.0 },
+            { nft: NFT_DATABASE[7],  chance: 2.0 },
+            { nft: NFT_DATABASE[10], chance: 1.0 }
+        ]
+    },
+    premium: {
+        name: "💎 Premium Case",
+        icon: "💎",
+        price: 500,
+        type: "premium",
+        cooldown: false,
+        items: [
+            { nft: NFT_DATABASE[2],  chance: 18.0 },
+            { nft: NFT_DATABASE[3],  chance: 15.0 },
+            { nft: NFT_DATABASE[4],  chance: 10.0 },
+            { nft: NFT_DATABASE[11], chance: 12.0 },
+            { nft: NFT_DATABASE[12], chance: 10.0 },
+            { nft: NFT_DATABASE[13], chance: 8.0  },
+            { nft: NFT_DATABASE[14], chance: 12.0 },
+            { nft: NFT_DATABASE[9],  chance: 8.0  },
+            { nft: NFT_DATABASE[7],  chance: 5.0  },
+            { nft: NFT_DATABASE[10], chance: 2.0  }
+        ]
+    }
+};
+
+const ACHIEVEMENTS = [
+    {id:'first_case', name:'Первый кейс',   desc:'Открой свой первый кейс',   icon:'🎁', reward:10},
+    {id:'cases_5',    name:'Новичок',        desc:'Открой 5 кейсов',            icon:'📦', reward:25},
+    {id:'cases_10',   name:'Коллекционер',   desc:'Открой 10 кейсов',           icon:'🎰', reward:50},
+    {id:'mythic',     name:'Мифическая удача',desc:'Получи Mythic NFT',         icon:'💎', reward:500}
+];
+
+let currentFilter = 'all';
+let currentCase = null;
+let userLevel = 1;
+let userXP = 0;
+let isAdmin = false;
+let inventory = [];
+let openedCases = 0;
+let achievements = [];
+let globalHistory = [];
+let freeTimerInterval = null;
+let currentWinItem = null;
+let isRouletteSpinning = false;
+let rouletteTimeout = null;
+
+function getStars() {
+    return parseInt(localStorage.getItem('gameStars') || '0', 10);
+}
+
+function setStars(val) {
+    val = Math.max(0, val);
+    localStorage.setItem('gameStars', val);
+    let balanceEl = document.getElementById('balance');
+    if (balanceEl) {
+        balanceEl.textContent = val;
+    }
+}
+
+function checkCanOpen(caseKey) {
+    let data = CASES_DATA[caseKey];
+    if (!data) {
+        return { ok: false, reason: 'Кейс не найден' };
+    }
+
+    if (data.cooldown) {
+        let ms = getFreeMsLeft();
+        if (ms > 0) {
+            return { ok: false, reason: '⏰ Бесплатный кейс раз в 24 часа!\n\nОсталось: ' + msToHM(ms) };
+        }
+    }
+
+    if (data.price > 0) {
+        let stars = getStars();
+        if (stars < data.price) {
+            return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
+        }
+    }
+
+    return { ok: true };
+}
+
+function getFreeMsLeft() {
+    let last = localStorage.getItem('lastFreeCase');
+    if (!last) {
+        return 0;
+    }
+    let left = 86400000 - (Date.now() - new Date(last).getTime());
+    return left > 0 ? left : 0;
+}
+
+function msToHM(ms) {
+    let h = Math.floor(ms / 3600000);
+    let m = Math.floor((ms % 3600000) / 60000);
+    let s = Math.floor((ms % 60000) / 1000);
+    return h > 0 ? h + 'ч ' + m + 'м' : m + 'м ' + s + 'с';
+}
+
+function startFreeTimer() {
+    if (freeTimerInterval) {
+        clearInterval(freeTimerInterval);
+    }
+    freeTimerInterval = setInterval(function() {
+        let ms = getFreeMsLeft();
+        let timerEl = document.getElementById('freeCountdown');
+        let statusEl = document.getElementById('freeStatus');
+        if (!timerEl) {
+            return;
+        }
+
+        if (ms <= 0) {
+            clearInterval(freeTimerInterval);
+            freeTimerInterval = null;
+            if (statusEl) {
+                statusEl.textContent = '✅ ДОСТУПЕН';
+                statusEl.style.color = '#10b981';
+            }
+            timerEl.textContent = '';
+            let card = document.getElementById('freeCard');
+            if (card) {
+                card.style.opacity = '1';
+            }
+        } else {
+            if (statusEl) {
+                statusEl.textContent = '🔒 ЗАБЛОКИРОВАН';
+                statusEl.style.color = '#ef4444';
+            }
+            timerEl.textContent = msToHM(ms);
+        }
+    }, 1000);
+}
+
+function initParticles() {
+    let canvas = document.getElementById('particles');
+    if (!canvas) {
+        return;
+    }
+    let ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let pts = [];
+    for (let i = 0; i < 50; i++) {
+        pts.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 2 + 1,
+            vx: Math.random() * 0.5 - 0.25,
+            vy: Math.random() * 0.5 - 0.25,
+            o: Math.random() * 0.5 + 0.2
+        });
+    }
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < pts.length; i++) {
+            let p = pts[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > canvas.width) {
+                p.vx *= -1;
+            }
+            if (p.y < 0 || p.y > canvas.height) {
+                p.vy *= -1;
+            }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(139,92,246,' + p.o + ')';
+            ctx.fill();
+        }
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+function hideLoader() {
+    let loader = document.getElementById('loader');
+    if (loader) {
+        loader.classList.add('hidden');
+    }
+}
+
+function init() {
+    let user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (user) {
+        let nameEl = document.getElementById('userName');
+        if (nameEl) {
+            nameEl.textContent = user.first_name || 'Player';
+        }
+        if (user.id === ADMIN_ID) {
+            isAdmin = true;
+            let badge = document.getElementById('adminBadge');
+            if (badge) {
+                badge.classList.remove('hidden');
+            }
+        }
+        let av = document.getElementById('avatarContainer');
+        if (av) {
+            if (user.photo_url) {
+                av.innerHTML = '<img src="' + user.photo_url + '" alt="Avatar">';
+            } else if (user.username) {
+                av.textContent = user.username.charAt(0).toUpperCase();
+            }
+        }
+    }
+
+    let balanceEl = document.getElementById('balance');
+    if (balanceEl) {
+        balanceEl.textContent = getStars();
+    }
+
+    loadUserProgress();
+    loadInventory();
+    loadAchievements();
+    generateFakeHistory();
+    generateCases();
+    loadRefLink();
+    fetchOnlineCount();
+    loadHistory();
+    initParticles();
+    hideLoader();
+    startFreeTimer();
+
+    setInterval(fetchOnlineCount, 15000);
+
+    let filterBtns = document.querySelectorAll('.filter-btn');
+    for (let i = 0; i < filterBtns.length; i++) {
+        filterBtns[i].addEventListener('click', function() {
+            let btns = document.querySelectorAll('.filter-btn');
+            for (let j = 0; j < btns.length; j++) {
+                btns[j].classList.remove('active');
+            }
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            generateCases();
+        });
+    }
+}
+
+function loadUserProgress() {
+    userLevel = parseInt(localStorage.getItem('userLevel') || '1', 10);
+    userXP = parseInt(localStorage.getItem('userXP') || '0', 10);
+    openedCases = parseInt(localStorage.getItem('openedCases') || '0', 10);
+    updateLevelDisplay();
+}
+
+function updateLevelDisplay() {
+    let xpNeeded = userLevel * 100;
+    let levelEl = document.getElementById('userLevel');
+    let xpEl = document.getElementById('userXP');
+    if (levelEl) {
+        levelEl.textContent = 'Level ' + userLevel;
+    }
+    if (xpEl) {
+        xpEl.textContent = userXP + '/' + xpNeeded + ' XP';
+    }
+}
+
+function addXP(amount) {
+    userXP += amount;
+    let need = userLevel * 100;
+    if (userXP >= need) {
+        userXP -= need;
+        userLevel++;
+        let bonus = userLevel * 10;
+        setStars(getStars() + bonus);
+        tg.showPopup({title:'🎉 LEVEL UP!', message:'Уровень ' + userLevel + '!\n+' + bonus + ' ⭐', buttons:[{type:'ok'}]});
+    }
+    localStorage.setItem('userLevel', userLevel);
+    localStorage.setItem('userXP', userXP);
+    updateLevelDisplay();
+}
+
+function getRarityColor(r) {
+    let colors = {common:'#9e9e9e', rare:'#3b82f6', epic:'#a855f7', legendary:'#fbbf24', mythic:'#ef4444', special:'#10b981'};
+    return colors[r] || '#fff';
+}
+
+function generateCases() {
+    let container = document.getElementById('casesContainer');
+    if (!container) {
+        return;
+    }
+
+    let entries = Object.keys(CASES_DATA).filter(function(key) {
+        let data = CASES_DATA[key];
+        if (currentFilter === 'all') {
+            return true;
+        }
+        if (currentFilter === 'free') {
+            return data.price === 0;
+        }
+        if (currentFilter === 'basic') {
+            return data.type === 'basic';
+        }
+        if (currentFilter === 'premium') {
+            return data.type === 'premium';
+        }
+        return true;
+    });
+
+    let html = '';
+    for (let i = 0; i < entries.length; i++) {
+        let key = entries[i];
+        let data = CASES_DATA[key];
+        let locked = data.cooldown ? getFreeMsLeft() > 0 : false;
+        let ms = locked ? getFreeMsLeft() : 0;
+        let stars = getStars();
+        let canAfford = data.price === 0 || stars >= data.price;
+
+        let footerHtml = '';
+        if (data.price === 0) {
+            let statusText = locked ? '🔒 ЗАБЛОКИРОВАН' : '✅ ДОСТУПЕН';
+            let statusColor = locked ? '#ef4444' : '#10b981';
+            let timerText = locked ? msToHM(ms) : '';
+            footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:14px;color:' + statusColor + ';">' + statusText + '</div><div id="freeCountdown" style="color:#6b7280;font-size:12px;margin-top:4px;">' + timerText + '</div></div>';
+        } else {
+            let priceColor = canAfford ? '#ffd700' : '#ef4444';
+            let shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает ' + (data.price - stars) + ' ⭐</div>';
+            footerHtml = '<div><div style="color:' + priceColor + ';font-size:24px;font-weight:900;">⭐ ' + data.price + '</div>' + shortText + '</div>';
+        }
+
+        let cardId = key === 'free' ? 'freeCard' : '';
+        let opacity = locked ? '0.6' : '1';
+        let badge = data.price === 0 ? '<div class="case-badge">FREE</div>' : '';
+
+        html += '<div class="case-big" id="' + cardId + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + opacity + ';">' + badge + '<div class="case-image-section"><div class="case-main-image">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
+    }
+
+    container.innerHTML = html;
+    startFreeTimer();
+}
+
+function showPreview(caseKey) {
+    let data = CASES_DATA[caseKey];
+    if (!data) {
+        return;
+    }
+
+    let check = checkCanOpen(caseKey);
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        return;
+    }
+
+    currentCase = caseKey;
+
+    let titleEl = document.getElementById('previewCaseTitle');
+    let iconEl = document.getElementById('previewCaseIcon');
+    let nameEl = document.getElementById('previewCaseName');
+    let priceEl = document.getElementById('previewCasePrice');
+    let btn = document.getElementById('previewOpenBtn');
+
+    if (titleEl) titleEl.textContent = data.name;
+    if (iconEl) iconEl.textContent = data.icon;
+    if (nameEl) nameEl.textContent = data.name.toUpperCase();
+    if (priceEl) priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
+
+    if (btn) {
+        btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+
+    let track = document.getElementById('previewRollingTrack');
+    if (track) {
+        track.innerHTML = '';
+        let itemsToShow = data.items.concat(data.items).concat(data.items);
+        for (let i = 0; i < itemsToShow.length; i++) {
+            let item = itemsToShow[i];
+            let nft = item.nft;
+            let div = document.createElement('div');
+            div.className = 'preview-rolling-item';
+            let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+            div.style.borderColor = color;
+
+            if (nft.isCurrency) {
+                div.innerHTML = '<div class="item-icon">' + nft.icon + '</div><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+            } else {
+                div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+            }
+            track.appendChild(div);
+        }
+    }
+
+    let itemsList = document.getElementById('previewItemsList');
+    if (itemsList) {
+        let listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
+        for (let j = 0; j < data.items.length; j++) {
+            let it = data.items[j];
+            let nft = it.nft;
+            if (!nft) continue;
+            if (nft.isCurrency) {
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">' + nft.icon + '</div></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+            } else {
+                let color = getRarityColor(nft.rarity);
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + color + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + color + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+            }
+        }
+        itemsList.innerHTML = listHtml;
+    }
+
+    let modal = document.getElementById('modalPreview');
+    if (modal) {
+        modal.classList.add('active');
+    }
+    document.body.style.overflow = 'hidden';
+}
+
+function closePreviewModal() {
+    let modal = document.getElementById('modalPreview');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
+    currentCase = null;
+}
+
+function openCaseFromPreview() {
+    if (!currentCase) {
+        return;
+    }
+
+    let data = CASES_DATA[currentCase];
+    let check = checkCanOpen(currentCase);
+
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        closePreviewModal();
+        generateCases();
+        return;
+    }
+
+    if (data.price > 0) {
+        setStars(getStars() - data.price);
+        generateCases();
+    }
+
+    if (data.cooldown) {
+        localStorage.setItem('lastFreeCase', new Date().toISOString());
+        generateCases();
+        startFreeTimer();
+    }
+
+    let key = currentCase;
+    closePreviewModal();
+    setTimeout(function() {
+        startRoulette(key);
+    }, 300);
+}
+
+function startRoulette(caseKey) {
+    if (isRouletteSpinning) {
+        return;
+    }
+    isRouletteSpinning = true;
+
+    let data = CASES_DATA[caseKey];
+    if (!data) {
+        isRouletteSpinning = false;
+        return;
+    }
+
+    let modal = document.getElementById('modalRoulette');
+    let track = document.getElementById('rouletteTrack');
+    let resultBox = document.getElementById('resultBox');
+    let title = document.getElementById('rouletteTitle');
+    let skipBtn = document.getElementById('skipBtn');
+
+    if (!modal || !track) {
+        isRouletteSpinning = false;
+        return;
+    }
+
+    modal.classList.add('active');
+    if (resultBox) {
+        resultBox.classList.remove('active');
+    }
+    if (title) {
+        title.textContent = '🎲 ОТКРЫВАЕМ...';
+    }
+    if (skipBtn) {
+        skipBtn.style.display = 'block';
+    }
+    document.body.style.overflow = 'hidden';
+
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0px)';
+    track.innerHTML = '';
+
+    let WIN_IDX = 35;
+    let TOTAL = 60;
+    let winItem = getRandomItemByChance(data.items);
+    currentWinItem = winItem;
+
+    for (let i = 0; i < TOTAL; i++) {
+        let item = (i === WIN_IDX) ? winItem : data.items[Math.floor(Math.random() * data.items.length)];
+        let div = document.createElement('div');
+        div.className = 'roulette-item';
+        let borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
+        div.style.borderColor = borderColor;
+        if (item.nft.isCurrency) {
+            div.innerHTML = '<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">' + item.nft.icon + '</div>';
+        } else {
+            div.innerHTML = '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
+        }
+        track.appendChild(div);
+    }
+
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            let firstItem = track.children[0];
+            if (!firstItem) {
+                isRouletteSpinning = false;
+                return;
+            }
+
+            let itemW = firstItem.getBoundingClientRect().width;
+            let gap = 10;
+            let stepW = itemW + gap;
+
+            let wrapper = track.parentElement;
+            let wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
+            let center = wrapW / 2;
+
+            let winCenterX = WIN_IDX * stepW + itemW / 2;
+            let offset = center - winCenterX;
+
+            track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
+            track.style.transform = 'translateX(' + offset + 'px)';
+            if (title) {
+                title.textContent = '🎰 КРУТИМ...';
+            }
+
+            if (rouletteTimeout) {
+                clearTimeout(rouletteTimeout);
+            }
+            rouletteTimeout = setTimeout(function() {
+                if (title) {
+                    title.textContent = '🎉 РЕЗУЛЬТАТ!';
+                }
+                showResult(winItem.nft, caseKey);
+                openedCases++;
+                localStorage.setItem('openedCases', openedCases);
+                checkAchievements();
+                generateCases();
+                if (skipBtn) {
+                    skipBtn.style.display = 'none';
+                }
+                isRouletteSpinning = false;
+                rouletteTimeout = null;
+            }, 5500);
+        });
+    });
+}
+
+function skipRoulette() {
+    if (!currentWinItem || !isRouletteSpinning) {
+        return;
+    }
+
+    let track = document.getElementById('rouletteTrack');
+    let title = document.getElementById('rouletteTitle');
+    let skipBtn = document.getElementById('skipBtn');
+
+    if (rouletteTimeout) {
+        clearTimeout(rouletteTimeout);
+        rouletteTimeout = null;
+    }
+
+    if (track) {
+        track.style.transition = 'transform 0.3s cubic-bezier(0.05, 0.85, 0.15, 1)';
+    }
+    if (title) {
+        title.textContent = '🎉 РЕЗУЛЬТАТ!';
+    }
+
+    let WIN_IDX = 35;
+    if (track) {
+        let firstItem = track.children[0];
+        if (firstItem) {
+            let itemW = firstItem.getBoundingClientRect().width;
+            let gap = 10;
+            let stepW = itemW + gap;
+            let wrapper = track.parentElement;
+            let wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
+            let center = wrapW / 2;
+            let winCenterX = WIN_IDX * stepW + itemW / 2;
+            let offset = center - winCenterX;
+            track.style.transform = 'translateX(' + offset + 'px)';
+        }
+    }
+
+    setTimeout(function() {
+        if (skipBtn) {
+            skipBtn.style.display = 'none';
+        }
+        showResult(currentWinItem.nft, currentCase);
+        openedCases++;
+        localStorage.setItem('openedCases', openedCases);
+        checkAchievements();
+        generateCases();
+        isRouletteSpinning = false;
+    }, 400);
+}
+
+function closeRouletteModal() {
+    let modal = document.getElementById('modalRoulette');
+    let track = document.getElementById('rouletteTrack');
+    let skipBtn = document.getElementById('skipBtn');
+
+    if (rouletteTimeout) {
+        clearTimeout(rouletteTimeout);
+        rouletteTimeout = null;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
+    isRouletteSpinning = false;
+
+    if (track) {
+        track.style.display = 'flex';
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(0px)';
+        track.innerHTML = '';
+    }
+    if (skipBtn) {
+        skipBtn.style.display = 'block';
+    }
+}
+
+function getRandomItemByChance(items) {
+    let rand = Math.random() * 100;
+    let cum = 0;
+    for (let i = 0; i < items.length; i++) {
+        cum += items[i].chance;
+        if (rand <= cum) {
+            return items[i];
+        }
+    }
+    return items[items.length - 1];
+}
+
+function showResult(nft, caseKey) {
+    let resultBox = document.getElementById('resultBox');
+    if (resultBox) {
+        resultBox.classList.add('active');
+    }
+
+    if (nft.isCurrency) {
+        let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1;
+        if (isStars) {
+            let newBal = getStars() + nft.amount;
+            setStars(newBal);
+            let iconEl = document.getElementById('resultIcon');
+            let nameEl = document.getElementById('resultName');
+            let rarityEl = document.getElementById('resultRarity');
+            let starsEl = document.getElementById('resultStars');
+            let tonEl = document.getElementById('resultTon');
+            if (iconEl) iconEl.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (nameEl) nameEl.textContent = '+' + nft.amount + ' звёзд';
+            if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
+            if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
+            if (tonEl) tonEl.innerHTML = '';
+            addXP(nft.amount);
+        } else {
+            let iconEl2 = document.getElementById('resultIcon');
+            let nameEl2 = document.getElementById('resultName');
+            let rarityEl2 = document.getElementById('resultRarity');
+            let starsEl2 = document.getElementById('resultStars');
+            let tonEl2 = document.getElementById('resultTon');
+            if (iconEl2) iconEl2.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (nameEl2) nameEl2.textContent = 'Подарок';
+            if (rarityEl2) rarityEl2.textContent = 'ОСОБОЕ';
+            if (starsEl2) starsEl2.innerHTML = '🎁 Сюрприз!';
+            if (tonEl2) tonEl2.innerHTML = '';
+            addXP(10);
+        }
+        if (resultBox) resultBox.style.borderColor = '#fbbf24';
+        let rarityEl3 = document.getElementById('resultRarity');
+        if (rarityEl3) rarityEl3.style.background = '#fbbf24';
+    } else {
+        let iconEl3 = document.getElementById('resultIcon');
+        let nameEl3 = document.getElementById('resultName');
+        let rarityEl4 = document.getElementById('resultRarity');
+        let starsEl3 = document.getElementById('resultStars');
+        let tonEl3 = document.getElementById('resultTon');
+        if (iconEl3) iconEl3.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display=\'none\'">';
+        if (nameEl3) nameEl3.textContent = nft.name;
+        if (rarityEl4) rarityEl4.textContent = nft.rarity.toUpperCase();
+        let color = getRarityColor(nft.rarity);
+        if (resultBox) resultBox.style.borderColor = color;
+        if (rarityEl4) rarityEl4.style.background = color;
+        if (starsEl3) starsEl3.innerHTML = '⭐ ' + nft.stars;
+        if (tonEl3) tonEl3.innerHTML = '💎 ' + nft.ton + ' TON';
+        addXP(Math.floor(nft.stars / 5));
+        addToInventory(nft);
+        saveToHistory(nft);
+        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
+            createConfetti();
+        }
+    }
+
+    addToGlobalHistory(nft);
+}
+
+function createConfetti() {
+    let colors = ['#10b981','#fbbf24','#ef4444','#3b82f6','#a855f7'];
+    for (let i = 0; i < 120; i++) {
+        let el = document.createElement('div');
+        el.style.cssText = 'position:fixed;top:50%;left:50%;width:10px;height:10px;background:' + colors[i % colors.length] + ';border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 2 + 1) + 's linear forwards;--x:' + Math.random() + ';';
+        document.body.appendChild(el);
+        (function(e) {
+            setTimeout(function() {
+                e.remove();
+            }, 3000);
+        })(el);
+    }
+}
+
+function addToInventory(nft) {
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    let newItem = {
+        id: nft.id,
+        name: nft.name,
+        stars: nft.stars,
+        ton: nft.ton,
+        image: nft.image,
+        isCurrency: nft.isCurrency || false,
+        amount: nft.amount || 0,
+        rarity: nft.rarity,
+        icon: nft.icon || '',
+        uid: Date.now() + '_' + Math.random().toString(36).slice(2),
+        time: new Date().toISOString()
+    };
+    inventory.unshift(newItem);
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+}
+
+function loadInventory() {
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    renderInventory();
+}
+
+function renderInventory() {
+    let c = document.getElementById('inventoryContainer');
+    if (!c) {
+        return;
+    }
+
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+
+    if (!inventory.length) {
+        c.innerHTML = '<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📦</div><h3>Инвентарь пуст</h3><p style="color:#6b7280;">Открой кейсы, чтобы получить NFT</p></div>';
+        return;
+    }
+
+    let order = { mythic:5, legendary:4, epic:3, rare:2, common:1 };
+    let sorted = inventory.slice().sort(function(a, b) {
+        return (order[b.rarity] || 0) - (order[a.rarity] || 0);
+    });
+
+    let totalTon = 0;
+    for (let i = 0; i < inventory.length; i++) {
+        totalTon += (inventory[i].ton || 0);
+    }
+
+    let html = '<div style="padding:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>📦 Мои NFT (' + inventory.length + ')</h3><div style="font-size:14px;color:#6b7280;">💎 <span style="color:#8b5cf6;font-weight:700;">' + totalTon.toFixed(2) + ' TON</span></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">';
+
+    for (let j = 0; j < sorted.length; j++) {
+        let nft = sorted[j];
+        let uid = nft.uid || JSON.stringify(nft);
+        let safeUid = encodeURIComponent(uid);
+        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:12px;border:2px solid ' + getRarityColor(nft.rarity) + ';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:' + getRarityColor(nft.rarity) + ';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + nft.rarity.toUpperCase() + '</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">' + nft.name + '</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ' + nft.ton + ' TON • ⭐ ' + nft.stars + '</div><button onclick="sellNFT(\'' + safeUid + '\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать ' + Math.floor((nft.stars || 0) * 0.7) + ' ⭐</button></div>';
+    }
+
+    html += '</div></div>';
+    c.innerHTML = html;
+}
+
+function sellNFT(safeUid) {
+    let uid = decodeURIComponent(safeUid);
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+
+    let idx = -1;
+    for (let i = 0; i < inventory.length; i++) {
+        let itemUid = inventory[i].uid || JSON.stringify(inventory[i]);
+        if (itemUid === uid) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx === -1) {
+        tg.showAlert('Предмет не найден!');
+        return;
+    }
+
+    let nft = inventory[idx];
+    let sp = Math.floor((nft.stars || 0) * 0.7);
+
+    tg.showPopup({
+        title: 'Продать NFT?',
+        message: nft.name + '\nВы получите: ' + sp + ' ⭐',
+        buttons: [
+            { id: 'sell', type: 'default', text: 'Продать за ' + sp + ' ⭐' },
+            { type: 'cancel' }
+        ]
+    }, function(btn) {
+        if (btn === 'sell') {
+            inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+            let freshIdx = -1;
+            for (let j = 0; j < inventory.length; j++) {
+                let itemUid = inventory[j].uid || JSON.stringify(inventory[j]);
+                if (itemUid === uid) {
+                    freshIdx = j;
+                    break;
+                }
+            }
+
+            if (freshIdx === -1) {
+                tg.showAlert('Предмет уже продан!');
+                return;
+            }
+
+            inventory.splice(freshIdx, 1);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            setStars(getStars() + sp);
+            loadInventory();
+            tg.showAlert('Продано за ' + sp + ' ⭐!');
+        }
+    });
+}
+
+function saveToHistory(nft) {
+    let h = JSON.parse(localStorage.getItem('caseHistory') || '[]');
+    let item = {
+        id: nft.id,
+        name: nft.name,
+        stars: nft.stars,
+        ton: nft.ton,
+        image: nft.image,
+        rarity: nft.rarity,
+        time: new Date().toLocaleString('ru-RU')
+    };
+    h.unshift(item);
+    if (h.length > 50) {
+        h = h.slice(0, 50);
+    }
+    localStorage.setItem('caseHistory', JSON.stringify(h));
+}
+
+function loadHistory() {
+    renderHistory(JSON.parse(localStorage.getItem('caseHistory') || '[]'));
+}
+
+function renderHistory(history) {
+    let c = document.getElementById('historyContainer');
+    if (!c) {
+        return;
+    }
+    if (!history.length) {
+        c.innerHTML = '<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📜</div><h3>История пуста</h3></div>';
+        return;
+    }
+    let html = '<div style="padding:20px;"><h3 style="margin-bottom:15px;">📜 История (' + history.length + ')</h3>';
+    for (let i = 0; i < history.length; i++) {
+        let item = history[i];
+        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ' + getRarityColor(item.rarity) + ';flex-shrink:0;"><img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + item.name + '</div><div style="font-size:12px;color:' + getRarityColor(item.rarity) + ';margin-top:4px;">' + (item.rarity ? item.rarity.toUpperCase() : '') + '</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">' + item.time + '</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ ' + item.stars + '</div><div style="font-size:12px;color:#0088cc;">💎 ' + item.ton + ' TON</div></div></div>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
+}
+
+function loadAchievements() {
+    achievements = JSON.parse(localStorage.getItem('achievements') || '[]');
+    renderAchievements();
+}
+
+function renderAchievements() {
+    let c = document.getElementById('achievementsContainer');
+    if (!c) {
+        return;
+    }
+    let prog = Math.round((achievements.length / ACHIEVEMENTS.length) * 100);
+    let html = '<div style="padding:20px;"><div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>🏆 Достижения</h3><div style="color:#8b5cf6;font-weight:700;">' + achievements.length + '/' + ACHIEVEMENTS.length + '</div></div><div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;"><div style="width:' + prog + '%;height:100%;background:linear-gradient(90deg,#8b5cf6,#6366f1);"></div></div></div>';
+    for (let i = 0; i < ACHIEVEMENTS.length; i++) {
+        let a = ACHIEVEMENTS[i];
+        let done = achievements.indexOf(a.id) !== -1;
+        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;opacity:' + (done ? 1 : 0.5) + ';border:2px solid ' + (done ? '#8b5cf6' : 'rgba(255,255,255,0.1)') + ';display:flex;align-items:center;gap:15px;"><div style="font-size:40px;filter:grayscale(' + (done ? 0 : 1) + ');">' + a.icon + '</div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + a.name + (done ? ' ✅' : '') + '</div><div style="font-size:13px;color:#6b7280;">' + a.desc + '</div></div><div style="color:' + (done ? '#8b5cf6' : '#ffd700') + ';font-weight:700;">+' + a.reward + ' ⭐</div></div>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
+}
+
+function checkAchievements() {
+    let map = {first_case:1, cases_5:5, cases_10:10};
+    let keys = Object.keys(map);
+    for (let i = 0; i < keys.length; i++) {
+        let id = keys[i];
+        let n = map[id];
+        if (openedCases >= n && achievements.indexOf(id) === -1) {
+            unlockAchievement(id);
+        }
+    }
+
+    if (openedCases >= 1) {
+        let hasMythic = false;
+        for (let j = 0; j < inventory.length; j++) {
+            if (inventory[j].rarity === 'mythic') {
+                hasMythic = true;
+                break;
+            }
+        }
+        if (hasMythic && achievements.indexOf('mythic') === -1) {
+            unlockAchievement('mythic');
+        }
+    }
+}
+
+function unlockAchievement(id) {
+    let a = null;
+    for (let i = 0; i < ACHIEVEMENTS.length; i++) {
+        if (ACHIEVEMENTS[i].id === id) {
+            a = ACHIEVEMENTS[i];
+            break;
+        }
+    }
+    if (!a) {
+        return;
+    }
+    achievements.push(id);
+    localStorage.setItem('achievements', JSON.stringify(achievements));
+    setStars(getStars() + a.reward);
+    tg.showPopup({title:'🏆 Достижение!', message:a.icon + ' ' + a.name + '\n' + a.desc + '\n+' + a.reward + ' ⭐', buttons:[{type:'ok'}]});
+    renderAchievements();
+}
+
+function fetchOnlineCount() {
+    let el = document.getElementById('onlineCount');
+    if (el) {
+        el.textContent = (150 + Math.floor(Math.random() * 50) - 25) + ' Online';
+    }
+}
+
+function generateFakeHistory() {
+    let names = ['Алексей','Мария','Дмитрий','Анна','Иван','Елена'];
+    let caseKeys = Object.keys(CASES_DATA);
+    for (let i = 0; i < 15; i++) {
+        let rCase = CASES_DATA[caseKeys[Math.floor(Math.random() * caseKeys.length)]];
+        let item = getRandomItemByChance(rCase.items);
+        globalHistory.push({nft:item.nft, username:names[Math.floor(Math.random() * names.length)], time:(Math.floor(Math.random() * 45) + 1) + ' мин назад'});
+    }
+    renderGlobalHistory();
+}
+
+function renderGlobalHistory() {
+    let slider = document.getElementById('nftScroll');
+    if (!slider) {
+        return;
+    }
+    let all = globalHistory.concat(globalHistory).concat(globalHistory);
+    let html = '';
+    for (let i = 0; i < all.length; i++) {
+        let item = all[i];
+        let nft = item.nft;
+        let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<div style="font-size:45px;">' + nft.icon + '</div>' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
+    }
+    slider.innerHTML = html;
+}
+
+function addToGlobalHistory(nft) {
+    let user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    let username = user ? (user.first_name || 'Игрок') : 'Игрок';
+    globalHistory.unshift({nft:nft, username:username, time:'только что'});
+    if (globalHistory.length > 25) {
+        globalHistory = globalHistory.slice(0, 25);
+    }
+    renderGlobalHistory();
+}
+
+function switchTab(tab) {
+    let navItems = document.querySelectorAll('.nav-item');
+    for (let i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+    let tabContents = document.querySelectorAll('.tab-content');
+    for (let j = 0; j < tabContents.length; j++) {
+        tabContents[j].classList.remove('active');
+    }
+    let map = {cases:'tabCases', inventory:'tabInventory', profile:'tabProfile', history:'tabHistory', achievements:'tabAchievements'};
+    let target = document.getElementById(map[tab]);
+    if (target) {
+        target.classList.add('active');
+    }
+    if (tab === 'inventory') {
+        renderInventory();
+    }
+    if (tab === 'history') {
+        loadHistory();
+    }
+    if (tab === 'achievements') {
+        renderAchievements();
+    }
+    if (tab === 'profile') {
+        renderProfile();
+    }
+}
+
+function renderProfile() {
+    let container = document.getElementById('profileContainer');
+    if (!container) return;
+
+    let user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    let name = user ? (user.first_name || 'Player') : 'Player';
+    let username = user ? (user.username || 'player') : 'player';
+
+    let html = '';
+    html += '<div class="profile-card">';
+    html += '<div class="profile-card-header">';
+    html += '<div class="profile-card-avatar">';
+    if (user && user.photo_url) {
+        html += '<img src="' + user.photo_url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    } else {
+        html += '🎰';
+    }
+    html += '</div>';
+    html += '<div><div class="profile-card-name">' + name + '</div>';
+    html += '<div class="profile-card-level">📊 Уровень ' + userLevel + '</div></div></div>';
+    html += '<div class="profile-stats">';
+    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + getStars() + '</div><div class="profile-stat-label">⭐ Звёзд</div></div>';
+    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + openedCases + '</div><div class="profile-stat-label">📦 Кейсов</div></div>';
+    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + inventory.length + '</div><div class="profile-stat-label">💎 NFT</div></div>';
+    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + userXP + '/' + (userLevel * 100) + '</div><div class="profile-stat-label">📈 Опыт</div></div>';
+    html += '</div></div>';
+
+    html += '<div class="profile-ref-section">';
+    html += '<div class="profile-ref-title">👥 Реферальная программа</div>';
+    html += '<div class="profile-ref-link" id="refLink">Загрузка...</div>';
+    html += '<div class="profile-ref-count">';
+    html += '<div class="profile-ref-count-value" id="refCount">0</div>';
+    html += '<div class="profile-ref-count-label">Приглашённых друзей</div>';
+    html += '</div>';
+    html += '<button class="profile-btn-copy" onclick="copyRefLink()">📋 Копировать ссылку</button>';
+    html += '</div>';
+
+    html += '<div class="profile-promo-section">';
+    html += '<div class="profile-promo-title">🎟️ Промокод</div>';
+    html += '<input type="text" id="promoInput" class="profile-promo-input" placeholder="Введите промокод">';
+    html += '<button class="profile-btn" onclick="activatePromo()">Активировать</button>';
+    html += '</div>';
+
+    container.innerHTML = html;
+    loadRefLink();
+}
+
+function loadRefLink() {
+    let uid = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user.id : '000';
+    let refEl = document.getElementById('refLink');
+    let countEl = document.getElementById('refCount');
+    if (refEl) {
+        refEl.textContent = 'https://t.me/gsdfsdfdsfbot?start=ref_' + uid;
+    }
+    if (countEl) {
+        countEl.textContent = localStorage.getItem('refCount') || '0';
+    }
+}
+
+function copyRefLink() {
+    let refEl = document.getElementById('refLink');
+    if (refEl) {
+        navigator.clipboard.writeText(refEl.textContent);
+        tg.showPopup({title:'Скопировано!', message:'Ссылка в буфере', buttons:[{type:'ok'}]});
+    }
+}
+
+function activatePromo() {
+    let input = document.getElementById('promoInput');
+    if (!input) {
+        return;
+    }
+    let code = input.value.trim().toUpperCase();
+    if (!code) {
+        tg.showAlert('Введите промокод');
+        return;
+    }
+    let codes = {'WELCOME':100, 'NEWYEAR2026':200, 'LUCKY':150};
+    let used = JSON.parse(localStorage.getItem('usedPromos') || '[]');
+    if (used.indexOf(code) !== -1) {
+        tg.showAlert('Промокод уже использован!');
+        return;
+    }
+    if (!codes[code]) {
+        tg.showAlert('Неверный промокод!');
+        return;
+    }
+    setStars(getStars() + codes[code]);
+    used.push(code);
+    localStorage.setItem('usedPromos', JSON.stringify(used));
+    tg.showPopup({title:'🎉 Активировано!', message:'+' + codes[code] + ' ⭐ звёзд!', buttons:[{type:'ok'}]});
+    input.value = '';
+    generateCases();
+}
+
+function openAdminPanel() {
+    if (!isAdmin) {
+        return;
+    }
+    let panel = document.getElementById('adminPanel');
+    if (panel) {
+        panel.classList.add('active');
+    }
+    document.body.style.overflow = 'hidden';
+    loadAdminStats();
+    loadAllUsers();
+}
+
+function closeAdminPanel() {
+    let panel = document.getElementById('adminPanel');
+    if (panel) {
+        panel.classList.remove('active');
+    }
+    document.body.style.overflow = '';
+}
+
+function loadAdminStats() {
+    let statsEl = document.getElementById('adminStats');
+    if (!statsEl) {
+        return;
+    }
+    statsEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">' + getStars() + '</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">' + openedCases + '</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + inventory.length + '</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">' + achievements.length + '</div><div class="admin-stat-label">Ачивок</div></div></div>';
+}
+
+function loadAllUsers() {
+    let user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    let listEl = document.getElementById('adminUsersList');
+    if (!listEl) {
+        return;
+    }
+    let name = user ? (user.first_name || 'Admin') : 'Admin';
+    let username = user ? (user.username || 'admin') : 'admin';
+    let id = user ? user.id : 0;
+    let avatar = name.charAt(0);
+    listEl.innerHTML = '<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">' + avatar + '</div><div><div style="font-size:16px;font-weight:700;">' + name + ' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@' + username + ' • ID: ' + id + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ ' + getStars() + '</span><span>📊 Lvl ' + userLevel + '</span><span>📦 ' + openedCases + '</span><span>💎 ' + inventory.length + '</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(' + id + ',\'' + username + '\',' + getStars() + ')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>';
+}
+
+function manageUserBalance(userId, username, curStars) {
+    let modal = document.createElement('div');
+    modal.className = 'admin-modal';
+    modal.innerHTML = '<div class="admin-modal-content"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3 style="font-size:20px;font-weight:800;">💰 Управление балансом</h3><div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest(\'.admin-modal\').remove()">✕</div></div><div style="background:rgba(30,20,50,0.5);padding:15px;border-radius:12px;margin-bottom:20px;"><div style="font-size:18px;font-weight:700;">@' + username + '</div><div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span id="modalCurStars" style="color:#8b5cf6;font-weight:700;">' + curStars + ' ⭐</span></div></div><input type="number" id="starsAmount" placeholder="Количество звёзд" min="1" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;margin-bottom:15px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><button class="admin-btn admin-btn-success" onclick="giveStars(\'' + username + '\')">➕ Выдать</button><button class="admin-btn admin-btn-danger" onclick="takeStars(\'' + username + '\')">➖ Забрать</button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;"><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=100">100</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=500">500</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=1000">1000</button></div></div>';
+    document.body.appendChild(modal);
+}
+
+function giveStars(username) {
+    let input = document.getElementById('starsAmount');
+    if (!input) {
+        return;
+    }
+    let amount = parseInt(input.value, 10);
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите количество!');
+        return;
+    }
+    setStars(getStars() + amount);
+    let modal = document.querySelector('.admin-modal');
+    if (modal) {
+        modal.remove();
+    }
+    generateCases();
+    loadAllUsers();
+    loadAdminStats();
+    tg.showPopup({title:'✅ Выдано!', message:'+' + amount + ' ⭐\nНовый баланс: ' + getStars() + ' ⭐', buttons:[{type:'ok'}]});
+}
+
+function takeStars(username) {
+    let input = document.getElementById('starsAmount');
+    if (!input) {
+        return;
+    }
+    let amount = parseInt(input.value, 10);
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите количество!');
+        return;
+    }
+    setStars(getStars() - amount);
+    let modal = document.querySelector('.admin-modal');
+    if (modal) {
+        modal.remove();
+    }
+    generateCases();
+    loadAllUsers();
+    loadAdminStats();
+    tg.showPopup({title:'✅ Забрано!', message:'-' + amount + ' ⭐\nНовый баланс: ' + getStars() + ' ⭐', buttons:[{type:'ok'}]});
+}
+
+function resetUserProgress() {
+    tg.showPopup({
+        title:'⚠️ Сброс!',
+        message:'Сбросить ВСЕ данные?\n(необратимо)',
+        buttons:[{id:'yes', type:'destructive', text:'Сбросить'}, {type:'cancel'}]
+    }, function(btn) {
+        if (btn === 'yes') {
+            let keys = ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'];
+            for (let i = 0; i < keys.length; i++) {
+                localStorage.removeItem(keys[i]);
+            }
+            userLevel = 1;
+            userXP = 0;
+            openedCases = 0;
+            inventory = [];
+            achievements = [];
+            let balanceEl = document.getElementById('balance');
+            if (balanceEl) {
+                balanceEl.textContent = '0';
+            }
+            updateLevelDisplay();
+            generateCases();
+            closeAdminPanel();
+            tg.showAlert('Прогресс сброшен!');
+        }
+    });
+}
+
+function sendGlobalNotification() {
+    tg.showPopup({title:'📢', message:'Требует backend', buttons:[{type:'ok'}]});
+}
+
+function createPromoCode() {
+    tg.showPopup({title:'🎟️ Промокоды', message:'WELCOME → 100 ⭐\nNEWYEAR2026 → 200 ⭐\nLUCKY → 150 ⭐', buttons:[{type:'ok'}]});
+}
+
+function exportUserData() {
+    let data = {stars:getStars(), level:userLevel, cases:openedCases, inventory:inventory, achievements:achievements};
+    let blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    let a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'export.json';
+    a.click();
+    tg.showAlert('Данные экспортированы!');
+}
+
+function switchAdminTab(tab) {
+    let tabs = document.querySelectorAll('.admin-tab-vertical');
+    for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove('active');
+    }
+    let selector = '[data-tab="' + tab + '"]';
+    let target = document.querySelector(selector);
+    if (target) {
+        target.classList.add('active');
+    }
+    let contents = document.querySelectorAll('.admin-tab-content');
+    for (let j = 0; j < contents.length; j++) {
+        contents[j].classList.remove('active');
+    }
+    let id = 'adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    let content = document.getElementById(id);
+    if (content) {
+        content.classList.add('active');
+    }
+    if (tab === 'stats') {
+        loadAdminStats();
+    }
+    if (tab === 'users') {
+        loadAllUsers();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    init();
+});
