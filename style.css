@@ -491,7 +491,7 @@ body::before {
     -webkit-text-fill-color: transparent;
 }
 
-.modal-close {
+.lose {
     font-size: 32px;
     cursor: pointer;
     color: #6b7280;
@@ -1581,4 +1581,80 @@ body::before {
     font-size: 10px;
     top: 10px;
     right: 10px;
+}
+/* Модалка с кейсами */
+.modal-cases {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.97);
+    backdrop-filter: blur(20px);
+    z-index: 1500;
+    overflow-y: auto;
+}
+.modal-cases.active {
+    display: block;
+}
+.modal-cases-content {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, #150a2e, #0a0a12);
+    padding-bottom: 30px;
+}
+.modal-cases-header {
+    position: sticky;
+    top: 0;
+    background: rgba(10, 10, 18, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+    z-index: 10;
+}
+.modal-cases-header h2 {
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* SVG иконки в нижней навигации */
+.nav-icon-svg {
+    width: 24px;
+    height: 24px;
+    color: #4a4a5a;
+    transition: color 0.3s;
+}
+.nav-item.active .nav-icon-svg {
+    color: #a78bfa;
+}
+.nav-item:hover .nav-icon-svg {
+    color: #8b5cf6;
+}
+
+/* Компактные кейсы в модалке */
+.modal-cases .case-big .case-image-section {
+    padding: 12px;
+    min-height: 70px;
+}
+.modal-cases .case-big .case-main-image {
+    font-size: 48px !important;
+}
+.modal-cases .case-big .case-title {
+    font-size: 14px !important;
+    margin-bottom: 4px;
+}
+.modal-cases .case-big .case-info-section {
+    padding: 8px 12px 12px;
+}
+.modal-cases .case-big .case-footer div div {
+    font-size: 16px !important;
+}
+.modal-cases .case-big {
+    margin-bottom: 10px;
 }
