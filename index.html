@@ -11,10 +11,39 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- КРУТАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
     <div class="loader-container" id="loader">
-        <div class="loader-3d"><div></div><div></div><div></div><div></div></div>
-        <div class="loader-text">Loading Premium Experience...</div>
-        <div class="loader-progress"><div class="loader-progress-bar"></div></div>
+        <!-- Частицы фона -->
+        <div class="loader-particles" id="loaderParticles"></div>
+        
+        <!-- Свечение -->
+        <div class="loader-glow"></div>
+        
+        <!-- Вращающаяся Durovs Cap -->
+        <div class="loader-hat-container">
+            <img src="nft/Durovs Cap.jpg" alt="Durovs Cap" class="loader-hat" id="loaderHat">
+            <div class="loader-hat-ring"></div>
+            <div class="loader-hat-ring2"></div>
+        </div>
+        
+        <!-- Текст Loading с глитч эффектом -->
+        <div class="loader-text-wrapper">
+            <div class="loader-text-main" id="loaderText">LOADING</div>
+            <div class="loader-text-glitch" id="loaderGlitch">LOADING</div>
+            <div class="loader-text-shadow">LOADING</div>
+        </div>
+        
+        <!-- Прогресс бар -->
+        <div class="loader-progress-container">
+            <div class="loader-progress-track">
+                <div class="loader-progress-bar" id="loaderProgressBar"></div>
+                <div class="loader-progress-glow"></div>
+            </div>
+            <div class="loader-progress-text" id="loaderProgressText">0%</div>
+        </div>
+        
+        <!-- Подпись -->
+        <div class="loader-subtitle">Premium Case Opening</div>
     </div>
 
     <canvas id="particles"></canvas>
