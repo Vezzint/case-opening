@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -80,27 +81,23 @@
     </div>
 
     <div class="tab-content" id="tabProfile">
-        <div style="padding: 20px;">
-            <div style="background: rgba(30, 30, 40, 0.5); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                <h3 style="font-size: 18px; margin-bottom: 15px;">👥 Реферальная программа</h3>
-                <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Приглашай друзей и получай бонусы</p>
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center;">
-                    <div style="font-size: 32px; font-weight: 900; color: #10b981;" id="refCount">0</div>
-                    <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Приглашённых друзей</div>
+        <div style="padding:20px;">
+            <div style="background:rgba(30,30,40,0.5);padding:25px;border-radius:16px;margin-bottom:15px;">
+                <h3 style="font-size:18px;margin-bottom:15px;">👥 Реферальная программа</h3>
+                <p style="color:#6b7280;font-size:14px;margin-bottom:15px;">Приглашай друзей и получай бонусы</p>
+                <div style="background:rgba(139,92,246,0.1);padding:15px;border-radius:12px;margin-bottom:15px;text-align:center;">
+                    <div style="font-size:32px;font-weight:900;color:#8b5cf6;" id="refCount">0</div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:5px;">Приглашённых друзей</div>
                 </div>
-                <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; word-break: break-all; font-size: 12px; margin-bottom: 15px;">
+                <div style="background:rgba(0,0,0,0.4);padding:15px;border-radius:10px;word-break:break-all;font-size:12px;margin-bottom:15px;">
                     <span id="refLink">Загрузка...</span>
                 </div>
-                <button onclick="copyRefLink()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 700;">
-                    📋 Копировать ссылку
-                </button>
+                <button onclick="copyRefLink()" style="width:100%;padding:15px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;">📋 Копировать ссылку</button>
             </div>
-            <div style="background: rgba(30, 30, 40, 0.5); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
-                <h3 style="font-size: 18px; margin-bottom: 15px;">🎟️ Промокод</h3>
-                <input type="text" id="promoInput" placeholder="Введите промокод" style="width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; margin-bottom: 15px;">
-                <button onclick="activatePromo()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 700;">
-                    Активировать
-                </button>
+            <div style="background:rgba(30,30,40,0.5);padding:25px;border-radius:16px;">
+                <h3 style="font-size:18px;margin-bottom:15px;">🎟️ Промокод</h3>
+                <input type="text" id="promoInput" placeholder="Введите промокод" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:15px;margin-bottom:15px;">
+                <button onclick="activatePromo()" style="width:100%;padding:15px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;">Активировать</button>
             </div>
         </div>
     </div>
@@ -128,7 +125,6 @@
         </div>
     </div>
 
-    <!-- Modal Preview Full Screen -->
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
             <div class="modal-preview-header">
@@ -144,13 +140,10 @@
                 <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
                 <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
             </div>
-            <div class="preview-items-list" id="previewItemsList">
-                <div class="preview-items-title">💎 Возможные награды</div>
-            </div>
+            <div class="preview-items-list" id="previewItemsList"></div>
         </div>
     </div>
 
-    <!-- Modal Roulette -->
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
         <div class="roulette-box">
@@ -173,7 +166,6 @@
         </div>
     </div>
 
-    <!-- ADMIN PANEL -->
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
@@ -189,13 +181,13 @@
                 <div id="adminStats"></div>
             </div>
             <div class="admin-tab-content" id="adminTabUsers">
-                <div style="margin-bottom: 15px;">
-                    <input type="text" id="adminUserSearch" placeholder="🔍 Поиск по username..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 14px;">
+                <div style="margin-bottom:15px;">
+                    <input type="text" id="adminUserSearch" placeholder="🔍 Поиск по username..." style="width:100%;padding:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;">
                 </div>
                 <div id="adminUsersList"></div>
             </div>
             <div class="admin-tab-content" id="adminTabActions">
-                <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display:flex;flex-direction:column;gap:12px;">
                     <button class="admin-action-btn" onclick="sendGlobalNotification()">
                         <div class="admin-action-icon">📢</div>
                         <div>
