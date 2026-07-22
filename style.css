@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -1000,6 +1004,32 @@ body {
 .admin-tab.active {
     color: #fbbf24;
     border-bottom-color: #fbbf24;
+}
+
+.admin-tabs-vertical {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 25px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-tab-vertical {
+    padding: 15px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b7280;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s;
+    background: rgba(30, 30, 40, 0.5);
+}
+
+.admin-tab-vertical.active {
+    color: #fbbf24;
+    border-left-color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
 }
 
 .admin-tab-content {
