@@ -3,245 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Case Opening Premium</title>
+    <title>Case Opening</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a12;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+            position: relative;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0 20px;
+            position: sticky;
+            top: 0;
+            background: #0a0a12;
+            z-index: 10;
+        }
+        .back-btn {
+            font-size: 28px;
+            cursor: pointer;
+            color: #6b7280;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .back-btn:hover {
+            color: #8b5cf6;
+        }
+        .case-title {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Стрелка над кейсом */
+        .arrow-indicator {
+            text-align: center;
+            margin-bottom: 4px;
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .arrow-indicator svg {
+            display: block;
+            margin: 0 auto 2px;
+        }
+
+        /* Ряд ячеек */
+        .slot-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .slot-cell {
+            width: 60px;
+            height: 80px;
+            background: rgba(30, 20, 50, 0.5);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+        .slot-cell img {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .slot-cell .cell-emoji {
+            font-size: 36px;
+        }
+        .slot-cell .cell-name {
+            font-size: 7px;
+            font-weight: 600;
+            margin-top: 2px;
+            text-align: center;
+            color: #9ca3af;
+            max-width: 56px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Индикатор редкости под ячейкой */
+        .rarity-bar {
+            width: 100%;
+            height: 3px;
+            border-radius: 0 0 12px 12px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: background 0.3s;
+        }
+        .rarity-bar.common { background: #9e9e9e; }
+        .rarity-bar.rare { background: #3b82f6; }
+        .rarity-bar.epic { background: #a855f7; }
+        .rarity-bar.legendary { background: #fbbf24; }
+        .rarity-bar.mythic { background: #ef4444; }
+        .rarity-bar.special { background: #10b981; }
+
+        /* Анимация пульсации ячейки */
+        .slot-cell.pulse {
+            animation: cellPulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 3;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        @keyframes cellPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+
+        /* Список наград (прокрутка) */
+        .items-scroll {
+            margin-top: 20px;
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .items-scroll::-webkit-scrollbar {
+            width: 3px;
+        }
+        .items-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+        .items-scroll::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 4px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(30, 20, 50, 0.3);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s;
+        }
+        .item-row:hover {
+            background: rgba(30, 20, 50, 0.5);
+        }
+        .item-row .item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .item-row .item-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .item-row .item-info {
+            flex: 1;
+        }
+        .item-row .item-info .name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .item-row .item-info .rarity {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .item-row .item-chance {
+            font-size: 14px;
+            font-weight: 800;
+            color: #8b5cf6;
+        }
+
+        /* Кнопки управления */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .spin-btn {
+            flex: 1;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+        .spin-btn:active {
+            transform: scale(0.96);
+        }
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .multipliers {
+            display: flex;
+            gap: 6px;
+        }
+        .multipliers button {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            background: rgba(30, 20, 50, 0.4);
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .multipliers button.active {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+        .multipliers button:active {
+            transform: scale(0.92);
+        }
+
+        /* Множественные ряды */
+        .slot-rows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Адаптив */
+        @media (max-width: 420px) {
+            .slot-cell {
+                width: 52px;
+                height: 70px;
+            }
+            .slot-cell img {
+                width: 36px;
+                height: 36px;
+            }
+            .slot-cell .cell-emoji {
+                font-size: 28px;
+            }
+            .multipliers button {
+                width: 34px;
+                height: 34px;
+                font-size: 11px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- КРУТАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
-    <div class="loader-container" id="loader">
-        <!-- Частицы фона -->
-        <div class="loader-particles" id="loaderParticles"></div>
-        
-        <!-- Свечение -->
-        <div class="loader-glow"></div>
-        
-        <!-- Вращающаяся Durovs Cap -->
-        <div class="loader-hat-container">
-            <img src="nft/Durovs Cap.jpg" alt="Durovs Cap" class="loader-hat" id="loaderHat">
-            <div class="loader-hat-ring"></div>
-            <div class="loader-hat-ring2"></div>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <button class="back-btn" onclick="closeCaseView()">‹</button>
+            <span class="case-title" id="caseTitle">Legendary Case</span>
         </div>
-        
-        <!-- Текст Loading с глитч эффектом -->
-        <div class="loader-text-wrapper">
-            <div class="loader-text-main" id="loaderText">LOADING</div>
-            <div class="loader-text-glitch" id="loaderGlitch">LOADING</div>
-            <div class="loader-text-shadow">LOADING</div>
-        </div>
-        
-        <!-- Прогресс бар -->
-        <div class="loader-progress-container">
-            <div class="loader-progress-track">
-                <div class="loader-progress-bar" id="loaderProgressBar"></div>
-                <div class="loader-progress-glow"></div>
-            </div>
-            <div class="loader-progress-text" id="loaderProgressText">0%</div>
-        </div>
-        
-        <!-- Подпись -->
-        <div class="loader-subtitle">Premium Case Opening</div>
-    </div>
 
-    <canvas id="particles"></canvas>
-
-    <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
-
-    <div class="profile-header">
-        <div class="profile-info">
-            <div class="profile-avatar" id="avatarContainer">🎰</div>
-            <div class="profile-details">
-                <h3 id="userName">Player</h3>
-                <div class="profile-level">
-                    <span class="level-badge" id="userLevel">Level 1</span>
-                    <span id="userXP">0/100 XP</span>
-                </div>
-            </div>
-        </div>
-        <div class="balance-box">
-            <span class="balance-amount" id="balance">0</span>
-            <span>⭐</span>
-        </div>
-    </div>
-
-    <div class="status-bar">
-        <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="onlineCount">Загрузка...</span>
-        </div>
-    </div>
-
-    <div class="nft-slider">
-        <div class="nft-scroll" id="nftScroll"></div>
-    </div>
-
-    <div class="tab-content active" id="tabGames">
-        <div class="games-grid">
-            <div class="game-card" onclick="openCasesModal()">
-                <div class="game-card-icon">🎰</div>
-                <div class="game-card-title">Кейсы</div>
-                <div class="game-card-desc">Открой кейс и получи награду</div>
-            </div>
-            <div class="game-card" onclick="showMinesweeper()">
-                <div class="game-card-icon">💣</div>
-                <div class="game-card-title">Сапёр</div>
-                <div class="game-card-desc">Найди мину и выиграй</div>
-            </div>
-            <div class="game-card" onclick="showPromoGames()">
-                <div class="game-card-icon">🎟️</div>
-                <div class="game-card-title">Промокод</div>
-                <div class="game-card-desc">Активируй бонус</div>
-            </div>
-            <div class="game-card" onclick="showComingSoon()">
-                <div class="game-card-icon">🔄</div>
-                <div class="game-card-title">Скоро</div>
-                <div class="game-card-desc">Новые игры</div>
-            </div>
-        </div>
-        <div id="gamesContent"></div>
-    </div>
-
-    <div class="modal-cases" id="modalCases">
-        <div class="modal-cases-content">
-            <div class="modal-cases-header">
-                <h2>🎰 Кейсы</h2>
-                <div class="modal-close" onclick="closeCasesModal()">✕</div>
-            </div>
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">Все</button>
-                <button class="filter-btn" data-filter="free">Бесплатные</button>
-                <button class="filter-btn" data-filter="basic">Базовые</button>
-                <button class="filter-btn" data-filter="premium">Премиум</button>
-                <button class="filter-btn" data-filter="legendary">Легендарный</button>
-            </div>
-            <div class="cases-container" id="casesContainer"></div>
-        </div>
-    </div>
-
-    <div class="tab-content" id="tabInventory">
-        <div id="inventoryContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabHistory">
-        <div id="historyContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabAchievements">
-        <div id="achievementsContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabProfile">
-        <div id="profileContainer"></div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('games')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="14" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/>
+        <!-- Стрелка + надпись -->
+        <div class="arrow-indicator">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="7,13 12,8 17,13"/>
+                <line x1="12" y1="18" x2="12" y2="8"/>
             </svg>
-            <div class="nav-label">Игры</div>
+            ВЫПАДЕТ ЗДЕСЬ
         </div>
-        <div class="nav-item" onclick="switchTab('inventory')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="18" y1="7" x2="18" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <div class="nav-label">Инвентарь</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('achievements')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">Награды</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('profile')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">Профиль</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('history')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">История</div>
-        </div>
-    </div>
 
-    <div class="modal-preview" id="modalPreview">
-        <div class="modal-preview-content">
-            <div class="modal-preview-header">
-                <h2 id="previewCaseTitle">Case Name</h2>
-                <div class="modal-close" onclick="closePreviewModal()">✕</div>
+        <!-- Контейнер для рядов ячеек -->
+        <div class="slot-rows-container" id="slotRowsContainer">
+            <!-- Один ряд по умолчанию -->
+            <div class="slot-row" data-row="0">
+                <div class="slot-cell" data-index="0"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
+                <div class="slot-cell" data-index="1"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
+                <div class="slot-cell" data-index="2" id="centerCell"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
+                <div class="slot-cell" data-index="3"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
+                <div class="slot-cell" data-index="4"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
             </div>
-            <div class="preview-rolling-container">
-                <div class="preview-rolling-track" id="previewRollingTrack"></div>
-            </div>
-            <div class="preview-info">
-                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
-                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
-                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
-                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
-            </div>
-            <div class="preview-items-list" id="previewItemsList"></div>
         </div>
-    </div>
 
-    <div class="modal-roulette" id="modalRoulette">
-        <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
-        <div class="roulette-box">
-            <div class="selector"></div>
-            <div class="roulette-wrapper">
-                <div class="roulette-track" id="rouletteTrack"></div>
-            </div>
-        </div>
-        <button class="skip-btn" id="skipBtn" onclick="skipRoulette()">⏩ Пропустить</button>
-        <div class="result-box" id="resultBox">
-            <div class="result-label">🎉 YOU WON!</div>
-            <div class="result-icon" id="resultIcon"></div>
-            <div class="result-name" id="resultName"></div>
-            <div class="result-rarity" id="resultRarity"></div>
-            <div class="result-values">
-                <span id="resultStars"></span>
-                <span id="resultTon"></span>
-            </div>
-            <button class="close-btn" onclick="closeRouletteModal()">Продолжить</button>
-        </div>
-    </div>
+        <!-- Список наград -->
+        <div class="items-scroll" id="itemsScroll"></div>
 
-    <div class="admin-panel-modal" id="adminPanel">
-        <div class="admin-panel-container">
-            <div class="admin-panel-header">
-                <h2>👑 ADMIN PANEL</h2>
-                <div class="admin-close" onclick="closeAdminPanel()">✕</div>
-            </div>
-            <div class="admin-tabs-vertical">
-                <div class="admin-tab-vertical active" data-tab="stats" onclick="switchAdminTab('stats')">📊 Статистика</div>
-                <div class="admin-tab-vertical" data-tab="users" onclick="switchAdminTab('users')">👥 Пользователи</div>
-                <div class="admin-tab-vertical" data-tab="actions" onclick="switchAdminTab('actions')">⚡ Действия</div>
-            </div>
-            <div class="admin-tab-content active" id="adminTabStats"><div id="adminStats"></div></div>
-            <div class="admin-tab-content" id="adminTabUsers">
-                <div style="margin-bottom:15px;"><input type="text" id="adminUserSearch" placeholder="🔍 Поиск..." style="width:100%;padding:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;"></div>
-                <div id="adminUsersList"></div>
-            </div>
-            <div class="admin-tab-content" id="adminTabActions">
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    <button class="admin-action-btn" onclick="sendGlobalNotification()"><div class="admin-action-icon">📢</div><div><div class="admin-action-title">Уведомление</div><div class="admin-action-desc">Всем пользователям</div></div></button>
-                    <button class="admin-action-btn" onclick="createPromoCode()"><div class="admin-action-icon">🎟️</div><div><div class="admin-action-title">Промокод</div><div class="admin-action-desc">Создать новый</div></div></button>
-                    <button class="admin-action-btn" onclick="exportUserData()"><div class="admin-action-icon">💾</div><div><div class="admin-action-title">Экспорт</div><div class="admin-action-desc">Данные пользователей</div></div></button>
-                </div>
+        <!-- Кнопки -->
+        <div class="controls">
+            <button class="spin-btn" id="spinBtn" onclick="startSpin()">🎰 Крутить</button>
+            <div class="multipliers">
+                <button class="active" data-mult="1" onclick="setMultiplier(1)">1x</button>
+                <button data-mult="2" onclick="setMultiplier(2)">2x</button>
+                <button data-mult="3" onclick="setMultiplier(3)">3x</button>
+                <button data-mult="4" onclick="setMultiplier(4)">4x</button>
             </div>
         </div>
     </div>
