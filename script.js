@@ -551,6 +551,19 @@ function skipRoulette() {
     generateCases();
 }
 
+function closeRouletteModal() {
+    const modal = document.getElementById('modalRoulette');
+    const track = document.getElementById('rouletteTrack');
+    const skipBtn = document.getElementById('skipBtn');
+
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+
+    // Восстанавливаем отображение рулетки для следующего запуска
+    track.style.display = 'flex';
+    skipBtn.style.display = 'block';
+}
+
 
 function getRandomItemByChance(items) {
     const rand = Math.random() * 100;
@@ -751,7 +764,9 @@ function sellNFT(safeUid) {
             inventory.splice(freshIdx, 1);
             localStorage.setItem('inventory', JSON.stringify(inventory));
             setStars(getStars() + sp);
-            renderInventory();
+            
+            // Принудительно перезагружаем инвентарь из localStorage
+            loadInventory();
             tg.showAlert(`Продано за ${sp} ⭐!`);
         }
     });
