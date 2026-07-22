@@ -101,6 +101,7 @@ let openedCases    = 0;
 let achievements   = [];
 let globalHistory  = [];
 let freeTimerInterval = null;  // интервал живого счётчика
+let currentWinItem = null;  // текущий выигрыш для пропуска
 
 // ===========================================================
 // ПОЛУЧЕНИЕ БАЛАНСА — всегда свежий из localStorage
@@ -450,12 +451,14 @@ function startRoulette(caseKey) {
     const track     = document.getElementById('rouletteTrack');
     const resultBox = document.getElementById('resultBox');
     const title     = document.getElementById('rouletteTitle');
+    const skipBtn   = document.getElementById('skipBtn');
 
     if (!modal || !track) return;
 
     modal.classList.add('active');
     resultBox.classList.remove('active');
     title.textContent = '🎲 ОТКРЫВАЕМ...';
+    skipBtn.style.display = 'block';  // Показываем кнопку пропуска
     document.body.style.overflow = 'hidden';
 
     // Сбрасываем без анимации
@@ -466,6 +469,7 @@ function startRoulette(caseKey) {
     const WIN_IDX = 35;
     const TOTAL   = 60;
     const winItem = getRandomItemByChance(data.items);
+    currentWinItem = winItem;  // Сохраняем для пропуска
 
     for (let i = 0; i < TOTAL; i++) {
         const item = (i === WIN_IDX)
@@ -515,7 +519,36 @@ function startRoulette(caseKey) {
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
         generateCases();
+        skipBtn.style.display = 'none';  // Скрываем кнопку после завершения
     }, 5400);
+}
+
+// ===========================================================
+// ПРОПУСК РУЛЕТКИ
+// ===========================================================
+function skipRoulette() {
+    if (!currentWinItem) return;
+
+    const modal     = document.getElementById('modalRoulette');
+    const track     = document.getElementById('rouletteTrack');
+    const resultBox = document.getElementById('resultBox');
+    const title     = document.getElementById('rouletteTitle');
+    const skipBtn   = document.getElementById('skipBtn');
+
+    // Останавливаем анимацию
+    track.style.transition = 'none';
+    title.textContent = '🎉 РЕЗУЛЬТАТ!';
+
+    // Скрываем рулетку и показываем результат
+    track.style.display = 'none';
+    skipBtn.style.display = 'none';
+
+    // Показываем результат
+    showResult(currentWinItem.nft, currentCase);
+    openedCases++;
+    localStorage.setItem('openedCases', openedCases);
+    checkAchievements();
+    generateCases();
 }
 
 
