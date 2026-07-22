@@ -12,128 +12,37 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="loader-container" id="loader">
-        <div class="loader-3d">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-        <div class="loader-text">Loading Premium Experience...</div>
-        <div class="loader-progress">
-            <div class="loader-progress-bar"></div>
-        </div>
-    </div>
-
+    <div class="loader-container" id="loader"><div class="loader-3d"><div></div><div></div><div></div><div></div></div><div class="loader-text">Loading Premium Experience...</div><div class="loader-progress"><div class="loader-progress-bar"></div></div></div>
     <canvas id="particles"></canvas>
-
     <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
-
     <div class="profile-header">
-        <div class="profile-info">
-            <div class="profile-avatar" id="avatarContainer">🎰</div>
-            <div class="profile-details">
-                <h3 id="userName">Player</h3>
-                <div class="profile-level">
-                    <span class="level-badge" id="userLevel">Level 1</span>
-                    <span id="userXP">0/100 XP</span>
-                </div>
-            </div>
-        </div>
-        <div class="balance-box">
-            <span class="balance-amount" id="balance">0</span>
-            <span>⭐</span>
-        </div>
+        <div class="profile-info"><div class="profile-avatar" id="avatarContainer">🎰</div><div class="profile-details"><h3 id="userName">Player</h3><div class="profile-level"><span class="level-badge" id="userLevel">Level 1</span><span id="userXP">0/100 XP</span></div></div></div>
+        <div class="balance-box"><span class="balance-amount" id="balance">0</span><span>⭐</span></div>
     </div>
-
-    <div class="status-bar">
-        <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="onlineCount">Загрузка...</span>
-        </div>
-    </div>
-
-    <div class="nft-slider">
-        <div class="nft-scroll" id="nftScroll"></div>
-    </div>
-
+    <div class="status-bar"><div class="status-left"><span class="status-dot"></span><span id="onlineCount">Загрузка...</span></div></div>
+    <div class="nft-slider"><div class="nft-scroll" id="nftScroll"></div></div>
     <div class="filters">
         <button class="filter-btn active" data-filter="all">Все кейсы</button>
         <button class="filter-btn" data-filter="free">Бесплатные</button>
         <button class="filter-btn" data-filter="basic">Базовые</button>
         <button class="filter-btn" data-filter="premium">Премиум</button>
     </div>
-
-    <div class="tab-content active" id="tabCases">
-        <div class="cases-container" id="casesContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabInventory">
-        <div id="inventoryContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabHistory">
-        <div id="historyContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabAchievements">
-        <div id="achievementsContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabProfile">
-        <div style="padding:20px;">
-            <div style="background:rgba(30,30,40,0.5);padding:25px;border-radius:16px;margin-bottom:15px;">
-                <h3 style="font-size:18px;margin-bottom:15px;">👥 Реферальная программа</h3>
-                <p style="color:#6b7280;font-size:14px;margin-bottom:15px;">Приглашай друзей и получай бонусы</p>
-                <div style="background:rgba(139,92,246,0.1);padding:15px;border-radius:12px;margin-bottom:15px;text-align:center;">
-                    <div style="font-size:32px;font-weight:900;color:#8b5cf6;" id="refCount">0</div>
-                    <div style="font-size:12px;color:#6b7280;margin-top:5px;">Приглашённых друзей</div>
-                </div>
-                <div style="background:rgba(0,0,0,0.4);padding:15px;border-radius:10px;word-break:break-all;font-size:12px;margin-bottom:15px;">
-                    <span id="refLink">Загрузка...</span>
-                </div>
-                <button onclick="copyRefLink()" style="width:100%;padding:15px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;">📋 Копировать ссылку</button>
-            </div>
-            <div style="background:rgba(30,30,40,0.5);padding:25px;border-radius:16px;">
-                <h3 style="font-size:18px;margin-bottom:15px;">🎟️ Промокод</h3>
-                <input type="text" id="promoInput" placeholder="Введите промокод" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:15px;margin-bottom:15px;">
-                <button onclick="activatePromo()" style="width:100%;padding:15px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;">Активировать</button>
-            </div>
-        </div>
-    </div>
-
+    <div class="tab-content active" id="tabCases"><div class="cases-container" id="casesContainer"></div></div>
+    <div class="tab-content" id="tabInventory"><div id="inventoryContainer"></div></div>
+    <div class="tab-content" id="tabHistory"><div id="historyContainer"></div></div>
+    <div class="tab-content" id="tabAchievements"><div id="achievementsContainer"></div></div>
+    <div class="tab-content" id="tabProfile"><div id="profileContainer"></div></div>
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('cases')">
-            <div class="nav-icon">🎰</div>
-            <div class="nav-label">Кейсы</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('inventory')">
-            <div class="nav-icon">📦</div>
-            <div class="nav-label">Инвентарь</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('history')">
-            <div class="nav-icon">📜</div>
-            <div class="nav-label">История</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('achievements')">
-            <div class="nav-icon">🏆</div>
-            <div class="nav-label">Награды</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('profile')">
-            <div class="nav-icon">👤</div>
-            <div class="nav-label">Профиль</div>
-        </div>
+        <div class="nav-item active" onclick="switchTab('cases')"><div class="nav-icon">🎰</div><div class="nav-label">Кейсы</div></div>
+        <div class="nav-item" onclick="switchTab('inventory')"><div class="nav-icon">📦</div><div class="nav-label">Инвентарь</div></div>
+        <div class="nav-item" onclick="switchTab('history')"><div class="nav-icon">📜</div><div class="nav-label">История</div></div>
+        <div class="nav-item" onclick="switchTab('achievements')"><div class="nav-icon">🏆</div><div class="nav-label">Награды</div></div>
+        <div class="nav-item" onclick="switchTab('profile')"><div class="nav-icon">👤</div><div class="nav-label">Профиль</div></div>
     </div>
-
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
-            <div class="modal-preview-header">
-                <h2 id="previewCaseTitle">Case Name</h2>
-                <div class="modal-close" onclick="closePreviewModal()">✕</div>
-            </div>
-            <div class="preview-rolling-container">
-                <div class="preview-rolling-track" id="previewRollingTrack"></div>
-            </div>
+            <div class="modal-preview-header"><h2 id="previewCaseTitle">Case Name</h2><div class="modal-close" onclick="closePreviewModal()">✕</div></div>
+            <div class="preview-rolling-container"><div class="preview-rolling-track" id="previewRollingTrack"></div></div>
             <div class="preview-info">
                 <div class="preview-case-icon" id="previewCaseIcon">📦</div>
                 <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
@@ -143,77 +52,36 @@
             <div class="preview-items-list" id="previewItemsList"></div>
         </div>
     </div>
-
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
-        <div class="roulette-box">
-            <div class="selector"></div>
-            <div class="roulette-wrapper">
-                <div class="roulette-track" id="rouletteTrack"></div>
-            </div>
-        </div>
+        <div class="roulette-box"><div class="selector"></div><div class="roulette-wrapper"><div class="roulette-track" id="rouletteTrack"></div></div></div>
         <button class="skip-btn" id="skipBtn" onclick="skipRoulette()">⏩ Пропустить</button>
         <div class="result-box" id="resultBox">
             <div class="result-label">🎉 YOU WON!</div>
             <div class="result-icon" id="resultIcon"></div>
             <div class="result-name" id="resultName"></div>
             <div class="result-rarity" id="resultRarity"></div>
-            <div class="result-values">
-                <span id="resultStars"></span>
-                <span id="resultTon"></span>
-            </div>
+            <div class="result-values"><span id="resultStars"></span><span id="resultTon"></span></div>
             <button class="close-btn" onclick="closeRouletteModal()">Продолжить</button>
         </div>
     </div>
-
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
-            <div class="admin-panel-header">
-                <h2>👑 ADMIN PANEL</h2>
-                <div class="admin-close" onclick="closeAdminPanel()">✕</div>
-            </div>
+            <div class="admin-panel-header"><h2>👑 ADMIN PANEL</h2><div class="admin-close" onclick="closeAdminPanel()">✕</div></div>
             <div class="admin-tabs-vertical">
                 <div class="admin-tab-vertical active" data-tab="stats" onclick="switchAdminTab('stats')">📊 Статистика</div>
                 <div class="admin-tab-vertical" data-tab="users" onclick="switchAdminTab('users')">👥 Пользователи</div>
                 <div class="admin-tab-vertical" data-tab="actions" onclick="switchAdminTab('actions')">⚡ Действия</div>
             </div>
-            <div class="admin-tab-content active" id="adminTabStats">
-                <div id="adminStats"></div>
-            </div>
-            <div class="admin-tab-content" id="adminTabUsers">
-                <div style="margin-bottom:15px;">
-                    <input type="text" id="adminUserSearch" placeholder="🔍 Поиск по username..." style="width:100%;padding:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;">
-                </div>
-                <div id="adminUsersList"></div>
-            </div>
-            <div class="admin-tab-content" id="adminTabActions">
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    <button class="admin-action-btn" onclick="sendGlobalNotification()">
-                        <div class="admin-action-icon">📢</div>
-                        <div>
-                            <div class="admin-action-title">Отправить уведомление всем</div>
-                            <div class="admin-action-desc">Отправить сообщение всем пользователям</div>
-                        </div>
-                    </button>
-                    <button class="admin-action-btn" onclick="createPromoCode()">
-                        <div class="admin-action-icon">🎟️</div>
-                        <div>
-                            <div class="admin-action-title">Создать промокод</div>
-                            <div class="admin-action-desc">Новый промокод с наградой</div>
-                        </div>
-                    </button>
-                    <button class="admin-action-btn" onclick="exportUserData()">
-                        <div class="admin-action-icon">💾</div>
-                        <div>
-                            <div class="admin-action-title">Экспорт данных</div>
-                            <div class="admin-action-desc">Скачать все данные пользователей</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
+            <div class="admin-tab-content active" id="adminTabStats"><div id="adminStats"></div></div>
+            <div class="admin-tab-content" id="adminTabUsers"><div style="margin-bottom:15px;"><input type="text" id="adminUserSearch" placeholder="🔍 Поиск по username..." style="width:100%;padding:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;"></div><div id="adminUsersList"></div></div>
+            <div class="admin-tab-content" id="adminTabActions"><div style="display:flex;flex-direction:column;gap:12px;">
+                <button class="admin-action-btn" onclick="sendGlobalNotification()"><div class="admin-action-icon">📢</div><div><div class="admin-action-title">Отправить уведомление всем</div><div class="admin-action-desc">Отправить сообщение всем пользователям</div></div></button>
+                <button class="admin-action-btn" onclick="createPromoCode()"><div class="admin-action-icon">🎟️</div><div><div class="admin-action-title">Создать промокод</div><div class="admin-action-desc">Новый промокод с наградой</div></div></button>
+                <button class="admin-action-btn" onclick="exportUserData()"><div class="admin-action-icon">💾</div><div><div class="admin-action-title">Экспорт данных</div><div class="admin-action-desc">Скачать все данные пользователей</div></div></button>
+            </div></div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
