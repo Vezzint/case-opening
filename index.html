@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- КРУТАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
+
     <div class="loader-container" id="loader">
         <div class="loader-particles" id="loaderParticles"></div>
         <div class="loader-glow"></div>
@@ -235,13 +235,11 @@
         </div>
     </div>
 
-    <!-- НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ -->
     <div class="case-screen" id="caseScreen">
         <div class="header">
             <button class="back-btn" onclick="closeCaseScreen()">‹</button>
             <span class="case-title" id="caseScreenTitle">Legendary Case</span>
         </div>
-
         <div class="arrow-indicator">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="7,13 12,8 17,13"/>
@@ -249,7 +247,6 @@
             </svg>
             ВЫПАДЕТ ЗДЕСЬ
         </div>
-
         <div class="slot-rows-container" id="slotRowsContainer">
             <div class="slot-row" data-row="0">
                 <div class="slot-cell" data-index="0"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
@@ -259,9 +256,7 @@
                 <div class="slot-cell" data-index="4"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
             </div>
         </div>
-
         <div class="items-scroll" id="slotItemsScroll"></div>
-
         <div class="controls">
             <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">🎰 Крутить</button>
             <div class="multipliers">
