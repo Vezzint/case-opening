@@ -1,4 +1,3 @@
-// script.js
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -100,6 +99,8 @@ let achievements = [];
 let globalHistory = [];
 let freeTimerInterval = null;
 let currentWinItem = null;
+let isRouletteSpinning = false;
+let rouletteTimeout = null;
 
 function getStars() {
     return parseInt(localStorage.getItem('gameStars') || '0');
@@ -356,6 +357,18 @@ function showPreview(caseKey) {
         track.appendChild(div);
     });
 
+    // Показываем список возможных наград
+    var itemsList = document.getElementById('previewItemsList');
+    itemsList.innerHTML = '<div class="preview-items-title">💎 Возможные награды</div>' + 
+        data.items.map(function(item) {
+            var nft = item.nft;
+            if (!nft) return '';
+            if (nft.isCurrency) {
+                return '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">' + nft.icon + '</div></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + item.chance + '%</div></div>';
+            }
+            return '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + getRarityColor(nft.rarity) + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + getRarityColor(nft.rarity) + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + item.chance + '%</div></div>';
+        }).join('');
+
     document.getElementById('modalPreview').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -395,76 +408,15 @@ function openCaseFromPreview() {
     setTimeout(function() { startRoulette(key); }, 300);
 }
 
-function showCaseInfo(caseKey) {
+function startRoulette(caseKey) {
+    if (isRouletteSpinning) return;
+    isRouletteSpinning = true;
+
     var data = CASES_DATA[caseKey];
-    if (!data) return;
-
-    var check = checkCanOpen(caseKey);
-    if (!check.ok) { tg.showAlert(check.reason); return; }
-
-    currentCase = caseKey;
-
-    document.getElementById('modalCaseTitle').textContent = data.name;
-    document.getElementById('modalCaseIcon').textContent = data.icon;
-    document.getElementById('modalCaseName').textContent = data.name.toUpperCase();
-    document.getElementById('modalCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
-
-    var btn = document.getElementById('modalOpenBtn');
-    btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
-    btn.disabled = false;
-    btn.style.opacity = '1';
-
-    document.getElementById('modalItemsList').innerHTML = data.items.map(function(item) {
-        var nft = item.nft;
-        if (!nft) return '';
-        if (nft.isCurrency) {
-            return '<div class="item-row"><div class="item-icon" style="border-color:#fbbf24;"><div style="font-size:40px;">' + nft.icon + '</div></div><div class="item-info"><div class="item-name">' + nft.name + '</div><div class="item-price-row"><span class="item-price-stars">Валюта</span></div></div><div class="item-chance">' + item.chance + '%</div></div>';
-        }
-        return '<div class="item-row"><div class="item-icon" style="border-color:' + getRarityColor(nft.rarity) + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="item-info"><div class="item-name">' + nft.name + '</div><div class="item-rarity" style="color:' + getRarityColor(nft.rarity) + ';">' + nft.rarity.toUpperCase() + '</div><div class="item-price-row"><span class="item-price-stars">⭐ ' + nft.stars + '</span><span class="item-price-ton">💎 ' + nft.ton + ' TON</span></div></div><div class="item-chance">' + item.chance + '%</div></div>';
-    }).join('');
-
-    document.getElementById('modalInfo').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeInfoModal() {
-    document.getElementById('modalInfo').classList.remove('active');
-    document.body.style.overflow = '';
-    currentCase = null;
-}
-
-function openCaseFromModal() {
-    if (!currentCase) return;
-
-    var data = CASES_DATA[currentCase];
-    var check = checkCanOpen(currentCase);
-
-    if (!check.ok) {
-        tg.showAlert(check.reason);
-        closeInfoModal();
-        generateCases();
+    if (!data) {
+        isRouletteSpinning = false;
         return;
     }
-
-    if (data.price > 0) {
-        setStars(getStars() - data.price);
-        generateCases();
-    }
-
-    if (data.cooldown) {
-        localStorage.setItem('lastFreeCase', new Date().toISOString());
-        generateCases();
-        startFreeTimer();
-    }
-
-    var key = currentCase;
-    closeInfoModal();
-    setTimeout(function() { startRoulette(key); }, 300);
-}
-
-function startRoulette(caseKey) {
-    var data = CASES_DATA[caseKey];
-    if (!data) return;
 
     var modal = document.getElementById('modalRoulette');
     var track = document.getElementById('rouletteTrack');
@@ -472,7 +424,10 @@ function startRoulette(caseKey) {
     var title = document.getElementById('rouletteTitle');
     var skipBtn = document.getElementById('skipBtn');
 
-    if (!modal || !track) return;
+    if (!modal || !track) {
+        isRouletteSpinning = false;
+        return;
+    }
 
     modal.classList.add('active');
     resultBox.classList.remove('active');
@@ -501,7 +456,10 @@ function startRoulette(caseKey) {
     requestAnimationFrame(function() {
         requestAnimationFrame(function() {
             var firstItem = track.children[0];
-            if (!firstItem) return;
+            if (!firstItem) {
+                isRouletteSpinning = false;
+                return;
+            }
 
             var itemW = firstItem.getBoundingClientRect().width;
             var gap = 10;
@@ -517,28 +475,37 @@ function startRoulette(caseKey) {
             track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
             track.style.transform = 'translateX(' + offset + 'px)';
             title.textContent = '🎰 КРУТИМ...';
+
+            if (rouletteTimeout) clearTimeout(rouletteTimeout);
+            rouletteTimeout = setTimeout(function() {
+                title.textContent = '🎉 РЕЗУЛЬТАТ!';
+                showResult(winItem.nft, caseKey);
+                openedCases++;
+                localStorage.setItem('openedCases', openedCases);
+                checkAchievements();
+                generateCases();
+                skipBtn.style.display = 'none';
+                isRouletteSpinning = false;
+                rouletteTimeout = null;
+            }, 5500);
         });
     });
-
-    setTimeout(function() {
-        title.textContent = '🎉 РЕЗУЛЬТАТ!';
-        showResult(winItem.nft, caseKey);
-        openedCases++;
-        localStorage.setItem('openedCases', openedCases);
-        checkAchievements();
-        generateCases();
-        skipBtn.style.display = 'none';
-    }, 5500);
 }
 
 function skipRoulette() {
-    if (!currentWinItem) return;
+    if (!currentWinItem || !isRouletteSpinning) return;
 
     var track = document.getElementById('rouletteTrack');
     var title = document.getElementById('rouletteTitle');
     var skipBtn = document.getElementById('skipBtn');
 
-    track.style.transition = 'transform 0.5s cubic-bezier(0.05, 0.85, 0.15, 1)';
+    // Останавливаем таймер
+    if (rouletteTimeout) {
+        clearTimeout(rouletteTimeout);
+        rouletteTimeout = null;
+    }
+
+    track.style.transition = 'transform 0.3s cubic-bezier(0.05, 0.85, 0.15, 1)';
     title.textContent = '🎉 РЕЗУЛЬТАТ!';
 
     var WIN_IDX = 35;
@@ -563,7 +530,8 @@ function skipRoulette() {
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
         generateCases();
-    }, 600);
+        isRouletteSpinning = false;
+    }, 400);
 }
 
 function closeRouletteModal() {
@@ -571,8 +539,14 @@ function closeRouletteModal() {
     var track = document.getElementById('rouletteTrack');
     var skipBtn = document.getElementById('skipBtn');
 
+    if (rouletteTimeout) {
+        clearTimeout(rouletteTimeout);
+        rouletteTimeout = null;
+    }
+
     modal.classList.remove('active');
     document.body.style.overflow = '';
+    isRouletteSpinning = false;
 
     track.style.display = 'flex';
     track.style.transition = 'none';
@@ -973,7 +947,6 @@ function switchAdminTab(tab) {
     if (tab === 'users') loadAllUsers();
 }
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     init();
 });
