@@ -9,10 +9,10 @@ const ADMIN_ID = 6584350034;
 
 const NFT_DATABASE = [
     {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
-    {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
-    {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
-    {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
-    {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
+    {id:1, name:"звезды",     stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
+    {id:2, name:"звёзд",      stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
+    {id:3, name:"звёзд",      stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
+    {id:4, name:"звёзд",      stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
     {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
     {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
     {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
