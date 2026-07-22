@@ -1,4 +1,4 @@
-// script.js - исправленный полный файл
+// script.js - полный исправленный файл
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -8,11 +8,11 @@ tg.setBackgroundColor('#0a0a0f');
 const ADMIN_ID = 6584350034;
 
 const NFT_DATABASE = [
-    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"💝"},
-    {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common",    icon:"⭐"},
-    {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",    icon:"⭐"},
-    {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare",      icon:"⭐"},
-    {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic",      icon:"⭐"},
+    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
+    {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
+    {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
+    {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
+    {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
     {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
     {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
     {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
@@ -23,7 +23,7 @@ const NFT_DATABASE = [
     {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
     {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15,name:"Heart",     stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
+    {id:15,name:"Сердце",        stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
     {id:16,name:"Mighty Arm",    stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
@@ -467,7 +467,7 @@ function showPreview(caseKey) {
             div.style.borderColor = color;
 
             if (nft.isCurrency) {
-                div.innerHTML = '<div class="item-icon">' + nft.icon + '</div><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+                div.innerHTML = '<img src="' + nft.image + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
             } else {
                 div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
             }
@@ -483,7 +483,7 @@ function showPreview(caseKey) {
             let nft = it.nft;
             if (!nft) continue;
             if (nft.isCurrency) {
-                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">' + nft.icon + '</div></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;overflow:hidden;"><img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
             } else {
                 let color = getRarityColor(nft.rarity);
                 listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + color + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + color + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
@@ -592,7 +592,7 @@ function startRoulette(caseKey) {
         let borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
         div.style.borderColor = borderColor;
         if (item.nft.isCurrency) {
-            div.innerHTML = '<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">' + item.nft.icon + '</div>';
+            div.innerHTML = '<img src="' + item.nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
         } else {
             div.innerHTML = '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
         }
@@ -753,7 +753,7 @@ function showResult(nft, caseKey) {
             let rarityEl = document.getElementById('resultRarity');
             let starsEl = document.getElementById('resultStars');
             let tonEl = document.getElementById('resultTon');
-            if (iconEl) iconEl.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (iconEl) iconEl.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
             if (nameEl) nameEl.textContent = '+' + nft.amount + ' ' + nft.name;
             if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
             if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
@@ -765,7 +765,7 @@ function showResult(nft, caseKey) {
             let rarityEl2 = document.getElementById('resultRarity');
             let starsEl2 = document.getElementById('resultStars');
             let tonEl2 = document.getElementById('resultTon');
-            if (iconEl2) iconEl2.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (iconEl2) iconEl2.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
             if (nameEl2) nameEl2.textContent = 'Подарок';
             if (rarityEl2) rarityEl2.textContent = 'ОСОБОЕ';
             if (starsEl2) starsEl2.innerHTML = '🎁 Сюрприз!';
@@ -825,7 +825,6 @@ function addToInventory(nft) {
         isCurrency: nft.isCurrency || false,
         amount: nft.amount || 0,
         rarity: nft.rarity,
-        icon: nft.icon || '',
         uid: Date.now() + '_' + Math.random().toString(36).slice(2),
         time: new Date().toISOString()
     };
@@ -1064,7 +1063,7 @@ function renderGlobalHistory() {
         let item = all[i];
         let nft = item.nft;
         let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<div style="font-size:45px;">' + nft.icon + '</div>' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
+        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
     }
     slider.innerHTML = html;
 }
