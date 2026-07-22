@@ -1454,6 +1454,7 @@ function startLoaderAnimation() {
 }
 
 // Запускаем анимацию загрузки при загрузке страницы
+// Убираем вызов init() здесь, так как он вызывается внутри startLoaderAnimation()
 document.addEventListener('DOMContentLoaded', function() {
     startLoaderAnimation();
 });
