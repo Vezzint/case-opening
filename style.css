@@ -447,6 +447,149 @@ body::before {
     align-items: center;
 }
 
+.modal-cases {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.97);
+    backdrop-filter: blur(20px);
+    z-index: 1500;
+    overflow-y: auto;
+}
+
+.modal-cases.active {
+    display: block;
+}
+
+.modal-cases-content {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, #150a2e, #0a0a12);
+    padding-bottom: 30px;
+}
+
+.modal-cases-header {
+    position: sticky;
+    top: 0;
+    background: rgba(10, 10, 18, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+    z-index: 10;
+}
+
+.modal-cases-header h2 {
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-close {
+    font-size: 32px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #8b5cf6;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.game-card {
+    background: linear-gradient(145deg, rgba(30, 20, 50, 0.6), rgba(20, 10, 40, 0.6));
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+}
+
+.game-card-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.game-card-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.game-card-desc {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+#gamesContent {
+    padding: 0 0 20px 0;
+}
+
+.nav-icon-svg {
+    width: 24px;
+    height: 24px;
+    color: #4a4a5a;
+    transition: color 0.3s;
+}
+
+.nav-item.active .nav-icon-svg {
+    color: #a78bfa;
+}
+
+.nav-item:hover .nav-icon-svg {
+    color: #8b5cf6;
+}
+
+.modal-cases .case-big .case-image-section {
+    padding: 12px;
+    min-height: 70px;
+}
+
+.modal-cases .case-big .case-main-image {
+    font-size: 48px !important;
+}
+
+.modal-cases .case-big .case-title {
+    font-size: 14px !important;
+    margin-bottom: 4px;
+}
+
+.modal-cases .case-big .case-info-section {
+    padding: 8px 12px 12px;
+}
+
+.modal-cases .case-big .case-footer div div {
+    font-size: 16px !important;
+}
+
+.modal-cases .case-big {
+    margin-bottom: 10px;
+}
+
 .modal-preview {
     display: none;
     position: fixed;
@@ -489,17 +632,6 @@ body::before {
     background: linear-gradient(135deg, #fff, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-}
-
-.lose {
-    font-size: 32px;
-    cursor: pointer;
-    color: #6b7280;
-    transition: color 0.3s;
-}
-
-.modal-close:hover {
-    color: #8b5cf6;
 }
 
 .preview-rolling-container {
@@ -1281,7 +1413,6 @@ body::before {
     display: none !important;
 }
 
-/* Profile styles */
 #profileContainer {
     padding: 20px;
 }
@@ -1502,159 +1633,4 @@ body::before {
 
 .profile-btn-copy:hover {
     background: rgba(139, 92, 246, 0.25);
-}
-/* Добавить в конец style.css */
-
-/* Games Grid */
-.games-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 20px;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.game-card {
-    background: linear-gradient(145deg, rgba(30, 20, 50, 0.6), rgba(20, 10, 40, 0.6));
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 30px 20px;
-    text-align: center;
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.game-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(139, 92, 246, 0.3);
-    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
-}
-
-.game-card-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-}
-
-.game-card-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.game-card-desc {
-    font-size: 13px;
-    color: #6b7280;
-}
-
-#gamesContent {
-    padding: 0 0 20px 0;
-}
-
-/* Compact cases */
-.case-big .case-image-section {
-    padding: 15px;
-    min-height: 100px;
-}
-
-.case-big .case-main-image {
-    font-size: 60px !important;
-}
-
-.case-big .case-title {
-    font-size: 16px !important;
-    margin-bottom: 8px;
-}
-
-.case-big .case-info-section {
-    padding: 12px 16px 16px;
-}
-
-.case-big .case-footer div div {
-    font-size: 20px !important;
-}
-
-.case-big .case-badge {
-    padding: 4px 10px;
-    font-size: 10px;
-    top: 10px;
-    right: 10px;
-}
-/* Модалка с кейсами */
-.modal-cases {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.97);
-    backdrop-filter: blur(20px);
-    z-index: 1500;
-    overflow-y: auto;
-}
-.modal-cases.active {
-    display: block;
-}
-.modal-cases-content {
-    min-height: 100vh;
-    background: radial-gradient(ellipse at 50% 0%, #150a2e, #0a0a12);
-    padding-bottom: 30px;
-}
-.modal-cases-header {
-    position: sticky;
-    top: 0;
-    background: rgba(10, 10, 18, 0.95);
-    backdrop-filter: blur(20px);
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-    z-index: 10;
-}
-.modal-cases-header h2 {
-    font-size: 20px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #fff, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* SVG иконки в нижней навигации */
-.nav-icon-svg {
-    width: 24px;
-    height: 24px;
-    color: #4a4a5a;
-    transition: color 0.3s;
-}
-.nav-item.active .nav-icon-svg {
-    color: #a78bfa;
-}
-.nav-item:hover .nav-icon-svg {
-    color: #8b5cf6;
-}
-
-/* Компактные кейсы в модалке */
-.modal-cases .case-big .case-image-section {
-    padding: 12px;
-    min-height: 70px;
-}
-.modal-cases .case-big .case-main-image {
-    font-size: 48px !important;
-}
-.modal-cases .case-big .case-title {
-    font-size: 14px !important;
-    margin-bottom: 4px;
-}
-.modal-cases .case-big .case-info-section {
-    padding: 8px 12px 12px;
-}
-.modal-cases .case-big .case-footer div div {
-    font-size: 16px !important;
-}
-.modal-cases .case-big {
-    margin-bottom: 10px;
 }
