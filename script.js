@@ -1,3 +1,4 @@
+// script.js
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -88,8 +89,8 @@ const CASES_DATA = {
         type: "legendary",
         cooldown: false,
         items: [
-            { nft: NFT_DATABASE[15], chance: 50.0 }, // ❤️ Сердце
-            { nft: NFT_DATABASE[16], chance: 50.0 }  // Mighty Arm (1500 ⭐)
+            { nft: NFT_DATABASE[15], chance: 50.0 },
+            { nft: NFT_DATABASE[16], chance: 50.0 }
         ]
     }
 };
@@ -127,25 +128,6 @@ function setStars(val) {
         balanceEl.textContent = val;
     }
 }
-
-// Добавляем функции для модалки кейсов
-function openCasesModal() {
-    let modal = document.getElementById('modalCases');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        generateCases();
-    }
-}
-
-function closeCasesModal() {
-    let modal = document.getElementById('modalCases');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-}
-
 
 function checkCanOpen(caseKey) {
     let data = CASES_DATA[caseKey];
@@ -324,7 +306,6 @@ function init() {
         });
     }
 
-    // Проверяем мифики при загрузке
     checkMythicAchievement();
 }
 
@@ -423,6 +404,23 @@ function generateCases() {
 
     container.innerHTML = html;
     startFreeTimer();
+}
+
+function openCasesModal() {
+    let modal = document.getElementById('modalCases');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        generateCases();
+    }
+}
+
+function closeCasesModal() {
+    let modal = document.getElementById('modalCases');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 function showPreview(caseKey) {
@@ -1098,20 +1096,24 @@ function switchTab(tab) {
     if (target) {
         target.classList.add('active');
     }
-    if (tab === 'inventory') renderInventory();
-    if (tab === 'history') loadHistory();
-    if (tab === 'achievements') renderAchievements();
-    if (tab === 'profile') renderProfile();
+    if (tab === 'inventory') {
+        renderInventory();
+    }
+    if (tab === 'history') {
+        loadHistory();
+    }
+    if (tab === 'achievements') {
+        renderAchievements();
+    }
+    if (tab === 'profile') {
+        renderProfile();
+    }
 }
 
 function renderGames() {
     let container = document.getElementById('gamesContent');
     if (!container) return;
     container.innerHTML = '';
-}
-
-function switchToCases() {
-    switchTab('cases');
 }
 
 function showMinesweeper() {
