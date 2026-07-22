@@ -23,7 +23,7 @@ const NFT_DATABASE = [
     {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
     {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15,name:"❤️ Сердце",     stars:0,   ton:0,    image:"nft/Heart.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"❤️"},
+    {id:15,name:"Heart",     stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"❤️"},
     {id:16,name:"Mighty Arm",    stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
