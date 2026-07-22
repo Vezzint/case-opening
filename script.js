@@ -1,4 +1,3 @@
-// script.js
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -22,7 +21,9 @@ const NFT_DATABASE = [
     {id:11,name:"Faith Amulet",  stars:650, ton:6, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
     {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
     {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
-    {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"}
+    {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
+    {id:15,name:"❤️ Сердце",     stars:0,   ton:0,    image:"nft/Heart.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"❤️"},
+    {id:16,name:"Mighty Arm",    stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
 const CASES_DATA = {
@@ -49,14 +50,15 @@ const CASES_DATA = {
         type: "basic",
         cooldown: false,
         items: [
-            { nft: NFT_DATABASE[1],  chance: 40.0 },
+            { nft: NFT_DATABASE[1],  chance: 35.0 },
             { nft: NFT_DATABASE[2],  chance: 25.0 },
             { nft: NFT_DATABASE[3],  chance: 15.0 },
             { nft: NFT_DATABASE[4],  chance: 8.0  },
-            { nft: NFT_DATABASE[8],  chance: 6.0  },
-            { nft: NFT_DATABASE[9],  chance: 3.0 },
-            { nft: NFT_DATABASE[7],  chance: 2.0 },
-            { nft: NFT_DATABASE[10], chance: 1.0 }
+            { nft: NFT_DATABASE[15], chance: 8.0  },
+            { nft: NFT_DATABASE[8],  chance: 5.0  },
+            { nft: NFT_DATABASE[9],  chance: 2.5 },
+            { nft: NFT_DATABASE[7],  chance: 1.0 },
+            { nft: NFT_DATABASE[10], chance: 0.5 }
         ]
     },
     premium: {
@@ -69,13 +71,28 @@ const CASES_DATA = {
             { nft: NFT_DATABASE[2],  chance: 18.0 },
             { nft: NFT_DATABASE[3],  chance: 15.0 },
             { nft: NFT_DATABASE[4],  chance: 10.0 },
+            { nft: NFT_DATABASE[15], chance: 12.0 },
             { nft: NFT_DATABASE[11], chance: 12.0 },
             { nft: NFT_DATABASE[12], chance: 10.0 },
             { nft: NFT_DATABASE[13], chance: 8.0  },
-            { nft: NFT_DATABASE[14], chance: 12.0 },
-            { nft: NFT_DATABASE[9],  chance: 8.0  },
-            { nft: NFT_DATABASE[7],  chance: 5.0  },
-            { nft: NFT_DATABASE[10], chance: 2.0  }
+            { nft: NFT_DATABASE[14], chance: 8.0  },
+            { nft: NFT_DATABASE[9],  chance: 5.0  },
+            { nft: NFT_DATABASE[7],  chance: 2.0  },
+            { nft: NFT_DATABASE[10], chance: 0.5  }
+        ]
+    },
+    legendary: {
+        name: "👑 Legendary Case",
+        icon: "👑",
+        price: 1000,
+        type: "legendary",
+        cooldown: false,
+        items: [
+            { nft: NFT_DATABASE[15], chance: 25.0 },
+            { nft: NFT_DATABASE[4],  chance: 15.0 },
+            { nft: NFT_DATABASE[11], chance: 15.0 },
+            { nft: NFT_DATABASE[12], chance: 10.0 },
+            { nft: NFT_DATABASE[16], chance: 35.0 }
         ]
     }
 };
@@ -290,6 +307,9 @@ function init() {
             generateCases();
         });
     }
+
+    // Проверяем мифики при загрузке
+    checkMythicAchievement();
 }
 
 function loadUserProgress() {
@@ -351,6 +371,9 @@ function generateCases() {
         if (currentFilter === 'premium') {
             return data.type === 'premium';
         }
+        if (currentFilter === 'legendary') {
+            return data.type === 'legendary';
+        }
         return true;
     });
 
@@ -368,18 +391,18 @@ function generateCases() {
             let statusText = locked ? '🔒 ЗАБЛОКИРОВАН' : '✅ ДОСТУПЕН';
             let statusColor = locked ? '#ef4444' : '#10b981';
             let timerText = locked ? msToHM(ms) : '';
-            footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:14px;color:' + statusColor + ';">' + statusText + '</div><div id="freeCountdown" style="color:#6b7280;font-size:12px;margin-top:4px;">' + timerText + '</div></div>';
+            footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:12px;color:' + statusColor + ';">' + statusText + '</div><div id="freeCountdown" style="color:#6b7280;font-size:10px;margin-top:2px;">' + timerText + '</div></div>';
         } else {
             let priceColor = canAfford ? '#ffd700' : '#ef4444';
-            let shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает ' + (data.price - stars) + ' ⭐</div>';
-            footerHtml = '<div><div style="color:' + priceColor + ';font-size:24px;font-weight:900;">⭐ ' + data.price + '</div>' + shortText + '</div>';
+            let shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:10px;margin-top:1px;">Не хватает ' + (data.price - stars) + ' ⭐</div>';
+            footerHtml = '<div><div style="color:' + priceColor + ';font-size:20px;font-weight:900;">⭐ ' + data.price + '</div>' + shortText + '</div>';
         }
 
         let cardId = key === 'free' ? 'freeCard' : '';
         let opacity = locked ? '0.6' : '1';
         let badge = data.price === 0 ? '<div class="case-badge">FREE</div>' : '';
 
-        html += '<div class="case-big" id="' + cardId + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + opacity + ';">' + badge + '<div class="case-image-section"><div class="case-main-image">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
+        html += '<div class="case-big" id="' + cardId + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + opacity + ';">' + badge + '<div class="case-image-section"><div class="case-main-image" style="font-size:60px;">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title" style="font-size:16px;">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
     }
 
     container.innerHTML = html;
@@ -598,6 +621,7 @@ function startRoulette(caseKey) {
                 openedCases++;
                 localStorage.setItem('openedCases', openedCases);
                 checkAchievements();
+                checkMythicAchievement();
                 generateCases();
                 if (skipBtn) {
                     skipBtn.style.display = 'none';
@@ -654,6 +678,7 @@ function skipRoulette() {
         openedCases++;
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
+        checkMythicAchievement();
         generateCases();
         isRouletteSpinning = false;
     }, 400);
@@ -705,7 +730,7 @@ function showResult(nft, caseKey) {
     }
 
     if (nft.isCurrency) {
-        let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1;
+        let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1 || nft.name.indexOf('Сердце') !== -1;
         if (isStars) {
             let newBal = getStars() + nft.amount;
             setStars(newBal);
@@ -715,7 +740,7 @@ function showResult(nft, caseKey) {
             let starsEl = document.getElementById('resultStars');
             let tonEl = document.getElementById('resultTon');
             if (iconEl) iconEl.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
-            if (nameEl) nameEl.textContent = '+' + nft.amount + ' звёзд';
+            if (nameEl) nameEl.textContent = '+' + nft.amount + ' ' + nft.name;
             if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
             if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
             if (tonEl) tonEl.innerHTML = '';
@@ -792,11 +817,13 @@ function addToInventory(nft) {
     };
     inventory.unshift(newItem);
     localStorage.setItem('inventory', JSON.stringify(inventory));
+    checkMythicAchievement();
 }
 
 function loadInventory() {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
     renderInventory();
+    checkMythicAchievement();
 }
 
 function renderInventory() {
@@ -960,18 +987,19 @@ function checkAchievements() {
             unlockAchievement(id);
         }
     }
+}
 
-    if (openedCases >= 1) {
-        let hasMythic = false;
-        for (let j = 0; j < inventory.length; j++) {
-            if (inventory[j].rarity === 'mythic') {
-                hasMythic = true;
-                break;
-            }
+function checkMythicAchievement() {
+    inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    let hasMythic = false;
+    for (let j = 0; j < inventory.length; j++) {
+        if (inventory[j].rarity === 'mythic') {
+            hasMythic = true;
+            break;
         }
-        if (hasMythic && achievements.indexOf('mythic') === -1) {
-            unlockAchievement('mythic');
-        }
+    }
+    if (hasMythic && achievements.indexOf('mythic') === -1) {
+        unlockAchievement('mythic');
     }
 }
 
@@ -1042,14 +1070,14 @@ function switchTab(tab) {
     for (let i = 0; i < navItems.length; i++) {
         navItems[i].classList.remove('active');
     }
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
     }
     let tabContents = document.querySelectorAll('.tab-content');
     for (let j = 0; j < tabContents.length; j++) {
         tabContents[j].classList.remove('active');
     }
-    let map = {cases:'tabCases', inventory:'tabInventory', profile:'tabProfile', history:'tabHistory', achievements:'tabAchievements'};
+    let map = {cases:'tabCases', games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
     let target = document.getElementById(map[tab]);
     if (target) {
         target.classList.add('active');
@@ -1066,6 +1094,57 @@ function switchTab(tab) {
     if (tab === 'profile') {
         renderProfile();
     }
+    if (tab === 'games') {
+        renderGames();
+    }
+}
+
+function renderGames() {
+    let container = document.getElementById('gamesContent');
+    if (!container) return;
+    container.innerHTML = '';
+}
+
+function switchToCases() {
+    switchTab('cases');
+}
+
+function showMinesweeper() {
+    tg.showAlert('💣 Сапёр скоро появится!');
+}
+
+function showPromoGames() {
+    let container = document.getElementById('gamesContent');
+    if (!container) return;
+    container.innerHTML = `
+        <div style="padding:20px;max-width:400px;margin:0 auto;">
+            <div style="background:rgba(30,20,50,0.6);border-radius:20px;padding:25px;border:1px solid rgba(139,92,246,0.15);">
+                <h3 style="font-size:20px;font-weight:800;margin-bottom:15px;color:#a78bfa;">🎟️ Активация промокода</h3>
+                <input type="text" id="promoInputGame" placeholder="Введите промокод" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#fff;font-size:15px;margin-bottom:12px;">
+                <button onclick="activatePromoGame()" style="width:100%;padding:16px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;">Активировать</button>
+            </div>
+        </div>
+    `;
+}
+
+function activatePromoGame() {
+    let input = document.getElementById('promoInputGame');
+    if (!input) return;
+    let code = input.value.trim().toUpperCase();
+    if (!code) { tg.showAlert('Введите промокод'); return; }
+    let codes = {'WELCOME':100, 'NEWYEAR2026':200, 'LUCKY':150};
+    let used = JSON.parse(localStorage.getItem('usedPromos') || '[]');
+    if (used.indexOf(code) !== -1) { tg.showAlert('Промокод уже использован!'); return; }
+    if (!codes[code]) { tg.showAlert('Неверный промокод!'); return; }
+    setStars(getStars() + codes[code]);
+    used.push(code);
+    localStorage.setItem('usedPromos', JSON.stringify(used));
+    tg.showPopup({title:'🎉 Активировано!', message:'+' + codes[code] + ' ⭐ звёзд!', buttons:[{type:'ok'}]});
+    input.value = '';
+}
+
+function showComingSoon() {
+    tg.showAlert('🔄 Скоро появится!');
 }
 
 function renderProfile() {
