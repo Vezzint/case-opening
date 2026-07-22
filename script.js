@@ -1,4 +1,4 @@
-// script.js - полный исправленный файл
+// script.js - полный файл с анимацией загрузки
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -1412,6 +1412,48 @@ function switchAdminTab(tab) {
     }
 }
 
+// ===== АНИМАЦИЯ ЗАГРУЗКИ =====
+function startLoaderAnimation() {
+    let progress = 0;
+    const progressBar = document.getElementById('loaderProgressBar');
+    const progressText = document.getElementById('loaderProgressText');
+    const loader = document.getElementById('loader');
+    
+    // Создаем частицы
+    const particlesContainer = document.getElementById('loaderParticles');
+    if (particlesContainer) {
+        for (let i = 0; i < 10; i++) {
+            const span = document.createElement('span');
+            particlesContainer.appendChild(span);
+        }
+    }
+    
+    // Анимируем прогресс
+    const interval = setInterval(() => {
+        progress += Math.random() * 3 + 1;
+        if (progress > 100) progress = 100;
+        
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
+        if (progressText) {
+            progressText.textContent = Math.floor(progress) + '%';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
+                // Запускаем основное приложение
+                init();
+            }, 500);
+        }
+    }, 150);
+}
+
+// Запускаем анимацию загрузки при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    init();
+    startLoaderAnimation();
 });
