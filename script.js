@@ -1,12 +1,13 @@
+// script.js
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 tg.setHeaderColor('#0a0a0f');
 tg.setBackgroundColor('#0a0a0f');
 
-const ADMIN_ID = 6584350034;
+var ADMIN_ID = 6584350034;
 
-const NFT_DATABASE = [
+var NFT_DATABASE = [
     {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special",   icon:"💝"},
     {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common",    icon:"⭐"},
     {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",    icon:"⭐"},
@@ -24,7 +25,7 @@ const NFT_DATABASE = [
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"}
 ];
 
-const CASES_DATA = {
+var CASES_DATA = {
   free: {
     name: "🎁 Бесплатный кейс",
     icon: "🎁",
@@ -81,62 +82,68 @@ const CASES_DATA = {
   }
 };
 
-const ACHIEVEMENTS = [
+var ACHIEVEMENTS = [
     {id:'first_case', name:'Первый кейс',   desc:'Открой свой первый кейс',   icon:'🎁', reward:10},
     {id:'cases_5',    name:'Новичок',        desc:'Открой 5 кейсов',            icon:'📦', reward:25},
     {id:'cases_10',   name:'Коллекционер',   desc:'Открой 10 кейсов',           icon:'🎰', reward:50},
     {id:'legendary',  name:'Легендарная удача',desc:'Получи легендарное NFT',   icon:'⭐', reward:200}
 ];
 
-let currentFilter = 'all';
-let currentCase = null;
-let userLevel = 1;
-let userXP = 0;
-let isAdmin = false;
-let inventory = [];
-let openedCases = 0;
-let achievements = [];
-let globalHistory = [];
-let freeTimerInterval = null;
-let currentWinItem = null;
-let isRouletteSpinning = false;
-let rouletteTimeout = null;
+var currentFilter = 'all';
+var currentCase = null;
+var userLevel = 1;
+var userXP = 0;
+var isAdmin = false;
+var inventory = [];
+var openedCases = 0;
+var achievements = [];
+var globalHistory = [];
+var freeTimerInterval = null;
+var currentWinItem = null;
+var isRouletteSpinning = false;
+var rouletteTimeout = null;
 
 function getStars() {
-    return parseInt(localStorage.getItem('gameStars') || '0');
+    return parseInt(localStorage.getItem('gameStars') || '0', 10);
 }
 
 function setStars(val) {
     val = Math.max(0, val);
     localStorage.setItem('gameStars', val);
     var balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = val;
+    if (balanceEl) {
+        balanceEl.textContent = val;
+    }
 }
 
 function checkCanOpen(caseKey) {
     var data = CASES_DATA[caseKey];
-    if (!data) return { ok:false, reason:'Кейс не найден' };
+    if (!data) {
+        return { ok: false, reason: 'Кейс не найден' };
+    }
 
     if (data.cooldown) {
         var ms = getFreeMsLeft();
         if (ms > 0) {
-            return { ok:false, reason:'⏰ Бесплатный кейс раз в 24 часа!\n\nОсталось: ' + msToHM(ms) };
+            return { ok: false, reason: '⏰ Бесплатный кейс раз в 24 часа!\n\nОсталось: ' + msToHM(ms) };
         }
     }
 
     if (data.price > 0) {
         var stars = getStars();
         if (stars < data.price) {
-            return { ok:false, reason:'❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
+            return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
         }
     }
 
-    return { ok:true };
+    return { ok: true };
 }
 
 function getFreeMsLeft() {
     var last = localStorage.getItem('lastFreeCase');
-    if (!last) return 0;
+    if (!last) {
+        return 0;
+    }
     var left = 24 * 3600 * 1000 - (Date.now() - new Date(last).getTime());
     return left > 0 ? left : 0;
 }
@@ -149,22 +156,34 @@ function msToHM(ms) {
 }
 
 function startFreeTimer() {
-    if (freeTimerInterval) clearInterval(freeTimerInterval);
+    if (freeTimerInterval) {
+        clearInterval(freeTimerInterval);
+    }
     freeTimerInterval = setInterval(function() {
         var ms = getFreeMsLeft();
         var timerEl = document.getElementById('freeCountdown');
         var statusEl = document.getElementById('freeStatus');
-        if (!timerEl) return;
+        if (!timerEl) {
+            return;
+        }
 
         if (ms <= 0) {
             clearInterval(freeTimerInterval);
             freeTimerInterval = null;
-            if (statusEl) { statusEl.textContent = '✅ ДОСТУПЕН'; statusEl.style.color = '#10b981'; }
+            if (statusEl) {
+                statusEl.textContent = '✅ ДОСТУПЕН';
+                statusEl.style.color = '#10b981';
+            }
             timerEl.textContent = '';
             var card = document.getElementById('freeCard');
-            if (card) card.style.opacity = '1';
+            if (card) {
+                card.style.opacity = '1';
+            }
         } else {
-            if (statusEl) { statusEl.textContent = '🔒 ЗАБЛОКИРОВАН'; statusEl.style.color = '#ef4444'; }
+            if (statusEl) {
+                statusEl.textContent = '🔒 ЗАБЛОКИРОВАН';
+                statusEl.style.color = '#ef4444';
+            }
             timerEl.textContent = msToHM(ms);
         }
     }, 1000);
@@ -172,34 +191,43 @@ function startFreeTimer() {
 
 function initParticles() {
     var canvas = document.getElementById('particles');
-    if (!canvas) return;
+    if (!canvas) {
+        return;
+    }
     var ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    var pts = Array.from({length:50}, function() {
-        return {
+    var pts = [];
+    for (var i = 0; i < 50; i++) {
+        pts.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             r: Math.random() * 2 + 1,
             vx: Math.random() * 0.5 - 0.25,
             vy: Math.random() * 0.5 - 0.25,
             o: Math.random() * 0.5 + 0.2
-        };
-    });
-    (function loop() {
+        });
+    }
+    function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pts.forEach(function(p) {
+        for (var i = 0; i < pts.length; i++) {
+            var p = pts[i];
             p.x += p.vx;
             p.y += p.vy;
-            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            if (p.x < 0 || p.x > canvas.width) {
+                p.vx *= -1;
+            }
+            if (p.y < 0 || p.y > canvas.height) {
+                p.vy *= -1;
+            }
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(16,185,129,' + p.o + ')';
+            ctx.fillStyle = 'rgba(139,92,246,' + p.o + ')';
             ctx.fill();
-        });
+        }
         requestAnimationFrame(loop);
-    })();
+    }
+    loop();
 }
 
 function hideLoader() {
@@ -210,19 +238,34 @@ function hideLoader() {
 }
 
 function init() {
-    var user = tg.initDataUnsafe?.user;
+    var user = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (user) {
-        document.getElementById('userName').textContent = user.first_name || 'Player';
+        var nameEl = document.getElementById('userName');
+        if (nameEl) {
+            nameEl.textContent = user.first_name || 'Player';
+        }
         if (user.id === ADMIN_ID) {
             isAdmin = true;
-            document.getElementById('adminBadge').classList.remove('hidden');
+            var badge = document.getElementById('adminBadge');
+            if (badge) {
+                badge.classList.remove('hidden');
+            }
         }
         var av = document.getElementById('avatarContainer');
-        if (user.photo_url) av.innerHTML = '<img src="' + user.photo_url + '" alt="Avatar">';
-        else if (user.username) av.textContent = user.username.charAt(0).toUpperCase();
+        if (av) {
+            if (user.photo_url) {
+                av.innerHTML = '<img src="' + user.photo_url + '" alt="Avatar">';
+            } else if (user.username) {
+                av.textContent = user.username.charAt(0).toUpperCase();
+            }
+        }
     }
 
-    document.getElementById('balance').textContent = getStars();
+    var balanceEl = document.getElementById('balance');
+    if (balanceEl) {
+        balanceEl.textContent = getStars();
+    }
+
     loadUserProgress();
     loadInventory();
     loadAchievements();
@@ -237,27 +280,37 @@ function init() {
 
     setInterval(fetchOnlineCount, 15000);
 
-    document.querySelectorAll('.filter-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    for (var i = 0; i < filterBtns.length; i++) {
+        filterBtns[i].addEventListener('click', function() {
+            var btns = document.querySelectorAll('.filter-btn');
+            for (var j = 0; j < btns.length; j++) {
+                btns[j].classList.remove('active');
+            }
             this.classList.add('active');
             currentFilter = this.getAttribute('data-filter');
             generateCases();
         });
-    });
+    }
 }
 
 function loadUserProgress() {
-    userLevel = parseInt(localStorage.getItem('userLevel') || '1');
-    userXP = parseInt(localStorage.getItem('userXP') || '0');
-    openedCases = parseInt(localStorage.getItem('openedCases') || '0');
+    userLevel = parseInt(localStorage.getItem('userLevel') || '1', 10);
+    userXP = parseInt(localStorage.getItem('userXP') || '0', 10);
+    openedCases = parseInt(localStorage.getItem('openedCases') || '0', 10);
     updateLevelDisplay();
 }
 
 function updateLevelDisplay() {
     var xpNeeded = userLevel * 100;
-    document.getElementById('userLevel').textContent = 'Level ' + userLevel;
-    document.getElementById('userXP').textContent = userXP + '/' + xpNeeded + ' XP';
+    var levelEl = document.getElementById('userLevel');
+    var xpEl = document.getElementById('userXP');
+    if (levelEl) {
+        levelEl.textContent = 'Level ' + userLevel;
+    }
+    if (xpEl) {
+        xpEl.textContent = userXP + '/' + xpNeeded + ' XP';
+    }
 }
 
 function addXP(amount) {
@@ -282,21 +335,31 @@ function getRarityColor(r) {
 
 function generateCases() {
     var container = document.getElementById('casesContainer');
-    if (!container) return;
+    if (!container) {
+        return;
+    }
 
-    var entries = Object.entries(CASES_DATA).filter(function(item) {
-        var k = item[0];
-        var d = item[1];
-        if (currentFilter === 'all') return true;
-        if (currentFilter === 'free') return d.price === 0;
-        if (currentFilter === 'basic') return d.type === 'basic';
-        if (currentFilter === 'premium') return d.type === 'premium';
+    var entries = Object.keys(CASES_DATA).filter(function(key) {
+        var data = CASES_DATA[key];
+        if (currentFilter === 'all') {
+            return true;
+        }
+        if (currentFilter === 'free') {
+            return data.price === 0;
+        }
+        if (currentFilter === 'basic') {
+            return data.type === 'basic';
+        }
+        if (currentFilter === 'premium') {
+            return data.type === 'premium';
+        }
         return true;
     });
 
-    container.innerHTML = entries.map(function(item) {
-        var key = item[0];
-        var data = item[1];
+    var html = '';
+    for (var i = 0; i < entries.length; i++) {
+        var key = entries[i];
+        var data = CASES_DATA[key];
         var locked = data.cooldown ? getFreeMsLeft() > 0 : false;
         var ms = locked ? getFreeMsLeft() : 0;
         var stars = getStars();
@@ -304,20 +367,32 @@ function generateCases() {
 
         var footerHtml = '';
         if (data.price === 0) {
-            footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:14px;color:' + (locked ? '#ef4444' : '#10b981') + ';">' + (locked ? '🔒 ЗАБЛОКИРОВАН' : '✅ ДОСТУПЕН') + '</div><div id="freeCountdown" style="color:#6b7280;font-size:12px;margin-top:4px;">' + (locked ? msToHM(ms) : '') + '</div></div>';
+            var statusText = locked ? '🔒 ЗАБЛОКИРОВАН' : '✅ ДОСТУПЕН';
+            var statusColor = locked ? '#ef4444' : '#10b981';
+            var timerText = locked ? msToHM(ms) : '';
+            footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:14px;color:' + statusColor + ';">' + statusText + '</div><div id="freeCountdown" style="color:#6b7280;font-size:12px;margin-top:4px;">' + timerText + '</div></div>';
         } else {
-            footerHtml = '<div><div style="color:' + (canAfford ? '#ffd700' : '#ef4444') + ';font-size:24px;font-weight:900;">⭐ ' + data.price + '</div>' + (!canAfford ? '<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает ' + (data.price - stars) + ' ⭐</div>' : '') + '</div>';
+            var priceColor = canAfford ? '#ffd700' : '#ef4444';
+            var shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:11px;margin-top:2px;">Не хватает ' + (data.price - stars) + ' ⭐</div>';
+            footerHtml = '<div><div style="color:' + priceColor + ';font-size:24px;font-weight:900;">⭐ ' + data.price + '</div>' + shortText + '</div>';
         }
 
-        return '<div class="case-big" id="' + (key === 'free' ? 'freeCard' : '') + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + (locked ? '0.6' : '1') + ';">' + (data.price === 0 ? '<div class="case-badge">FREE</div>' : '') + '<div class="case-image-section"><div class="case-main-image">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
-    }).join('');
+        var cardId = key === 'free' ? 'freeCard' : '';
+        var opacity = locked ? '0.6' : '1';
+        var badge = data.price === 0 ? '<div class="case-badge">FREE</div>' : '';
 
+        html += '<div class="case-big" id="' + cardId + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + opacity + ';">' + badge + '<div class="case-image-section"><div class="case-main-image">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
+    }
+
+    container.innerHTML = html;
     startFreeTimer();
 }
 
 function showPreview(caseKey) {
     var data = CASES_DATA[caseKey];
-    if (!data) return;
+    if (!data) {
+        return;
+    }
 
     var check = checkCanOpen(caseKey);
     if (!check.ok) {
@@ -327,60 +402,81 @@ function showPreview(caseKey) {
 
     currentCase = caseKey;
 
-    document.getElementById('previewCaseTitle').textContent = data.name;
-    document.getElementById('previewCaseIcon').textContent = data.icon;
-    document.getElementById('previewCaseName').textContent = data.name.toUpperCase();
-    document.getElementById('previewCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
-
+    var titleEl = document.getElementById('previewCaseTitle');
+    var iconEl = document.getElementById('previewCaseIcon');
+    var nameEl = document.getElementById('previewCaseName');
+    var priceEl = document.getElementById('previewCasePrice');
     var btn = document.getElementById('previewOpenBtn');
-    btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
-    btn.disabled = false;
-    btn.style.opacity = '1';
+
+    if (titleEl) titleEl.textContent = data.name;
+    if (iconEl) iconEl.textContent = data.icon;
+    if (nameEl) nameEl.textContent = data.name.toUpperCase();
+    if (priceEl) priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
+
+    if (btn) {
+        btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
 
     var track = document.getElementById('previewRollingTrack');
-    track.innerHTML = '';
-
-    var itemsToShow = data.items.concat(data.items).concat(data.items);
-
-    itemsToShow.forEach(function(item) {
-        var nft = item.nft;
-        var div = document.createElement('div');
-        div.className = 'preview-rolling-item';
-        var color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        div.style.borderColor = color;
-
-        if (nft.isCurrency) {
-            div.innerHTML = '<div class="item-icon">' + nft.icon + '</div><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
-        } else {
-            div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
-        }
-        track.appendChild(div);
-    });
-
-    // Показываем список возможных наград
-    var itemsList = document.getElementById('previewItemsList');
-    itemsList.innerHTML = '<div class="preview-items-title">💎 Возможные награды</div>' + 
-        data.items.map(function(item) {
+    if (track) {
+        track.innerHTML = '';
+        var itemsToShow = data.items.concat(data.items).concat(data.items);
+        for (var i = 0; i < itemsToShow.length; i++) {
+            var item = itemsToShow[i];
             var nft = item.nft;
-            if (!nft) return '';
-            if (nft.isCurrency) {
-                return '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">' + nft.icon + '</div></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + item.chance + '%</div></div>';
-            }
-            return '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + getRarityColor(nft.rarity) + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + getRarityColor(nft.rarity) + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + item.chance + '%</div></div>';
-        }).join('');
+            var div = document.createElement('div');
+            div.className = 'preview-rolling-item';
+            var color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+            div.style.borderColor = color;
 
-    document.getElementById('modalPreview').classList.add('active');
+            if (nft.isCurrency) {
+                div.innerHTML = '<div class="item-icon">' + nft.icon + '</div><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+            } else {
+                div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+            }
+            track.appendChild(div);
+        }
+    }
+
+    var itemsList = document.getElementById('previewItemsList');
+    if (itemsList) {
+        var listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
+        for (var j = 0; j < data.items.length; j++) {
+            var it = data.items[j];
+            var nft = it.nft;
+            if (!nft) continue;
+            if (nft.isCurrency) {
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;"><div style="font-size:32px;">' + nft.icon + '</div></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+            } else {
+                var color = getRarityColor(nft.rarity);
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + color + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + color + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+            }
+        }
+        itemsList.innerHTML = listHtml;
+    }
+
+    var modal = document.getElementById('modalPreview');
+    if (modal) {
+        modal.classList.add('active');
+    }
     document.body.style.overflow = 'hidden';
 }
 
 function closePreviewModal() {
-    document.getElementById('modalPreview').classList.remove('active');
+    var modal = document.getElementById('modalPreview');
+    if (modal) {
+        modal.classList.remove('active');
+    }
     document.body.style.overflow = '';
     currentCase = null;
 }
 
 function openCaseFromPreview() {
-    if (!currentCase) return;
+    if (!currentCase) {
+        return;
+    }
 
     var data = CASES_DATA[currentCase];
     var check = checkCanOpen(currentCase);
@@ -405,11 +501,15 @@ function openCaseFromPreview() {
 
     var key = currentCase;
     closePreviewModal();
-    setTimeout(function() { startRoulette(key); }, 300);
+    setTimeout(function() {
+        startRoulette(key);
+    }, 300);
 }
 
 function startRoulette(caseKey) {
-    if (isRouletteSpinning) return;
+    if (isRouletteSpinning) {
+        return;
+    }
     isRouletteSpinning = true;
 
     var data = CASES_DATA[caseKey];
@@ -430,9 +530,15 @@ function startRoulette(caseKey) {
     }
 
     modal.classList.add('active');
-    resultBox.classList.remove('active');
-    title.textContent = '🎲 ОТКРЫВАЕМ...';
-    skipBtn.style.display = 'block';
+    if (resultBox) {
+        resultBox.classList.remove('active');
+    }
+    if (title) {
+        title.textContent = '🎲 ОТКРЫВАЕМ...';
+    }
+    if (skipBtn) {
+        skipBtn.style.display = 'block';
+    }
     document.body.style.overflow = 'hidden';
 
     track.style.transition = 'none';
@@ -448,8 +554,13 @@ function startRoulette(caseKey) {
         var item = (i === WIN_IDX) ? winItem : data.items[Math.floor(Math.random() * data.items.length)];
         var div = document.createElement('div');
         div.className = 'roulette-item';
-        div.style.borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
-        div.innerHTML = item.nft.isCurrency ? '<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">' + item.nft.icon + '</div>' : '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
+        var borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
+        div.style.borderColor = borderColor;
+        if (item.nft.isCurrency) {
+            div.innerHTML = '<div style="font-size:60px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">' + item.nft.icon + '</div>';
+        } else {
+            div.innerHTML = '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
+        }
         track.appendChild(div);
     }
 
@@ -474,17 +585,25 @@ function startRoulette(caseKey) {
 
             track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
             track.style.transform = 'translateX(' + offset + 'px)';
-            title.textContent = '🎰 КРУТИМ...';
+            if (title) {
+                title.textContent = '🎰 КРУТИМ...';
+            }
 
-            if (rouletteTimeout) clearTimeout(rouletteTimeout);
+            if (rouletteTimeout) {
+                clearTimeout(rouletteTimeout);
+            }
             rouletteTimeout = setTimeout(function() {
-                title.textContent = '🎉 РЕЗУЛЬТАТ!';
+                if (title) {
+                    title.textContent = '🎉 РЕЗУЛЬТАТ!';
+                }
                 showResult(winItem.nft, caseKey);
                 openedCases++;
                 localStorage.setItem('openedCases', openedCases);
                 checkAchievements();
                 generateCases();
-                skipBtn.style.display = 'none';
+                if (skipBtn) {
+                    skipBtn.style.display = 'none';
+                }
                 isRouletteSpinning = false;
                 rouletteTimeout = null;
             }, 5500);
@@ -493,38 +612,46 @@ function startRoulette(caseKey) {
 }
 
 function skipRoulette() {
-    if (!currentWinItem || !isRouletteSpinning) return;
+    if (!currentWinItem || !isRouletteSpinning) {
+        return;
+    }
 
     var track = document.getElementById('rouletteTrack');
     var title = document.getElementById('rouletteTitle');
     var skipBtn = document.getElementById('skipBtn');
 
-    // Останавливаем таймер
     if (rouletteTimeout) {
         clearTimeout(rouletteTimeout);
         rouletteTimeout = null;
     }
 
-    track.style.transition = 'transform 0.3s cubic-bezier(0.05, 0.85, 0.15, 1)';
-    title.textContent = '🎉 РЕЗУЛЬТАТ!';
+    if (track) {
+        track.style.transition = 'transform 0.3s cubic-bezier(0.05, 0.85, 0.15, 1)';
+    }
+    if (title) {
+        title.textContent = '🎉 РЕЗУЛЬТАТ!';
+    }
 
     var WIN_IDX = 35;
-    var firstItem = track.children[0];
-    if (firstItem) {
-        var itemW = firstItem.getBoundingClientRect().width;
-        var gap = 10;
-        var stepW = itemW + gap;
-        var wrapper = track.parentElement;
-        var wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
-        var center = wrapW / 2;
-        var winCenterX = WIN_IDX * stepW + itemW / 2;
-        var offset = center - winCenterX;
-
-        track.style.transform = 'translateX(' + offset + 'px)';
+    if (track) {
+        var firstItem = track.children[0];
+        if (firstItem) {
+            var itemW = firstItem.getBoundingClientRect().width;
+            var gap = 10;
+            var stepW = itemW + gap;
+            var wrapper = track.parentElement;
+            var wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
+            var center = wrapW / 2;
+            var winCenterX = WIN_IDX * stepW + itemW / 2;
+            var offset = center - winCenterX;
+            track.style.transform = 'translateX(' + offset + 'px)';
+        }
     }
 
     setTimeout(function() {
-        skipBtn.style.display = 'none';
+        if (skipBtn) {
+            skipBtn.style.display = 'none';
+        }
         showResult(currentWinItem.nft, currentCase);
         openedCases++;
         localStorage.setItem('openedCases', openedCases);
@@ -544,15 +671,21 @@ function closeRouletteModal() {
         rouletteTimeout = null;
     }
 
-    modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+    }
     document.body.style.overflow = '';
     isRouletteSpinning = false;
 
-    track.style.display = 'flex';
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0px)';
-    track.innerHTML = '';
-    skipBtn.style.display = 'block';
+    if (track) {
+        track.style.display = 'flex';
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(0px)';
+        track.innerHTML = '';
+    }
+    if (skipBtn) {
+        skipBtn.style.display = 'block';
+    }
 }
 
 function getRandomItemByChance(items) {
@@ -560,49 +693,71 @@ function getRandomItemByChance(items) {
     var cum = 0;
     for (var i = 0; i < items.length; i++) {
         cum += items[i].chance;
-        if (rand <= cum) return items[i];
+        if (rand <= cum) {
+            return items[i];
+        }
     }
     return items[items.length - 1];
 }
 
 function showResult(nft, caseKey) {
     var resultBox = document.getElementById('resultBox');
-    resultBox.classList.add('active');
+    if (resultBox) {
+        resultBox.classList.add('active');
+    }
 
     if (nft.isCurrency) {
-        var isStars = nft.name.includes('звезд') || nft.name.includes('звёзд');
+        var isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1;
         if (isStars) {
             var newBal = getStars() + nft.amount;
             setStars(newBal);
-            document.getElementById('resultIcon').innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
-            document.getElementById('resultName').textContent = '+' + nft.amount + ' звёзд';
-            document.getElementById('resultRarity').textContent = 'ВАЛЮТА';
-            document.getElementById('resultStars').innerHTML = 'Баланс: ⭐ ' + newBal;
-            document.getElementById('resultTon').innerHTML = '';
+            var iconEl = document.getElementById('resultIcon');
+            var nameEl = document.getElementById('resultName');
+            var rarityEl = document.getElementById('resultRarity');
+            var starsEl = document.getElementById('resultStars');
+            var tonEl = document.getElementById('resultTon');
+            if (iconEl) iconEl.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (nameEl) nameEl.textContent = '+' + nft.amount + ' звёзд';
+            if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
+            if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
+            if (tonEl) tonEl.innerHTML = '';
             addXP(nft.amount);
         } else {
-            document.getElementById('resultIcon').innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
-            document.getElementById('resultName').textContent = 'Подарок';
-            document.getElementById('resultRarity').textContent = 'ОСОБОЕ';
-            document.getElementById('resultStars').innerHTML = '🎁 Сюрприз!';
-            document.getElementById('resultTon').innerHTML = '';
+            var iconEl2 = document.getElementById('resultIcon');
+            var nameEl2 = document.getElementById('resultName');
+            var rarityEl2 = document.getElementById('resultRarity');
+            var starsEl2 = document.getElementById('resultStars');
+            var tonEl2 = document.getElementById('resultTon');
+            if (iconEl2) iconEl2.innerHTML = '<div style="font-size:100px;">' + nft.icon + '</div>';
+            if (nameEl2) nameEl2.textContent = 'Подарок';
+            if (rarityEl2) rarityEl2.textContent = 'ОСОБОЕ';
+            if (starsEl2) starsEl2.innerHTML = '🎁 Сюрприз!';
+            if (tonEl2) tonEl2.innerHTML = '';
             addXP(10);
         }
-        resultBox.style.borderColor = '#fbbf24';
-        document.getElementById('resultRarity').style.background = '#fbbf24';
+        if (resultBox) resultBox.style.borderColor = '#fbbf24';
+        var rarityEl3 = document.getElementById('resultRarity');
+        if (rarityEl3) rarityEl3.style.background = '#fbbf24';
     } else {
-        document.getElementById('resultIcon').innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display=\'none\'">';
-        document.getElementById('resultName').textContent = nft.name;
-        document.getElementById('resultRarity').textContent = nft.rarity.toUpperCase();
+        var iconEl3 = document.getElementById('resultIcon');
+        var nameEl3 = document.getElementById('resultName');
+        var rarityEl4 = document.getElementById('resultRarity');
+        var starsEl3 = document.getElementById('resultStars');
+        var tonEl3 = document.getElementById('resultTon');
+        if (iconEl3) iconEl3.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display=\'none\'">';
+        if (nameEl3) nameEl3.textContent = nft.name;
+        if (rarityEl4) rarityEl4.textContent = nft.rarity.toUpperCase();
         var color = getRarityColor(nft.rarity);
-        resultBox.style.borderColor = color;
-        document.getElementById('resultRarity').style.background = color;
-        document.getElementById('resultStars').innerHTML = '⭐ ' + nft.stars;
-        document.getElementById('resultTon').innerHTML = '💎 ' + nft.ton + ' TON';
+        if (resultBox) resultBox.style.borderColor = color;
+        if (rarityEl4) rarityEl4.style.background = color;
+        if (starsEl3) starsEl3.innerHTML = '⭐ ' + nft.stars;
+        if (tonEl3) tonEl3.innerHTML = '💎 ' + nft.ton + ' TON';
         addXP(Math.floor(nft.stars / 5));
         addToInventory(nft);
         saveToHistory(nft);
-        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') createConfetti();
+        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
+            createConfetti();
+        }
     }
 
     addToGlobalHistory(nft);
@@ -614,7 +769,11 @@ function createConfetti() {
         var el = document.createElement('div');
         el.style.cssText = 'position:fixed;top:50%;left:50%;width:10px;height:10px;background:' + colors[i % colors.length] + ';border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 2 + 1) + 's linear forwards;--x:' + Math.random() + ';';
         document.body.appendChild(el);
-        setTimeout(function(e) { e.remove(); }, 3000);
+        (function(e) {
+            setTimeout(function() {
+                e.remove();
+            }, 3000);
+        })(el);
     }
 }
 
@@ -644,7 +803,9 @@ function loadInventory() {
 
 function renderInventory() {
     var c = document.getElementById('inventoryContainer');
-    if (!c) return;
+    if (!c) {
+        return;
+    }
 
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
@@ -658,23 +819,36 @@ function renderInventory() {
         return (order[b.rarity] || 0) - (order[a.rarity] || 0);
     });
 
-    var totalTon = inventory.reduce(function(s, n) { return s + (n.ton || 0); }, 0);
+    var totalTon = 0;
+    for (var i = 0; i < inventory.length; i++) {
+        totalTon += (inventory[i].ton || 0);
+    }
 
-    c.innerHTML = '<div style="padding:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>📦 Мои NFT (' + inventory.length + ')</h3><div style="font-size:14px;color:#6b7280;">💎 <span style="color:#10b981;font-weight:700;">' + totalTon.toFixed(2) + ' TON</span></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">' + sorted.map(function(nft) {
+    var html = '<div style="padding:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>📦 Мои NFT (' + inventory.length + ')</h3><div style="font-size:14px;color:#6b7280;">💎 <span style="color:#10b981;font-weight:700;">' + totalTon.toFixed(2) + ' TON</span></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">';
+
+    for (var j = 0; j < sorted.length; j++) {
+        var nft = sorted[j];
         var uid = nft.uid || JSON.stringify(nft);
         var safeUid = encodeURIComponent(uid);
-        return '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:12px;border:2px solid ' + getRarityColor(nft.rarity) + ';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:' + getRarityColor(nft.rarity) + ';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + nft.rarity.toUpperCase() + '</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">' + nft.name + '</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ' + nft.ton + ' TON • ⭐ ' + nft.stars + '</div><button onclick="sellNFT(\'' + safeUid + '\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать ' + Math.floor((nft.stars || 0) * 0.7) + ' ⭐</button></div>';
-    }).join('') + '</div></div>';
+        html += '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:12px;border:2px solid ' + getRarityColor(nft.rarity) + ';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:' + getRarityColor(nft.rarity) + ';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + nft.rarity.toUpperCase() + '</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">' + nft.name + '</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ' + nft.ton + ' TON • ⭐ ' + nft.stars + '</div><button onclick="sellNFT(\'' + safeUid + '\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать ' + Math.floor((nft.stars || 0) * 0.7) + ' ⭐</button></div>';
+    }
+
+    html += '</div></div>';
+    c.innerHTML = html;
 }
 
 function sellNFT(safeUid) {
     var uid = decodeURIComponent(safeUid);
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
-    var idx = inventory.findIndex(function(item) {
-        var itemUid = item.uid || JSON.stringify(item);
-        return itemUid === uid;
-    });
+    var idx = -1;
+    for (var i = 0; i < inventory.length; i++) {
+        var itemUid = inventory[i].uid || JSON.stringify(inventory[i]);
+        if (itemUid === uid) {
+            idx = i;
+            break;
+        }
+    }
 
     if (idx === -1) {
         tg.showAlert('Предмет не найден!');
@@ -694,10 +868,14 @@ function sellNFT(safeUid) {
     }, function(btn) {
         if (btn === 'sell') {
             inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
-            var freshIdx = inventory.findIndex(function(item) {
-                var itemUid = item.uid || JSON.stringify(item);
-                return itemUid === uid;
-            });
+            var freshIdx = -1;
+            for (var j = 0; j < inventory.length; j++) {
+                var itemUid = inventory[j].uid || JSON.stringify(inventory[j]);
+                if (itemUid === uid) {
+                    freshIdx = j;
+                    break;
+                }
+            }
 
             if (freshIdx === -1) {
                 tg.showAlert('Предмет уже продан!');
@@ -725,7 +903,9 @@ function saveToHistory(nft) {
         time: new Date().toLocaleString('ru-RU')
     };
     h.unshift(item);
-    if (h.length > 50) h = h.slice(0, 50);
+    if (h.length > 50) {
+        h = h.slice(0, 50);
+    }
     localStorage.setItem('caseHistory', JSON.stringify(h));
 }
 
@@ -735,14 +915,20 @@ function loadHistory() {
 
 function renderHistory(history) {
     var c = document.getElementById('historyContainer');
-    if (!c) return;
+    if (!c) {
+        return;
+    }
     if (!history.length) {
         c.innerHTML = '<div style="padding:60px 20px;text-align:center;"><div style="font-size:80px;opacity:0.3;">📜</div><h3>История пуста</h3></div>';
         return;
     }
-    c.innerHTML = '<div style="padding:20px;"><h3 style="margin-bottom:15px;">📜 История (' + history.length + ')</h3>' + history.map(function(item) {
-        return '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ' + getRarityColor(item.rarity) + ';flex-shrink:0;"><img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + item.name + '</div><div style="font-size:12px;color:' + getRarityColor(item.rarity) + ';margin-top:4px;">' + (item.rarity ? item.rarity.toUpperCase() : '') + '</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">' + item.time + '</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ ' + item.stars + '</div><div style="font-size:12px;color:#0088cc;">💎 ' + item.ton + ' TON</div></div></div>';
-    }).join('') + '</div>';
+    var html = '<div style="padding:20px;"><h3 style="margin-bottom:15px;">📜 История (' + history.length + ')</h3>';
+    for (var i = 0; i < history.length; i++) {
+        var item = history[i];
+        html += '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ' + getRarityColor(item.rarity) + ';flex-shrink:0;"><img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + item.name + '</div><div style="font-size:12px;color:' + getRarityColor(item.rarity) + ';margin-top:4px;">' + (item.rarity ? item.rarity.toUpperCase() : '') + '</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">' + item.time + '</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ ' + item.stars + '</div><div style="font-size:12px;color:#0088cc;">💎 ' + item.ton + ' TON</div></div></div>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
 }
 
 function loadAchievements() {
@@ -752,26 +938,43 @@ function loadAchievements() {
 
 function renderAchievements() {
     var c = document.getElementById('achievementsContainer');
-    if (!c) return;
+    if (!c) {
+        return;
+    }
     var prog = Math.round((achievements.length / ACHIEVEMENTS.length) * 100);
-    c.innerHTML = '<div style="padding:20px;"><div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>🏆 Достижения</h3><div style="color:#10b981;font-weight:700;">' + achievements.length + '/' + ACHIEVEMENTS.length + '</div></div><div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;"><div style="width:' + prog + '%;height:100%;background:linear-gradient(90deg,#10b981,#059669);"></div></div></div>' + ACHIEVEMENTS.map(function(a) {
-        var done = achievements.includes(a.id);
-        return '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;opacity:' + (done ? 1 : 0.5) + ';border:2px solid ' + (done ? '#10b981' : 'rgba(255,255,255,0.1)') + ';display:flex;align-items:center;gap:15px;"><div style="font-size:40px;filter:grayscale(' + (done ? 0 : 1) + ');">' + a.icon + '</div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + a.name + (done ? ' ✅' : '') + '</div><div style="font-size:13px;color:#6b7280;">' + a.desc + '</div></div><div style="color:' + (done ? '#10b981' : '#ffd700') + ';font-weight:700;">+' + a.reward + ' ⭐</div></div>';
-    }).join('') + '</div>';
+    var html = '<div style="padding:20px;"><div style="margin-bottom:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>🏆 Достижения</h3><div style="color:#8b5cf6;font-weight:700;">' + achievements.length + '/' + ACHIEVEMENTS.length + '</div></div><div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;"><div style="width:' + prog + '%;height:100%;background:linear-gradient(90deg,#8b5cf6,#6366f1);"></div></div></div>';
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+        var a = ACHIEVEMENTS[i];
+        var done = achievements.indexOf(a.id) !== -1;
+        html += '<div style="background:rgba(30,30,40,0.5);border-radius:12px;padding:15px;margin-bottom:12px;opacity:' + (done ? 1 : 0.5) + ';border:2px solid ' + (done ? '#8b5cf6' : 'rgba(255,255,255,0.1)') + ';display:flex;align-items:center;gap:15px;"><div style="font-size:40px;filter:grayscale(' + (done ? 0 : 1) + ');">' + a.icon + '</div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + a.name + (done ? ' ✅' : '') + '</div><div style="font-size:13px;color:#6b7280;">' + a.desc + '</div></div><div style="color:' + (done ? '#8b5cf6' : '#ffd700') + ';font-weight:700;">+' + a.reward + ' ⭐</div></div>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
 }
 
 function checkAchievements() {
     var map = {first_case:1, cases_5:5, cases_10:10};
-    Object.entries(map).forEach(function(item) {
-        var id = item[0];
-        var n = item[1];
-        if (openedCases >= n && !achievements.includes(id)) unlockAchievement(id);
-    });
+    var keys = Object.keys(map);
+    for (var i = 0; i < keys.length; i++) {
+        var id = keys[i];
+        var n = map[id];
+        if (openedCases >= n && achievements.indexOf(id) === -1) {
+            unlockAchievement(id);
+        }
+    }
 }
 
 function unlockAchievement(id) {
-    var a = ACHIEVEMENTS.find(function(x) { return x.id === id; });
-    if (!a) return;
+    var a = null;
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+        if (ACHIEVEMENTS[i].id === id) {
+            a = ACHIEVEMENTS[i];
+            break;
+        }
+    }
+    if (!a) {
+        return;
+    }
     achievements.push(id);
     localStorage.setItem('achievements', JSON.stringify(achievements));
     setStars(getStars() + a.reward);
@@ -780,13 +983,17 @@ function unlockAchievement(id) {
 }
 
 function fetchOnlineCount() {
-    document.getElementById('onlineCount').textContent = (150 + Math.floor(Math.random() * 50) - 25) + ' Online';
+    var el = document.getElementById('onlineCount');
+    if (el) {
+        el.textContent = (150 + Math.floor(Math.random() * 50) - 25) + ' Online';
+    }
 }
 
 function generateFakeHistory() {
     var names = ['Алексей','Мария','Дмитрий','Анна','Иван','Елена'];
+    var caseKeys = Object.keys(CASES_DATA);
     for (var i = 0; i < 15; i++) {
-        var rCase = Object.values(CASES_DATA)[Math.floor(Math.random() * 3)];
+        var rCase = CASES_DATA[caseKeys[Math.floor(Math.random() * caseKeys.length)]];
         var item = getRandomItemByChance(rCase.items);
         globalHistory.push({nft:item.nft, username:names[Math.floor(Math.random() * names.length)], time:(Math.floor(Math.random() * 45) + 1) + ' мин назад'});
     }
@@ -795,93 +1002,170 @@ function generateFakeHistory() {
 
 function renderGlobalHistory() {
     var slider = document.getElementById('nftScroll');
-    if (!slider) return;
+    if (!slider) {
+        return;
+    }
     var all = globalHistory.concat(globalHistory).concat(globalHistory);
-    slider.innerHTML = all.map(function(item) {
+    var html = '';
+    for (var i = 0; i < all.length; i++) {
+        var item = all[i];
         var nft = item.nft;
         var color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        return '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<div style="font-size:45px;">' + nft.icon + '</div>' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
-    }).join('');
+        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<div style="font-size:45px;">' + nft.icon + '</div>' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
+    }
+    slider.innerHTML = html;
 }
 
 function addToGlobalHistory(nft) {
-    var user = tg.initDataUnsafe?.user;
-    globalHistory.unshift({nft:nft, username:user?.first_name || 'Игрок', time:'только что'});
-    if (globalHistory.length > 25) globalHistory = globalHistory.slice(0, 25);
+    var user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    var username = user ? (user.first_name || 'Игрок') : 'Игрок';
+    globalHistory.unshift({nft:nft, username:username, time:'только что'});
+    if (globalHistory.length > 25) {
+        globalHistory = globalHistory.slice(0, 25);
+    }
     renderGlobalHistory();
 }
 
 function switchTab(tab) {
-    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
-    event.currentTarget.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    var navItems = document.querySelectorAll('.nav-item');
+    for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+    var tabContents = document.querySelectorAll('.tab-content');
+    for (var j = 0; j < tabContents.length; j++) {
+        tabContents[j].classList.remove('active');
+    }
     var map = {cases:'tabCases', inventory:'tabInventory', profile:'tabProfile', history:'tabHistory', achievements:'tabAchievements'};
-    document.getElementById(map[tab]).classList.add('active');
-    if (tab === 'inventory') renderInventory();
-    if (tab === 'history') loadHistory();
-    if (tab === 'achievements') renderAchievements();
+    var target = document.getElementById(map[tab]);
+    if (target) {
+        target.classList.add('active');
+    }
+    if (tab === 'inventory') {
+        renderInventory();
+    }
+    if (tab === 'history') {
+        loadHistory();
+    }
+    if (tab === 'achievements') {
+        renderAchievements();
+    }
 }
 
 function loadRefLink() {
-    var uid = tg.initDataUnsafe?.user?.id || '000';
-    document.getElementById('refLink').textContent = 'https://t.me/gsdfsdfdsfbot?start=ref_' + uid;
-    document.getElementById('refCount').textContent = localStorage.getItem('refCount') || '0';
+    var uid = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user.id : '000';
+    var refEl = document.getElementById('refLink');
+    var countEl = document.getElementById('refCount');
+    if (refEl) {
+        refEl.textContent = 'https://t.me/gsdfsdfdsfbot?start=ref_' + uid;
+    }
+    if (countEl) {
+        countEl.textContent = localStorage.getItem('refCount') || '0';
+    }
 }
 
 function copyRefLink() {
-    navigator.clipboard.writeText(document.getElementById('refLink').textContent);
-    tg.showPopup({title:'Скопировано!', message:'Ссылка в буфере', buttons:[{type:'ok'}]});
+    var refEl = document.getElementById('refLink');
+    if (refEl) {
+        navigator.clipboard.writeText(refEl.textContent);
+        tg.showPopup({title:'Скопировано!', message:'Ссылка в буфере', buttons:[{type:'ok'}]});
+    }
 }
 
 function activatePromo() {
-    var code = document.getElementById('promoInput').value.trim().toUpperCase();
-    if (!code) { tg.showAlert('Введите промокод'); return; }
+    var input = document.getElementById('promoInput');
+    if (!input) {
+        return;
+    }
+    var code = input.value.trim().toUpperCase();
+    if (!code) {
+        tg.showAlert('Введите промокод');
+        return;
+    }
     var codes = {'WELCOME':100, 'NEWYEAR2026':200, 'LUCKY':150};
     var used = JSON.parse(localStorage.getItem('usedPromos') || '[]');
-    if (used.includes(code)) { tg.showAlert('Промокод уже использован!'); return; }
-    if (!codes[code]) { tg.showAlert('Неверный промокод!'); return; }
+    if (used.indexOf(code) !== -1) {
+        tg.showAlert('Промокод уже использован!');
+        return;
+    }
+    if (!codes[code]) {
+        tg.showAlert('Неверный промокод!');
+        return;
+    }
     setStars(getStars() + codes[code]);
     used.push(code);
     localStorage.setItem('usedPromos', JSON.stringify(used));
     tg.showPopup({title:'🎉 Активировано!', message:'+' + codes[code] + ' ⭐ звёзд!', buttons:[{type:'ok'}]});
-    document.getElementById('promoInput').value = '';
+    input.value = '';
     generateCases();
 }
 
 function openAdminPanel() {
-    if (!isAdmin) return;
-    document.getElementById('adminPanel').classList.add('active');
+    if (!isAdmin) {
+        return;
+    }
+    var panel = document.getElementById('adminPanel');
+    if (panel) {
+        panel.classList.add('active');
+    }
     document.body.style.overflow = 'hidden';
     loadAdminStats();
     loadAllUsers();
 }
 
 function closeAdminPanel() {
-    document.getElementById('adminPanel').classList.remove('active');
+    var panel = document.getElementById('adminPanel');
+    if (panel) {
+        panel.classList.remove('active');
+    }
     document.body.style.overflow = '';
 }
 
 function loadAdminStats() {
-    document.getElementById('adminStats').innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">' + getStars() + '</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">' + openedCases + '</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + inventory.length + '</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">' + achievements.length + '</div><div class="admin-stat-label">Ачивок</div></div></div>';
+    var statsEl = document.getElementById('adminStats');
+    if (!statsEl) {
+        return;
+    }
+    statsEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">' + getStars() + '</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">' + openedCases + '</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + inventory.length + '</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">' + achievements.length + '</div><div class="admin-stat-label">Ачивок</div></div></div>';
 }
 
 function loadAllUsers() {
-    var user = tg.initDataUnsafe?.user;
-    document.getElementById('adminUsersList').innerHTML = '<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">' + (user?.first_name || 'A').charAt(0) + '</div><div><div style="font-size:16px;font-weight:700;">' + (user?.first_name || 'Admin') + ' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@' + (user?.username || 'admin') + ' • ID: ' + (user?.id || 0) + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ ' + getStars() + '</span><span>📊 Lvl ' + userLevel + '</span><span>📦 ' + openedCases + '</span><span>💎 ' + inventory.length + '</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(' + (user?.id || 0) + ',\'' + (user?.username || 'admin') + '\',' + getStars() + ')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>';
+    var user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    var listEl = document.getElementById('adminUsersList');
+    if (!listEl) {
+        return;
+    }
+    var name = user ? (user.first_name || 'Admin') : 'Admin';
+    var username = user ? (user.username || 'admin') : 'admin';
+    var id = user ? user.id : 0;
+    var avatar = name.charAt(0);
+    listEl.innerHTML = '<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">' + avatar + '</div><div><div style="font-size:16px;font-weight:700;">' + name + ' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@' + username + ' • ID: ' + id + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ ' + getStars() + '</span><span>📊 Lvl ' + userLevel + '</span><span>📦 ' + openedCases + '</span><span>💎 ' + inventory.length + '</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(' + id + ',\'' + username + '\',' + getStars() + ')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>';
 }
 
 function manageUserBalance(userId, username, curStars) {
     var modal = document.createElement('div');
     modal.className = 'admin-modal';
-    modal.innerHTML = '<div class="admin-modal-content"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3 style="font-size:20px;font-weight:800;">💰 Управление балансом</h3><div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest(\'.admin-modal\').remove()">✕</div></div><div style="background:rgba(30,30,40,0.5);padding:15px;border-radius:12px;margin-bottom:20px;"><div style="font-size:18px;font-weight:700;">@' + username + '</div><div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span id="modalCurStars" style="color:#10b981;font-weight:700;">' + curStars + ' ⭐</span></div></div><input type="number" id="starsAmount" placeholder="Количество звёзд" min="1" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;margin-bottom:15px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><button class="admin-btn admin-btn-success" onclick="giveStars(\'' + username + '\')">➕ Выдать</button><button class="admin-btn admin-btn-danger" onclick="takeStars(\'' + username + '\')">➖ Забрать</button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;"><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=100">100</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=500">500</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=1000">1000</button></div></div>';
+    modal.innerHTML = '<div class="admin-modal-content"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3 style="font-size:20px;font-weight:800;">💰 Управление балансом</h3><div style="font-size:28px;cursor:pointer;color:#6b7280;" onclick="this.closest(\'.admin-modal\').remove()">✕</div></div><div style="background:rgba(30,30,40,0.5);padding:15px;border-radius:12px;margin-bottom:20px;"><div style="font-size:18px;font-weight:700;">@' + username + '</div><div style="font-size:14px;color:#6b7280;margin-top:6px;">Баланс: <span id="modalCurStars" style="color:#8b5cf6;font-weight:700;">' + curStars + ' ⭐</span></div></div><input type="number" id="starsAmount" placeholder="Количество звёзд" min="1" style="width:100%;padding:15px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:16px;margin-bottom:15px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><button class="admin-btn admin-btn-success" onclick="giveStars(\'' + username + '\')">➕ Выдать</button><button class="admin-btn admin-btn-danger" onclick="takeStars(\'' + username + '\')">➖ Забрать</button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;"><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=100">100</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=500">500</button><button class="admin-btn-quick" onclick="document.getElementById(\'starsAmount\').value=1000">1000</button></div></div>';
     document.body.appendChild(modal);
 }
 
 function giveStars(username) {
-    var amount = parseInt(document.getElementById('starsAmount').value);
-    if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
+    var input = document.getElementById('starsAmount');
+    if (!input) {
+        return;
+    }
+    var amount = parseInt(input.value, 10);
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите количество!');
+        return;
+    }
     setStars(getStars() + amount);
-    document.querySelector('.admin-modal').remove();
+    var modal = document.querySelector('.admin-modal');
+    if (modal) {
+        modal.remove();
+    }
     generateCases();
     loadAllUsers();
     loadAdminStats();
@@ -889,10 +1173,20 @@ function giveStars(username) {
 }
 
 function takeStars(username) {
-    var amount = parseInt(document.getElementById('starsAmount').value);
-    if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
+    var input = document.getElementById('starsAmount');
+    if (!input) {
+        return;
+    }
+    var amount = parseInt(input.value, 10);
+    if (!amount || amount <= 0) {
+        tg.showAlert('Введите количество!');
+        return;
+    }
     setStars(getStars() - amount);
-    document.querySelector('.admin-modal').remove();
+    var modal = document.querySelector('.admin-modal');
+    if (modal) {
+        modal.remove();
+    }
     generateCases();
     loadAllUsers();
     loadAdminStats();
@@ -906,13 +1200,19 @@ function resetUserProgress() {
         buttons:[{id:'yes', type:'destructive', text:'Сбросить'}, {type:'cancel'}]
     }, function(btn) {
         if (btn === 'yes') {
-            ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'].forEach(function(k) { localStorage.removeItem(k); });
+            var keys = ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'];
+            for (var i = 0; i < keys.length; i++) {
+                localStorage.removeItem(keys[i]);
+            }
             userLevel = 1;
             userXP = 0;
             openedCases = 0;
             inventory = [];
             achievements = [];
-            document.getElementById('balance').textContent = '0';
+            var balanceEl = document.getElementById('balance');
+            if (balanceEl) {
+                balanceEl.textContent = '0';
+            }
             updateLevelDisplay();
             generateCases();
             closeAdminPanel();
@@ -930,7 +1230,8 @@ function createPromoCode() {
 }
 
 function exportUserData() {
-    var blob = new Blob([JSON.stringify({stars:getStars(), level:userLevel, cases:openedCases, inventory:inventory, achievements:achievements}, null, 2)], {type:'application/json'});
+    var data = {stars:getStars(), level:userLevel, cases:openedCases, inventory:inventory, achievements:achievements};
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'export.json';
@@ -939,12 +1240,30 @@ function exportUserData() {
 }
 
 function switchAdminTab(tab) {
-    document.querySelectorAll('.admin-tab-vertical').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
-    document.querySelectorAll('.admin-tab-content').forEach(function(c) { c.classList.remove('active'); });
-    document.getElementById('adminTab' + tab[0].toUpperCase() + tab.slice(1)).classList.add('active');
-    if (tab === 'stats') loadAdminStats();
-    if (tab === 'users') loadAllUsers();
+    var tabs = document.querySelectorAll('.admin-tab-vertical');
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove('active');
+    }
+    var selector = '[data-tab="' + tab + '"]';
+    var target = document.querySelector(selector);
+    if (target) {
+        target.classList.add('active');
+    }
+    var contents = document.querySelectorAll('.admin-tab-content');
+    for (var j = 0; j < contents.length; j++) {
+        contents[j].classList.remove('active');
+    }
+    var id = 'adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    var content = document.getElementById(id);
+    if (content) {
+        content.classList.add('active');
+    }
+    if (tab === 'stats') {
+        loadAdminStats();
+    }
+    if (tab === 'users') {
+        loadAllUsers();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
