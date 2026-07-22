@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -57,15 +56,42 @@
         <div class="nft-scroll" id="nftScroll"></div>
     </div>
 
-    <div class="filters">
-        <button class="filter-btn active" data-filter="all">Все кейсы</button>
-        <button class="filter-btn" data-filter="free">Бесплатные</button>
-        <button class="filter-btn" data-filter="basic">Базовые</button>
-        <button class="filter-btn" data-filter="premium">Премиум</button>
+    <!-- Основные вкладки -->
+    <div class="tab-content active" id="tabCases">
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Все кейсы</button>
+            <button class="filter-btn" data-filter="free">Бесплатные</button>
+            <button class="filter-btn" data-filter="basic">Базовые</button>
+            <button class="filter-btn" data-filter="premium">Премиум</button>
+            <button class="filter-btn" data-filter="legendary">Легендарный</button>
+        </div>
+        <div class="cases-container" id="casesContainer"></div>
     </div>
 
-    <div class="tab-content active" id="tabCases">
-        <div class="cases-container" id="casesContainer"></div>
+    <div class="tab-content" id="tabGames">
+        <div class="games-grid">
+            <div class="game-card" onclick="switchToCases()">
+                <div class="game-card-icon">🎰</div>
+                <div class="game-card-title">Кейсы</div>
+                <div class="game-card-desc">Открывай кейсы</div>
+            </div>
+            <div class="game-card" onclick="showMinesweeper()">
+                <div class="game-card-icon">💣</div>
+                <div class="game-card-title">Сапёр</div>
+                <div class="game-card-desc">Найди мину</div>
+            </div>
+            <div class="game-card" onclick="showPromoGames()">
+                <div class="game-card-icon">🎟️</div>
+                <div class="game-card-title">Промокод</div>
+                <div class="game-card-desc">Активируй бонус</div>
+            </div>
+            <div class="game-card" onclick="showComingSoon()">
+                <div class="game-card-icon">🔄</div>
+                <div class="game-card-title">Скоро</div>
+                <div class="game-card-desc">Новые игры</div>
+            </div>
+        </div>
+        <div id="gamesContent"></div>
     </div>
 
     <div class="tab-content" id="tabInventory">
@@ -89,13 +115,13 @@
             <div class="nav-icon">🎰</div>
             <div class="nav-label">Кейсы</div>
         </div>
+        <div class="nav-item" onclick="switchTab('games')">
+            <div class="nav-icon">🎮</div>
+            <div class="nav-label">Игры</div>
+        </div>
         <div class="nav-item" onclick="switchTab('inventory')">
             <div class="nav-icon">📦</div>
             <div class="nav-label">Инвентарь</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('history')">
-            <div class="nav-icon">📜</div>
-            <div class="nav-label">История</div>
         </div>
         <div class="nav-item" onclick="switchTab('achievements')">
             <div class="nav-icon">🏆</div>
@@ -107,6 +133,7 @@
         </div>
     </div>
 
+    <!-- Modal Preview -->
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
             <div class="modal-preview-header">
@@ -126,6 +153,7 @@
         </div>
     </div>
 
+    <!-- Modal Roulette -->
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
         <div class="roulette-box">
@@ -148,6 +176,7 @@
         </div>
     </div>
 
+    <!-- ADMIN PANEL -->
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
