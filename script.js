@@ -88,11 +88,8 @@ const CASES_DATA = {
         type: "legendary",
         cooldown: false,
         items: [
-            { nft: NFT_DATABASE[15], chance: 25.0 },
-            { nft: NFT_DATABASE[4],  chance: 15.0 },
-            { nft: NFT_DATABASE[11], chance: 15.0 },
-            { nft: NFT_DATABASE[12], chance: 10.0 },
-            { nft: NFT_DATABASE[16], chance: 35.0 }
+            { nft: NFT_DATABASE[15], chance: 50.0 }, // ❤️ Сердце
+            { nft: NFT_DATABASE[16], chance: 50.0 }  // Mighty Arm (1500 ⭐)
         ]
     }
 };
@@ -130,6 +127,25 @@ function setStars(val) {
         balanceEl.textContent = val;
     }
 }
+
+// Добавляем функции для модалки кейсов
+function openCasesModal() {
+    let modal = document.getElementById('modalCases');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        generateCases();
+    }
+}
+
+function closeCasesModal() {
+    let modal = document.getElementById('modalCases');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
 
 function checkCanOpen(caseKey) {
     let data = CASES_DATA[caseKey];
@@ -1077,26 +1093,15 @@ function switchTab(tab) {
     for (let j = 0; j < tabContents.length; j++) {
         tabContents[j].classList.remove('active');
     }
-    let map = {cases:'tabCases', games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
+    let map = {games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
     let target = document.getElementById(map[tab]);
     if (target) {
         target.classList.add('active');
     }
-    if (tab === 'inventory') {
-        renderInventory();
-    }
-    if (tab === 'history') {
-        loadHistory();
-    }
-    if (tab === 'achievements') {
-        renderAchievements();
-    }
-    if (tab === 'profile') {
-        renderProfile();
-    }
-    if (tab === 'games') {
-        renderGames();
-    }
+    if (tab === 'inventory') renderInventory();
+    if (tab === 'history') loadHistory();
+    if (tab === 'achievements') renderAchievements();
+    if (tab === 'profile') renderProfile();
 }
 
 function renderGames() {
