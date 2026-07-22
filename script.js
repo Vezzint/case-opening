@@ -520,7 +520,7 @@ function startRoulette(caseKey) {
         checkAchievements();
         generateCases();
         skipBtn.style.display = 'none';  // Скрываем кнопку после завершения
-    }, 5400);
+    }, 5500);  // Увеличил задержку для полной остановки анимации
 }
 
 // ===========================================================
@@ -535,20 +535,37 @@ function skipRoulette() {
     const title     = document.getElementById('rouletteTitle');
     const skipBtn   = document.getElementById('skipBtn');
 
-    // Останавливаем анимацию
-    track.style.transition = 'none';
+    // Останавливаем анимацию и позиционируем на выигрышный элемент
+    track.style.transition = 'transform 0.5s cubic-bezier(0.05, 0.85, 0.15, 1)';
     title.textContent = '🎉 РЕЗУЛЬТАТ!';
 
-    // Скрываем рулетку и показываем результат
-    track.style.display = 'none';
-    skipBtn.style.display = 'none';
+    // Вычисляем позицию для выигрышного элемента
+    const WIN_IDX = 35;
+    const TOTAL   = 60;
+    const firstItem = track.children[0];
+    if (firstItem) {
+        const itemW  = firstItem.getBoundingClientRect().width;
+        const gap    = 10;
+        const stepW  = itemW + gap;
+        const wrapper = track.parentElement;
+        const wrapW   = wrapper ? wrapper.getBoundingClientRect().width : 370;
+        const center  = wrapW / 2;
+        const winCenterX = WIN_IDX * stepW + itemW / 2;
+        const offset     = center - winCenterX;
 
-    // Показываем результат
-    showResult(currentWinItem.nft, currentCase);
-    openedCases++;
-    localStorage.setItem('openedCases', openedCases);
-    checkAchievements();
-    generateCases();
+        track.style.transform = `translateX(${offset}px)`;
+    }
+
+    // Ждем завершения анимации позиционирования
+    setTimeout(() => {
+        skipBtn.style.display = 'none';
+        // Показываем результат
+        showResult(currentWinItem.nft, currentCase);
+        openedCases++;
+        localStorage.setItem('openedCases', openedCases);
+        checkAchievements();
+        generateCases();
+    }, 600);
 }
 
 function closeRouletteModal() {
