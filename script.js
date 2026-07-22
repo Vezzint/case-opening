@@ -82,7 +82,6 @@ var CASES_DATA = {
     ]
   }
 };
-};
 
 var ACHIEVEMENTS = [
     {id:'first_case', name:'Первый кейс',   desc:'Открой свой первый кейс',   icon:'🎁', reward:10},
