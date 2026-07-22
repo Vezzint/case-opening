@@ -29,9 +29,7 @@
     <canvas id="particles"></canvas>
 
     <!-- Admin Badge -->
-    <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">
-        👑 ADMIN
-    </div>
+    <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
 
     <!-- Header -->
     <div class="profile-header">
@@ -98,12 +96,10 @@
             <div style="background: rgba(30, 30, 40, 0.5); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
                 <h3 style="font-size: 18px; margin-bottom: 15px;">👥 Реферальная программа</h3>
                 <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Приглашай друзей и получай бонусы</p>
-
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center;">
                     <div style="font-size: 32px; font-weight: 900; color: #10b981;" id="refCount">0</div>
                     <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Приглашённых друзей</div>
                 </div>
-
                 <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; word-break: break-all; font-size: 12px; margin-bottom: 15px;">
                     <span id="refLink">Загрузка...</span>
                 </div>
@@ -111,7 +107,6 @@
                     📋 Копировать ссылку
                 </button>
             </div>
-
             <div style="background: rgba(30, 30, 40, 0.5); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
                 <h3 style="font-size: 18px; margin-bottom: 15px;">🎟️ Промокод</h3>
                 <input type="text" id="promoInput" placeholder="Введите промокод" style="width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; margin-bottom: 15px;">
@@ -146,65 +141,36 @@
         </div>
     </div>
 
-    <!-- Modal: Case Preview with Rolling Items -->
+    <!-- Modal: Case Preview с крутящимися предметами -->
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
             <div class="modal-preview-header">
                 <h2 id="previewCaseTitle">Case Name</h2>
                 <div class="modal-close" onclick="closePreviewModal()">✕</div>
             </div>
-            
             <div class="preview-rolling-container">
-                <div class="preview-rolling-track" id="previewRollingTrack">
-                    <!-- Items will be injected here -->
-                </div>
+                <div class="preview-rolling-track" id="previewRollingTrack"></div>
             </div>
-            
             <div class="preview-info">
                 <div class="preview-case-icon" id="previewCaseIcon">📦</div>
                 <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
                 <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
-                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">
-                    Открыть кейс
-                </button>
+                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
                 <button class="close-preview-btn" onclick="closePreviewModal()">Закрыть</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal: Case Info (Old, kept for compatibility) -->
-    <div class="modal-info" id="modalInfo">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalCaseTitle">Case Name</h2>
-                <div class="modal-close" onclick="closeInfoModal()">✕</div>
-            </div>
-            <div class="case-detail-image">
-                <div class="case-detail-image-icon" id="modalCaseIcon">📦</div>
-            </div>
-            <div class="case-detail-info">
-                <div class="case-detail-title" id="modalCaseName">CASE NAME</div>
-                <div class="case-detail-price" id="modalCasePrice">⭐ 50</div>
-                <button class="open-case-btn" id="modalOpenBtn" onclick="openCaseFromModal()">Открыть кейс</button>
-            </div>
-            <div class="items-section-title">💎 Возможные награды</div>
-            <div class="items-list" id="modalItemsList"></div>
         </div>
     </div>
 
     <!-- Modal: Roulette -->
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
-
         <div class="roulette-box">
             <div class="selector"></div>
             <div class="roulette-wrapper">
                 <div class="roulette-track" id="rouletteTrack"></div>
             </div>
         </div>
-
         <button class="skip-btn" id="skipBtn" onclick="skipRoulette()">⏩ Пропустить</button>
-
         <div class="result-box" id="resultBox">
             <div class="result-label">🎉 YOU WON!</div>
             <div class="result-icon" id="resultIcon"></div>
@@ -225,24 +191,20 @@
                 <h2>👑 ADMIN PANEL</h2>
                 <div class="admin-close" onclick="closeAdminPanel()">✕</div>
             </div>
-
             <div class="admin-tabs-vertical">
                 <div class="admin-tab-vertical active" data-tab="stats" onclick="switchAdminTab('stats')">📊 Статистика</div>
                 <div class="admin-tab-vertical" data-tab="users" onclick="switchAdminTab('users')">👥 Пользователи</div>
                 <div class="admin-tab-vertical" data-tab="actions" onclick="switchAdminTab('actions')">⚡ Действия</div>
             </div>
-
             <div class="admin-tab-content active" id="adminTabStats">
                 <div id="adminStats"></div>
             </div>
-
             <div class="admin-tab-content" id="adminTabUsers">
                 <div style="margin-bottom: 15px;">
                     <input type="text" id="adminUserSearch" placeholder="🔍 Поиск по username..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 14px;">
                 </div>
                 <div id="adminUsersList"></div>
             </div>
-
             <div class="admin-tab-content" id="adminTabActions">
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="admin-action-btn" onclick="sendGlobalNotification()">
@@ -252,7 +214,6 @@
                             <div class="admin-action-desc">Отправить сообщение всем пользователям</div>
                         </div>
                     </button>
-
                     <button class="admin-action-btn" onclick="createPromoCode()">
                         <div class="admin-action-icon">🎟️</div>
                         <div>
@@ -260,7 +221,6 @@
                             <div class="admin-action-desc">Новый промокод с наградой</div>
                         </div>
                     </button>
-
                     <button class="admin-action-btn" onclick="exportUserData()">
                         <div class="admin-action-icon">💾</div>
                         <div>
