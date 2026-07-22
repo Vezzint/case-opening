@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 3D Loader -->
     <div class="loader-container" id="loader">
         <div class="loader-3d">
             <div></div>
@@ -25,13 +24,10 @@
         </div>
     </div>
 
-    <!-- Particles Background -->
     <canvas id="particles"></canvas>
 
-    <!-- Admin Badge -->
     <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
 
-    <!-- Header -->
     <div class="profile-header">
         <div class="profile-info">
             <div class="profile-avatar" id="avatarContainer">🎰</div>
@@ -49,7 +45,6 @@
         </div>
     </div>
 
-    <!-- Status Bar -->
     <div class="status-bar">
         <div class="status-left">
             <span class="status-dot"></span>
@@ -57,12 +52,10 @@
         </div>
     </div>
 
-    <!-- NFT Slider -->
     <div class="nft-slider">
         <div class="nft-scroll" id="nftScroll"></div>
     </div>
 
-    <!-- Filters -->
     <div class="filters">
         <button class="filter-btn active" data-filter="all">Все кейсы</button>
         <button class="filter-btn" data-filter="free">Бесплатные</button>
@@ -70,27 +63,22 @@
         <button class="filter-btn" data-filter="premium">Премиум</button>
     </div>
 
-    <!-- Tab: Cases -->
     <div class="tab-content active" id="tabCases">
         <div class="cases-container" id="casesContainer"></div>
     </div>
 
-    <!-- Tab: Inventory -->
     <div class="tab-content" id="tabInventory">
         <div id="inventoryContainer"></div>
     </div>
 
-    <!-- Tab: History -->
     <div class="tab-content" id="tabHistory">
         <div id="historyContainer"></div>
     </div>
 
-    <!-- Tab: Achievements -->
     <div class="tab-content" id="tabAchievements">
         <div id="achievementsContainer"></div>
     </div>
 
-    <!-- Tab: Profile -->
     <div class="tab-content" id="tabProfile">
         <div style="padding: 20px;">
             <div style="background: rgba(30, 30, 40, 0.5); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
@@ -117,7 +105,6 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('cases')">
             <div class="nav-icon">🎰</div>
@@ -141,7 +128,7 @@
         </div>
     </div>
 
-    <!-- Modal: Case Preview с крутящимися предметами -->
+    <!-- Modal Preview Full Screen -->
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
             <div class="modal-preview-header">
@@ -156,12 +143,14 @@
                 <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
                 <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
                 <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
-                <button class="close-preview-btn" onclick="closePreviewModal()">Закрыть</button>
+            </div>
+            <div class="preview-items-list" id="previewItemsList">
+                <div class="preview-items-title">💎 Возможные награды</div>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Roulette -->
+    <!-- Modal Roulette -->
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
         <div class="roulette-box">
