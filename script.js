@@ -209,7 +209,10 @@ function initParticles() {
 }
 
 function hideLoader() {
-    setTimeout(() => document.getElementById('loader')?.classList.add('hidden'), 2000);
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.classList.add('hidden');
+    }
 }
 
 // ===========================================================
