@@ -32,13 +32,13 @@ const CASES_DATA = {
     type: "free",
     cooldown: true,
     items: [
-      { nft: NFT_DATABASE[0],  chance: 40.0 }, // 💝 Подарок
-      { nft: NFT_DATABASE[1],  chance: 30.0 }, // ⭐ 3 звезды
-      { nft: NFT_DATABASE[2],  chance: 15.0 }, // ⭐ 5 звёзд
-      { nft: NFT_DATABASE[3],  chance: 10.0 }, // ⭐ 15 звёзд
-      { nft: NFT_DATABASE[4],  chance: 4.5  }, // ⭐ 50 звёзд
-      { nft: NFT_DATABASE[12], chance: 0.4  }, // Happy Brownie (legendary)
-      { nft: NFT_DATABASE[13], chance: 0.1  }  // Instant Ramen (legendary)
+      { nft: NFT_DATABASE[0],  chance: 40.0 },
+      { nft: NFT_DATABASE[1],  chance: 30.0 },
+      { nft: NFT_DATABASE[2],  chance: 15.0 },
+      { nft: NFT_DATABASE[3],  chance: 10.0 },
+      { nft: NFT_DATABASE[4],  chance: 4.5  },
+      { nft: NFT_DATABASE[12], chance: 0.4  },
+      { nft: NFT_DATABASE[13], chance: 0.1  }
     ]
   },
 
@@ -49,15 +49,14 @@ const CASES_DATA = {
     type: "basic",
     cooldown: false,
     items: [
-      { nft: NFT_DATABASE[1],  chance: 55.0 }, // ⭐ 3 звезды
-      { nft: NFT_DATABASE[2],  chance: 25.0 }, // ⭐ 5 звёзд
-      { nft: NFT_DATABASE[3],  chance: 12.0 }, // ⭐ 15 звёзд
-      { nft: NFT_DATABASE[4],  chance: 7.0  }, // ⭐ 50 звёзд
-
-      { nft: NFT_DATABASE[8],  chance: 0.8  }, // Backpack (legendary)
-      { nft: NFT_DATABASE[9],  chance: 0.15 }, // Crystal Eagle (mythic)
-      { nft: NFT_DATABASE[7],  chance: 0.04 }, // Astral Shard (mythic)
-      { nft: NFT_DATABASE[10], chance: 0.01 }  // Durovs Cap (mythic)
+      { nft: NFT_DATABASE[1],  chance: 55.0 },
+      { nft: NFT_DATABASE[2],  chance: 25.0 },
+      { nft: NFT_DATABASE[3],  chance: 12.0 },
+      { nft: NFT_DATABASE[4],  chance: 7.0  },
+      { nft: NFT_DATABASE[8],  chance: 0.8  },
+      { nft: NFT_DATABASE[9],  chance: 0.15 },
+      { nft: NFT_DATABASE[7],  chance: 0.04 },
+      { nft: NFT_DATABASE[10], chance: 0.01 }
     ]
   },
 
@@ -68,18 +67,16 @@ const CASES_DATA = {
     type: "premium",
     cooldown: false,
     items: [
-      { nft: NFT_DATABASE[2],  chance: 30.0 }, // ⭐ 5 звёзд
-      { nft: NFT_DATABASE[3],  chance: 25.0 }, // ⭐ 15 звёзд
-      { nft: NFT_DATABASE[4],  chance: 20.0 }, // ⭐ 50 звёзд
-
-      { nft: NFT_DATABASE[11], chance: 8.0  }, // Faith Amulet (legendary)
-      { nft: NFT_DATABASE[12], chance: 5.0  }, // Happy Brownie (legendary)
-      { nft: NFT_DATABASE[13], chance: 2.0  }, // Instant Ramen (legendary)
-      { nft: NFT_DATABASE[14], chance: 8.0  }, // Jolly Chimp (legendary)
-
-      { nft: NFT_DATABASE[9],  chance: 1.5  }, // Crystal Eagle (mythic)
-      { nft: NFT_DATABASE[7],  chance: 0.4  }, // Astral Shard (mythic)
-      { nft: NFT_DATABASE[10], chance: 0.1  }  // Durovs Cap (mythic)
+      { nft: NFT_DATABASE[2],  chance: 30.0 },
+      { nft: NFT_DATABASE[3],  chance: 25.0 },
+      { nft: NFT_DATABASE[4],  chance: 20.0 },
+      { nft: NFT_DATABASE[11], chance: 8.0  },
+      { nft: NFT_DATABASE[12], chance: 5.0  },
+      { nft: NFT_DATABASE[13], chance: 2.0  },
+      { nft: NFT_DATABASE[14], chance: 8.0  },
+      { nft: NFT_DATABASE[9],  chance: 1.5  },
+      { nft: NFT_DATABASE[7],  chance: 0.4  },
+      { nft: NFT_DATABASE[10], chance: 0.1  }
     ]
   }
 };
@@ -100,12 +97,10 @@ let inventory      = [];
 let openedCases    = 0;
 let achievements   = [];
 let globalHistory  = [];
-let freeTimerInterval = null;  // интервал живого счётчика
-let currentWinItem = null;  // текущий выигрыш для пропуска
+let freeTimerInterval = null;
+let currentWinItem = null;
+let previewInterval = null;
 
-// ===========================================================
-// ПОЛУЧЕНИЕ БАЛАНСА — всегда свежий из localStorage
-// ===========================================================
 function getStars() {
     return parseInt(localStorage.getItem('gameStars') || '0');
 }
@@ -115,9 +110,6 @@ function setStars(val) {
     document.getElementById('balance').textContent = val;
 }
 
-// ===========================================================
-// ЕДИНСТВЕННАЯ ПРОВЕРКА — для ВСЕХ без исключений
-// ===========================================================
 function checkCanOpen(caseKey) {
     const data = CASES_DATA[caseKey];
     if (!data) return { ok:false, reason:'Кейс не найден' };
@@ -153,9 +145,6 @@ function msToHM(ms) {
     return h > 0 ? `${h}ч ${m}м` : `${m}м ${s}с`;
 }
 
-// ===========================================================
-// ЖИВОЙ СЧЁТЧИК ТАЙМЕРА НА КАРТОЧКЕ БЕСПЛАТНОГО КЕЙСА
-// ===========================================================
 function startFreeTimer() {
     if (freeTimerInterval) clearInterval(freeTimerInterval);
     freeTimerInterval = setInterval(() => {
@@ -169,7 +158,6 @@ function startFreeTimer() {
             freeTimerInterval = null;
             if (statusEl) { statusEl.textContent = '✅ ДОСТУПЕН'; statusEl.style.color = '#10b981'; }
             timerEl.textContent = '';
-            // Снимаем затемнение с карточки
             const card = document.getElementById('freeCard');
             if (card) card.style.opacity = '1';
         } else {
@@ -179,9 +167,6 @@ function startFreeTimer() {
     }, 1000);
 }
 
-// ===========================================================
-// ЧАСТИЦЫ
-// ===========================================================
 function initParticles() {
     const canvas = document.getElementById('particles');
     if (!canvas) return;
@@ -216,9 +201,6 @@ function hideLoader() {
     }
 }
 
-// ===========================================================
-// ИНИЦИАЛИЗАЦИЯ
-// ===========================================================
 function init() {
     const user = tg.initDataUnsafe?.user;
     if (user) {
@@ -289,9 +271,6 @@ function getRarityColor(r) {
     return {common:'#9e9e9e',rare:'#3b82f6',epic:'#a855f7',legendary:'#fbbf24',mythic:'#ef4444',special:'#10b981'}[r] || '#fff';
 }
 
-// ===========================================================
-// ГЕНЕРАЦИЯ КАРТОЧЕК КЕЙСОВ
-// ===========================================================
 function generateCases() {
     const container = document.getElementById('casesContainer');
     if (!container) return;
@@ -330,7 +309,7 @@ function generateCases() {
         }
 
         return `
-            <div class="case-big" id="${key=== 'free'?'freeCard':''}" onclick="showCaseInfo('${key}')"
+            <div class="case-big" id="${key=== 'free'?'freeCard':''}" onclick="showPreview('${key}')"
                  style="opacity:${locked?'0.6':'1'}">
                 ${data.price === 0 ? '<div class="case-badge">FREE</div>' : ''}
                 <div class="case-image-section">
@@ -346,9 +325,106 @@ function generateCases() {
     startFreeTimer();
 }
 
-// ===========================================================
-// ИНФО О КЕЙСЕ
-// ===========================================================
+// ===== NEW PREVIEW MODAL =====
+function showPreview(caseKey) {
+    const data = CASES_DATA[caseKey];
+    if (!data) return;
+
+    // Проверка на блокировку
+    const check = checkCanOpen(caseKey);
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        return;
+    }
+
+    currentCase = caseKey;
+
+    // Заполняем данные
+    document.getElementById('previewCaseTitle').textContent = data.name;
+    document.getElementById('previewCaseIcon').textContent = data.icon;
+    document.getElementById('previewCaseName').textContent = data.name.toUpperCase();
+    document.getElementById('previewCasePrice').textContent = data.price === 0 ? 'БЕСПЛАТНО' : `⭐ ${data.price}`;
+
+    const btn = document.getElementById('previewOpenBtn');
+    btn.textContent = data.price === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${data.price}`;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+
+    // Заполняем трек с предметами
+    const track = document.getElementById('previewRollingTrack');
+    track.innerHTML = '';
+    
+    // Делаем 3 копии для бесконечной прокрутки
+    const itemsToShow = [...data.items, ...data.items, ...data.items];
+    
+    itemsToShow.forEach(item => {
+        const nft = item.nft;
+        const div = document.createElement('div');
+        div.className = 'preview-rolling-item';
+        const color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
+        div.style.borderColor = color;
+        
+        if (nft.isCurrency) {
+            div.innerHTML = `
+                <div class="item-icon">${nft.icon}</div>
+                <div class="item-name">${nft.name}</div>
+                <div class="item-rarity-label" style="color:${color};">${nft.rarity}</div>
+            `;
+        } else {
+            div.innerHTML = `
+                <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=item-icon>💎</div>'">
+                <div class="item-name">${nft.name}</div>
+                <div class="item-rarity-label" style="color:${color};">${nft.rarity}</div>
+            `;
+        }
+        track.appendChild(div);
+    });
+
+    // Показываем модалку
+    document.getElementById('modalPreview').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePreviewModal() {
+    document.getElementById('modalPreview').classList.remove('active');
+    document.body.style.overflow = '';
+    currentCase = null;
+    if (previewInterval) {
+        clearInterval(previewInterval);
+        previewInterval = null;
+    }
+}
+
+function openCaseFromPreview() {
+    if (!currentCase) return;
+
+    const data  = CASES_DATA[currentCase];
+    const check = checkCanOpen(currentCase);
+
+    if (!check.ok) {
+        tg.showAlert(check.reason);
+        closePreviewModal();
+        generateCases();
+        return;
+    }
+
+    if (data.price > 0) {
+        setStars(getStars() - data.price);
+        generateCases();
+    }
+
+    if (data.cooldown) {
+        localStorage.setItem('lastFreeCase', new Date().toISOString());
+        generateCases();
+        startFreeTimer();
+    }
+
+    const key = currentCase;
+    closePreviewModal();
+    setTimeout(() => startRoulette(key), 300);
+}
+
+// ===== OLD MODAL INFO (kept for compatibility) =====
 function showCaseInfo(caseKey) {
     const data = CASES_DATA[caseKey];
     if (!data) return;
@@ -407,9 +483,6 @@ function closeInfoModal() {
     currentCase = null;
 }
 
-// ===========================================================
-// КНОПКА ОТКРЫТЬ
-// ===========================================================
 function openCaseFromModal() {
     if (!currentCase) return;
 
@@ -423,10 +496,9 @@ function openCaseFromModal() {
         return;
     }
 
-    // Списываем звёзды ДО закрытия окна — баланс сразу обновится
     if (data.price > 0) {
         setStars(getStars() - data.price);
-        generateCases(); // обновляем "не хватает" на карточке
+        generateCases();
     }
 
     if (data.cooldown) {
@@ -440,9 +512,7 @@ function openCaseFromModal() {
     setTimeout(() => startRoulette(key), 300);
 }
 
-// ===========================================================
-// РУЛЕТКА — ПОЛНАЯ АНИМАЦИЯ
-// ===========================================================
+// ===== ROULETTE =====
 function startRoulette(caseKey) {
     const data = CASES_DATA[caseKey];
     if (!data) return;
@@ -458,10 +528,9 @@ function startRoulette(caseKey) {
     modal.classList.add('active');
     resultBox.classList.remove('active');
     title.textContent = '🎲 ОТКРЫВАЕМ...';
-    skipBtn.style.display = 'block';  // Показываем кнопку пропуска
+    skipBtn.style.display = 'block';
     document.body.style.overflow = 'hidden';
 
-    // Сбрасываем без анимации
     track.style.transition = 'none';
     track.style.transform  = 'translateX(0px)';
     track.innerHTML        = '';
@@ -469,7 +538,7 @@ function startRoulette(caseKey) {
     const WIN_IDX = 35;
     const TOTAL   = 60;
     const winItem = getRandomItemByChance(data.items);
-    currentWinItem = winItem;  // Сохраняем для пропуска
+    currentWinItem = winItem;
 
     for (let i = 0; i < TOTAL; i++) {
         const item = (i === WIN_IDX)
@@ -487,22 +556,19 @@ function startRoulette(caseKey) {
         track.appendChild(div);
     }
 
-    // Ждём 2 кадра — браузер РЕАЛЬНО отрисовывает элементы
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            // Измеряем РЕАЛЬНУЮ ширину элемента из DOM
             const firstItem = track.children[0];
             if (!firstItem) return;
 
             const itemW  = firstItem.getBoundingClientRect().width;
-            const gap    = 10; // ← укажи gap из своего style.css (.roulette-track gap: 10px)
+            const gap    = 10;
             const stepW  = itemW + gap;
 
             const wrapper = track.parentElement;
             const wrapW   = wrapper ? wrapper.getBoundingClientRect().width : 370;
             const center  = wrapW / 2;
 
-            // Считаем смещение: центр победного элемента → центр экрана
             const winCenterX = WIN_IDX * stepW + itemW / 2;
             const offset     = center - winCenterX;
 
@@ -519,13 +585,10 @@ function startRoulette(caseKey) {
         localStorage.setItem('openedCases', openedCases);
         checkAchievements();
         generateCases();
-        skipBtn.style.display = 'none';  // Скрываем кнопку после завершения
-    }, 5500);  // Увеличил задержку для полной остановки анимации
+        skipBtn.style.display = 'none';
+    }, 5500);
 }
 
-// ===========================================================
-// ПРОПУСК РУЛЕТКИ
-// ===========================================================
 function skipRoulette() {
     if (!currentWinItem) return;
 
@@ -535,13 +598,10 @@ function skipRoulette() {
     const title     = document.getElementById('rouletteTitle');
     const skipBtn   = document.getElementById('skipBtn');
 
-    // Останавливаем анимацию и позиционируем на выигрышный элемент
     track.style.transition = 'transform 0.5s cubic-bezier(0.05, 0.85, 0.15, 1)';
     title.textContent = '🎉 РЕЗУЛЬТАТ!';
 
-    // Вычисляем позицию для выигрышного элемента
     const WIN_IDX = 35;
-    const TOTAL   = 60;
     const firstItem = track.children[0];
     if (firstItem) {
         const itemW  = firstItem.getBoundingClientRect().width;
@@ -556,10 +616,8 @@ function skipRoulette() {
         track.style.transform = `translateX(${offset}px)`;
     }
 
-    // Ждем завершения анимации позиционирования
     setTimeout(() => {
         skipBtn.style.display = 'none';
-        // Показываем результат
         showResult(currentWinItem.nft, currentCase);
         openedCases++;
         localStorage.setItem('openedCases', openedCases);
@@ -576,14 +634,12 @@ function closeRouletteModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
 
-    // Полностью сбрасываем стили рулетки для следующего запуска
     track.style.display = 'flex';
     track.style.transition = 'none';
     track.style.transform = 'translateX(0px)';
     track.innerHTML = '';
     skipBtn.style.display = 'block';
 }
-
 
 function getRandomItemByChance(items) {
     const rand = Math.random() * 100;
@@ -595,9 +651,6 @@ function getRandomItemByChance(items) {
     return items[items.length - 1];
 }
 
-// ===========================================================
-// ПОКАЗ РЕЗУЛЬТАТА
-// ===========================================================
 function showResult(nft, caseKey) {
     const resultBox = document.getElementById('resultBox');
     resultBox.classList.add('active');
@@ -655,19 +708,15 @@ function createConfetti() {
     }
 }
 
-// ===========================================================
-// ИНВЕНТАРЬ
-// ===========================================================
 function addToInventory(nft) {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
     inventory.unshift({
         ...nft,
-        uid: Date.now() + '_' + Math.random().toString(36).slice(2), // уникальный id
+        uid: Date.now() + '_' + Math.random().toString(36).slice(2),
         time: new Date().toISOString()
     });
     localStorage.setItem('inventory', JSON.stringify(inventory));
 }
-
 
 function loadInventory() {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
@@ -678,7 +727,6 @@ function renderInventory() {
     const c = document.getElementById('inventoryContainer');
     if (!c) return;
 
-    // Всегда читаем свежие данные из localStorage
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
     if (!inventory.length) {
@@ -705,7 +753,6 @@ function renderInventory() {
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">
                 ${sorted.map(nft => {
-                    // uid для надёжного поиска, или fallback на JSON-строку
                     const uid = nft.uid || JSON.stringify(nft);
                     const safeUid = encodeURIComponent(uid);
                     return `
@@ -737,14 +784,10 @@ function renderInventory() {
         </div>`;
 }
 
-
 function sellNFT(safeUid) {
     const uid = decodeURIComponent(safeUid);
-
-    // Читаем свежий инвентарь из localStorage
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
 
-    // Ищем предмет по uid
     const idx = inventory.findIndex(item => {
         const itemUid = item.uid || JSON.stringify(item);
         return itemUid === uid;
@@ -767,7 +810,6 @@ function sellNFT(safeUid) {
         ]
     }, btn => {
         if (btn === 'sell') {
-            // Снова читаем свежий инвентарь (мог измениться пока popup был открыт)
             inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
             const freshIdx = inventory.findIndex(item => (item.uid||JSON.stringify(item)) === uid);
 
@@ -779,17 +821,12 @@ function sellNFT(safeUid) {
             inventory.splice(freshIdx, 1);
             localStorage.setItem('inventory', JSON.stringify(inventory));
             setStars(getStars() + sp);
-            
-            // Принудительно перезагружаем инвентарь из localStorage
             loadInventory();
             tg.showAlert(`Продано за ${sp} ⭐!`);
         }
     });
 }
 
-// ===========================================================
-// ИСТОРИЯ
-// ===========================================================
 function saveToHistory(nft) {
     let h = JSON.parse(localStorage.getItem('caseHistory') || '[]');
     h.unshift({...nft, time: new Date().toLocaleString('ru-RU')});
@@ -827,9 +864,6 @@ function renderHistory(history) {
     </div>`;
 }
 
-// ===========================================================
-// ДОСТИЖЕНИЯ
-// ===========================================================
 function loadAchievements() {
     achievements = JSON.parse(localStorage.getItem('achievements') || '[]');
     renderAchievements();
@@ -881,9 +915,6 @@ function unlockAchievement(id) {
     renderAchievements();
 }
 
-// ===========================================================
-// ОНЛАЙН / ИСТОРИЯ СЛАЙДЕР
-// ===========================================================
 function fetchOnlineCount() {
     document.getElementById('onlineCount').textContent = `${150+Math.floor(Math.random()*50)-25} Online`;
 }
@@ -924,9 +955,6 @@ function addToGlobalHistory(nft) {
     renderGlobalHistory();
 }
 
-// ===========================================================
-// НАВИГАЦИЯ
-// ===========================================================
 function switchTab(tab) {
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     event.currentTarget.classList.add('active');
@@ -938,9 +966,6 @@ function switchTab(tab) {
     if (tab==='achievements') renderAchievements();
 }
 
-// ===========================================================
-// РЕФЕРАЛ / ПРОМО
-// ===========================================================
 function loadRefLink() {
     const uid = tg.initDataUnsafe?.user?.id || '000';
     document.getElementById('refLink').textContent  = `https://t.me/gsdfsdfdsfbot?start=ref_${uid}`;
@@ -964,12 +989,9 @@ function activatePromo() {
     localStorage.setItem('usedPromos', JSON.stringify(used));
     tg.showPopup({title:'🎉 Активировано!',message:`+${codes[code]} ⭐ звёзд!`,buttons:[{type:'ok'}]});
     document.getElementById('promoInput').value = '';
-    generateCases(); // обновляем кнопки кейсов
+    generateCases();
 }
 
-// ===========================================================
-// АДМИН ПАНЕЛЬ
-// ===========================================================
 function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminPanel').classList.add('active');
@@ -1054,7 +1076,7 @@ function giveStars(username) {
     if (!amount || amount <= 0) { tg.showAlert('Введите количество!'); return; }
     setStars(getStars() + amount);
     document.querySelector('.admin-modal').remove();
-    generateCases(); // сразу обновляем кнопки кейсов
+    generateCases();
     loadAllUsers();
     loadAdminStats();
     tg.showPopup({title:'✅ Выдано!', message:`+${amount} ⭐\nНовый баланс: ${getStars()} ⭐`, buttons:[{type:'ok'}]});
@@ -1105,7 +1127,7 @@ function exportUserData() {
 }
 
 function switchAdminTab(tab) {
-    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-vertical').forEach(t=>t.classList.remove('active'));
     document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
     document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.remove('active'));
     document.getElementById(`adminTab${tab[0].toUpperCase()+tab.slice(1)}`).classList.add('active');
