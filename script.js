@@ -638,11 +638,6 @@ function createConfetti() {
     }
 }
 
-function closeRouletteModal() {
-    document.getElementById('modalRoulette').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
 // ===========================================================
 // ИНВЕНТАРЬ
 // ===========================================================
