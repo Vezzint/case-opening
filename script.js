@@ -1416,6 +1416,242 @@ function switchAdminTab(tab) {
     }
 }
 
+// ===== НОВАЯ ЛОГИКА КЕЙСА =====
+let currentMultiplier = 1;
+let isSpinning = false;
+let spinTimer = null;
+let currentCaseData = null;
+let winResults = [];
+
+function openCaseView(caseKey) {
+    currentCaseData = CASES_DATA[caseKey];
+    if (!currentCaseData) return;
+
+    document.getElementById('caseTitle').textContent = currentCaseData.name;
+    
+    renderItemsList();
+    resetSlots();
+    document.querySelector('.container').style.display = 'block';
+}
+
+function renderItemsList() {
+    const container = document.getElementById('itemsScroll');
+    if (!container || !currentCaseData) return;
+    
+    let html = '';
+    for (let item of currentCaseData.items) {
+        const nft = item.nft;
+        const color = getRarityColor(nft.rarity);
+        html += `
+            <div class="item-row">
+                <div class="item-icon">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:20px>💎</div>'">
+                </div>
+                <div class="item-info">
+                    <div class="name">${nft.name}</div>
+                    <div class="rarity" style="color:${color}">${nft.rarity ? nft.rarity.toUpperCase() : 'ОБЫЧНЫЙ'}</div>
+                </div>
+                <div class="item-chance">${item.chance}%</div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
+function resetSlots() {
+    const rows = document.querySelectorAll('.slot-row');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('.slot-cell');
+        cells.forEach(cell => {
+            cell.className = 'slot-cell';
+            cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
+        });
+    });
+}
+
+function setMultiplier(mult) {
+    currentMultiplier = mult;
+    document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.multipliers button[data-mult="${mult}"]`).classList.add('active');
+    updateRows(mult);
+}
+
+function updateRows(count) {
+    const container = document.getElementById('slotRowsContainer');
+    const currentRows = container.querySelectorAll('.slot-row').length;
+    
+    if (count > currentRows) {
+        for (let i = currentRows; i < count; i++) {
+            const row = document.createElement('div');
+            row.className = 'slot-row';
+            row.dataset.row = i;
+            for (let j = 0; j < 5; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'slot-cell';
+                cell.dataset.index = j;
+                cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
+                row.appendChild(cell);
+            }
+            container.appendChild(row);
+        }
+    } else if (count < currentRows) {
+        for (let i = currentRows - 1; i >= count; i--) {
+            const row = container.querySelectorAll('.slot-row')[i];
+            if (row) row.remove();
+        }
+    }
+}
+
+function startSpin() {
+    if (isSpinning || !currentCaseData) return;
+    isSpinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    
+    const rows = document.querySelectorAll('.slot-row');
+    const totalRows = rows.length;
+    
+    winResults = [];
+    for (let i = 0; i < totalRows; i++) {
+        const winItem = getRandomItemByChance(currentCaseData.items);
+        winResults.push(winItem);
+    }
+    
+    rows.forEach((row, idx) => {
+        animateRow(row, winResults[idx], idx);
+    });
+}
+
+function animateRow(row, winItem, rowIndex) {
+    const cells = row.querySelectorAll('.slot-cell');
+    const items = currentCaseData.items;
+    let cycles = 0;
+    const maxCycles = 20 + Math.floor(Math.random() * 10);
+    let interval = 50;
+    
+    function step() {
+        cells.forEach((cell, idx) => {
+            const randomItem = items[Math.floor(Math.random() * items.length)];
+            const nft = randomItem.nft;
+            const color = getRarityColor(nft.rarity);
+            
+            cell.className = 'slot-cell';
+            if (nft.isCurrency) {
+                cell.innerHTML = `<div style="font-size:28px;">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${nft.rarity || 'common'}"></div>`;
+            } else {
+                cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:28px>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${nft.rarity || 'common'}"></div>`;
+            }
+        });
+        
+        cycles++;
+        interval += 2;
+        
+        if (cycles < maxCycles) {
+            spinTimer = setTimeout(step, interval);
+        } else {
+            finishRow(row, winItem, rowIndex);
+        }
+    }
+    
+    step();
+}
+
+function finishRow(row, winItem, rowIndex) {
+    const cells = row.querySelectorAll('.slot-cell');
+    const nft = winItem.nft;
+    const rarityClass = nft.rarity || 'common';
+    
+    const centerCell = cells[2];
+    centerCell.className = 'slot-cell pulse';
+    if (nft.isCurrency) {
+        centerCell.innerHTML = `<div style="font-size:28px;">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+    } else {
+        centerCell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:28px>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+    }
+    
+    cells.forEach((cell, idx) => {
+        if (idx === 2) return;
+        const randomItem = currentCaseData.items[Math.floor(Math.random() * currentCaseData.items.length)];
+        const rnft = randomItem.nft;
+        const rclass = rnft.rarity || 'common';
+        cell.className = 'slot-cell';
+        if (rnft.isCurrency) {
+            cell.innerHTML = `<div style="font-size:28px;">${rnft.icon || '💎'}</div><div class="cell-name">${rnft.name}</div><div class="rarity-bar ${rclass}"></div>`;
+        } else {
+            cell.innerHTML = `<img src="${rnft.image}" alt="${rnft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:28px>💎</div>'"><div class="cell-name">${rnft.name}</div><div class="rarity-bar ${rclass}"></div>`;
+        }
+    });
+    
+    addToInventory(nft);
+    saveToHistory(nft);
+    addToGlobalHistory(nft);
+    
+    if (nft.rarity === 'mythic' || nft.rarity === 'legendary') {
+        createConfetti();
+    }
+    
+    const allRows = document.querySelectorAll('.slot-row');
+    let finished = 0;
+    allRows.forEach(r => {
+        const center = r.querySelector('.slot-cell:nth-child(3)');
+        if (center && center.classList.contains('pulse')) finished++;
+    });
+    
+    if (finished === allRows.length) {
+        setTimeout(() => {
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+            
+            let msg = '🎉 Вы выиграли:\n';
+            allRows.forEach((r, idx) => {
+                const result = winResults[idx];
+                if (result) {
+                    msg += `${result.nft.name} (${result.nft.rarity || 'обычный'})\n`;
+                }
+            });
+            tg.showPopup({
+                title: '🎉 Поздравляем!',
+                message: msg,
+                buttons: [{type: 'ok'}]
+            });
+            
+            setTimeout(() => {
+                resetSlots();
+                winResults = [];
+            }, 5000);
+        }, 1500);
+    }
+}
+
+function closeCaseView() {
+    document.querySelector('.container').style.display = 'none';
+    document.getElementById('tabGames').style.display = 'block';
+    resetSlots();
+    isSpinning = false;
+    document.getElementById('spinBtn').disabled = false;
+    if (spinTimer) {
+        clearTimeout(spinTimer);
+        spinTimer = null;
+    }
+}
+
+const originalOpenCasesModal = openCasesModal;
+openCasesModal = function() {
+    const modal = document.getElementById('modalCases');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('tabGames').style.display = 'none';
+    openCaseView('legendary');
+};
+
+const originalShowPreview = showPreview;
+showPreview = function(caseKey) {
+    closeCasesModal();
+    document.getElementById('tabGames').style.display = 'none';
+    openCaseView(caseKey);
+};
+
 // ===== АНИМАЦИЯ ЗАГРУЗКИ =====
 function startLoaderAnimation() {
     let progress = 0;
