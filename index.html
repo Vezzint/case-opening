@@ -146,7 +146,33 @@
         </div>
     </div>
 
-    <!-- Modal: Case Info -->
+    <!-- Modal: Case Preview with Rolling Items -->
+    <div class="modal-preview" id="modalPreview">
+        <div class="modal-preview-content">
+            <div class="modal-preview-header">
+                <h2 id="previewCaseTitle">Case Name</h2>
+                <div class="modal-close" onclick="closePreviewModal()">✕</div>
+            </div>
+            
+            <div class="preview-rolling-container">
+                <div class="preview-rolling-track" id="previewRollingTrack">
+                    <!-- Items will be injected here -->
+                </div>
+            </div>
+            
+            <div class="preview-info">
+                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
+                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
+                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
+                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">
+                    Открыть кейс
+                </button>
+                <button class="close-preview-btn" onclick="closePreviewModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Case Info (Old, kept for compatibility) -->
     <div class="modal-info" id="modalInfo">
         <div class="modal-content">
             <div class="modal-header">
