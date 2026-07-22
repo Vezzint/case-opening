@@ -200,10 +200,10 @@
                 <div class="admin-close" onclick="closeAdminPanel()">✕</div>
             </div>
 
-            <div class="admin-tabs">
-                <div class="admin-tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 Статистика</div>
-                <div class="admin-tab" data-tab="users" onclick="switchAdminTab('users')">👥 Пользователи</div>
-                <div class="admin-tab" data-tab="actions" onclick="switchAdminTab('actions')">⚡ Действия</div>
+            <div class="admin-tabs-vertical">
+                <div class="admin-tab-vertical active" data-tab="stats" onclick="switchAdminTab('stats')">📊 Статистика</div>
+                <div class="admin-tab-vertical" data-tab="users" onclick="switchAdminTab('users')">👥 Пользователи</div>
+                <div class="admin-tab-vertical" data-tab="actions" onclick="switchAdminTab('actions')">⚡ Действия</div>
             </div>
 
             <div class="admin-tab-content active" id="adminTabStats">
@@ -218,7 +218,7 @@
             </div>
 
             <div class="admin-tab-content" id="adminTabActions">
-                <div style="display: grid; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="admin-action-btn" onclick="sendGlobalNotification()">
                         <div class="admin-action-icon">📢</div>
                         <div>
