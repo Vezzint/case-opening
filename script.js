@@ -559,8 +559,11 @@ function closeRouletteModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
 
-    // Восстанавливаем отображение рулетки для следующего запуска
+    // Полностью сбрасываем стили рулетки для следующего запуска
     track.style.display = 'flex';
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0px)';
+    track.innerHTML = '';
     skipBtn.style.display = 'block';
 }
 
