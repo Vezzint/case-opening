@@ -1,4 +1,4 @@
-// script.js
+// script.js - исправленный полный файл
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
