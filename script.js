@@ -1,4 +1,4 @@
-// script.js - полный файл с анимацией загрузки
+// script.js - полный файл с анимацией загрузки и новым экраном
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -8,11 +8,11 @@ tg.setBackgroundColor('#0a0a0f');
 const ADMIN_ID = 6584350034;
 
 const NFT_DATABASE = [
-    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
-    {id:1, name:"звезды",     stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
-    {id:2, name:"звёзд",      stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
-    {id:3, name:"звёзд",      stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
-    {id:4, name:"звёзд",      stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
+    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special", icon:"💝"},
+    {id:1, name:"звезды",     stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common",  icon:"⭐"},
+    {id:2, name:"звёзд",      stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",  icon:"⭐"},
+    {id:3, name:"звёзд",      stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare",    icon:"⭐"},
+    {id:4, name:"звёзд",      stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic",    icon:"⭐"},
     {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
     {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
     {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
@@ -23,8 +23,8 @@ const NFT_DATABASE = [
     {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
     {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15,name:"Сердце",        stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
-    {id:16,name:"Mighty Arm",    stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
+    {id:15, name:"Сердце",       stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special", icon:"❤️"},
+    {id:16, name:"Mighty Arm",   stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
 const CASES_DATA = {
@@ -435,77 +435,10 @@ function showPreview(caseKey) {
         return;
     }
 
-    currentCase = caseKey;
-
-    let titleEl = document.getElementById('previewCaseTitle');
-    let iconEl = document.getElementById('previewCaseIcon');
-    let nameEl = document.getElementById('previewCaseName');
-    let priceEl = document.getElementById('previewCasePrice');
-    let btn = document.getElementById('previewOpenBtn');
-
-    if (titleEl) titleEl.textContent = data.name;
-    if (iconEl) iconEl.textContent = data.icon;
-    if (nameEl) nameEl.textContent = data.name.toUpperCase();
-    if (priceEl) priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
-
-    if (btn) {
-        btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    }
-
-    let track = document.getElementById('previewRollingTrack');
-    if (track) {
-        track.innerHTML = '';
-        let itemsToShow = data.items.concat(data.items).concat(data.items);
-        for (let i = 0; i < itemsToShow.length; i++) {
-            let item = itemsToShow[i];
-            let nft = item.nft;
-            let div = document.createElement('div');
-            div.className = 'preview-rolling-item';
-            let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-            div.style.borderColor = color;
-
-            if (nft.isCurrency) {
-                div.innerHTML = '<img src="' + nft.image + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
-            } else {
-                div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
-            }
-            track.appendChild(div);
-        }
-    }
-
-    let itemsList = document.getElementById('previewItemsList');
-    if (itemsList) {
-        let listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
-        for (let j = 0; j < data.items.length; j++) {
-            let it = data.items[j];
-            let nft = it.nft;
-            if (!nft) continue;
-            if (nft.isCurrency) {
-                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;overflow:hidden;"><img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
-            } else {
-                let color = getRarityColor(nft.rarity);
-                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + color + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + color + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
-            }
-        }
-        itemsList.innerHTML = listHtml;
-    }
-
-    let modal = document.getElementById('modalPreview');
-    if (modal) {
-        modal.classList.add('active');
-    }
-    document.body.style.overflow = 'hidden';
-}
-
-function closePreviewModal() {
-    let modal = document.getElementById('modalPreview');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-    document.body.style.overflow = '';
-    currentCase = null;
+    // Закрываем модалку с кейсами
+    closeCasesModal();
+    // Открываем новый экран с 5 ячейками
+    openCaseScreen(caseKey);
 }
 
 function openCaseFromPreview() {
@@ -755,7 +688,6 @@ function showResult(nft, caseKey) {
             let tonEl = document.getElementById('resultTon');
             if (iconEl) iconEl.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
             if (nameEl) {
-                // Убираем цифру из названия, чтобы не было дублирования
                 let cleanName = nft.name.replace(/^\d+\s*/, '');
                 nameEl.textContent = '+' + nft.amount + ' ' + cleanName;
             }
@@ -829,6 +761,7 @@ function addToInventory(nft) {
         isCurrency: nft.isCurrency || false,
         amount: nft.amount || 0,
         rarity: nft.rarity,
+        icon: nft.icon || '',
         uid: Date.now() + '_' + Math.random().toString(36).slice(2),
         time: new Date().toISOString()
     };
@@ -1416,8 +1349,6 @@ function switchAdminTab(tab) {
     }
 }
 
-
-
 // ===== АНИМАЦИЯ ЗАГРУЗКИ =====
 function startLoaderAnimation() {
     let progress = 0;
@@ -1425,7 +1356,6 @@ function startLoaderAnimation() {
     const progressText = document.getElementById('loaderProgressText');
     const loader = document.getElementById('loader');
     
-    // Создаем частицы
     const particlesContainer = document.getElementById('loaderParticles');
     if (particlesContainer) {
         for (let i = 0; i < 10; i++) {
@@ -1434,7 +1364,6 @@ function startLoaderAnimation() {
         }
     }
     
-    // Анимируем прогресс
     const interval = setInterval(() => {
         progress += Math.random() * 3 + 1;
         if (progress > 100) progress = 100;
@@ -1452,7 +1381,6 @@ function startLoaderAnimation() {
                 if (loader) {
                     loader.classList.add('hidden');
                 }
-                // Запускаем основное приложение
                 init();
             }, 500);
         }
@@ -1470,11 +1398,9 @@ function openCaseScreen(caseKey) {
     currentSlotCaseData = CASES_DATA[caseKey];
     if (!currentSlotCaseData) return;
 
-    // Скрываем всё остальное
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelector('.bottom-nav').style.display = 'none';
     
-    // Показываем экран кейса
     const screen = document.getElementById('caseScreen');
     if (screen) {
         screen.classList.add('active');
@@ -1493,10 +1419,8 @@ function closeCaseScreen() {
     if (screen) {
         screen.classList.remove('active');
     }
-    // Показываем обратно
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = '');
     document.querySelector('.bottom-nav').style.display = '';
-    // Возвращаемся на вкладку игр
     document.getElementById('tabGames').style.display = 'block';
     document.getElementById('tabGames').classList.add('active');
     if (slotTimer) {
@@ -1658,7 +1582,6 @@ function finishSlotRow(row, winItem, rowIndex) {
         }
     });
     
-    // Добавляем в инвентарь
     addToInventory(nft);
     saveToHistory(nft);
     addToGlobalHistory(nft);
@@ -1667,7 +1590,6 @@ function finishSlotRow(row, winItem, rowIndex) {
         createConfetti();
     }
     
-    // Проверяем все ли ряды завершились
     const allRows = document.querySelectorAll('.slot-row');
     let finished = 0;
     allRows.forEach(r => {
@@ -1701,24 +1623,6 @@ function finishSlotRow(row, winItem, rowIndex) {
     }
 }
 
-// Перехватываем открытие кейса из модалки
-const originalShowPreviewForSlot = showPreview;
-showPreview = function(caseKey) {
-    const data = CASES_DATA[caseKey];
-    if (!data) return;
-    const check = checkCanOpen(caseKey);
-    if (!check.ok) {
-        tg.showAlert(check.reason);
-        return;
-    }
-    // Закрываем модалку с кейсами
-    closeCasesModal();
-    // Открываем новый экран
-    openCaseScreen(caseKey);
-};
-
-// Запускаем анимацию загрузки при загрузке страницы
-// Убираем вызов init() здесь, так как он вызывается внутри startLoaderAnimation()
 document.addEventListener('DOMContentLoaded', function() {
     startLoaderAnimation();
 });
