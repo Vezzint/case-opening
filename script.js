@@ -754,7 +754,11 @@ function showResult(nft, caseKey) {
             let starsEl = document.getElementById('resultStars');
             let tonEl = document.getElementById('resultTon');
             if (iconEl) iconEl.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
-            if (nameEl) nameEl.textContent = '+' + nft.amount + ' ' + nft.name;
+            if (nameEl) {
+                // Убираем цифру из названия, чтобы не было дублирования
+                let cleanName = nft.name.replace(/^\d+\s*/, '');
+                nameEl.textContent = '+' + nft.amount + ' ' + cleanName;
+            }
             if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
             if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
             if (tonEl) tonEl.innerHTML = '';
