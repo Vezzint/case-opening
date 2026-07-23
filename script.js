@@ -1398,6 +1398,10 @@ function openCaseScreen(caseKey) {
     currentSlotCaseData = CASES_DATA[caseKey];
     if (!currentSlotCaseData) return;
 
+    currentMultiplier = 1;
+    document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
+    document.querySelector('.multipliers button[data-mult="1"]').classList.add('active');
+
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelector('.bottom-nav').style.display = 'none';
     
@@ -1408,7 +1412,6 @@ function openCaseScreen(caseKey) {
         renderSlotItemsList();
         resetSlotRows();
         updateSlotRows(1);
-        document.querySelector('.multipliers button[data-mult="1"]').classList.add('active');
         document.getElementById('slotSpinBtn').disabled = false;
         isSlotSpinning = false;
     }
@@ -1427,8 +1430,12 @@ function closeCaseScreen() {
         clearTimeout(slotTimer);
         slotTimer = null;
     }
+    stopIdleAnimation();
     isSlotSpinning = false;
     document.getElementById('slotSpinBtn').disabled = false;
+    currentMultiplier = 1;
+    document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.multipliers button[data-mult="1"]`).classList.add('active');
 }
 
 function renderSlotItemsList() {
@@ -1465,6 +1472,43 @@ function resetSlotRows() {
             cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
         });
     });
+    startIdleAnimation();
+}
+
+let idleAnimationInterval = null;
+
+function startIdleAnimation() {
+    if (idleAnimationInterval) {
+        clearInterval(idleAnimationInterval);
+    }
+    idleAnimationInterval = setInterval(() => {
+        if (isSlotSpinning) return;
+        const container = document.getElementById('slotRowsContainer');
+        if (!container || !currentSlotCaseData) return;
+        const rows = container.querySelectorAll('.slot-row');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('.slot-cell');
+            cells.forEach(cell => {
+                if (!cell.classList.contains('pulse')) {
+                    const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
+                    const nft = randomItem.nft;
+                    const rarityClass = nft.rarity || 'common';
+                    if (nft.isCurrency) {
+                        cell.innerHTML = `<div class="cell-emoji">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+                    } else {
+                        cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+                    }
+                }
+            });
+        });
+    }, 800);
+}
+
+function stopIdleAnimation() {
+    if (idleAnimationInterval) {
+        clearInterval(idleAnimationInterval);
+        idleAnimationInterval = null;
+    }
 }
 
 function updateSlotRows(count) {
@@ -1504,6 +1548,26 @@ function setSlotMultiplier(mult) {
 
 function startSlotSpin() {
     if (isSlotSpinning || !currentSlotCaseData) return;
+    
+    const cost = currentSlotCaseData.price * currentMultiplier;
+    const stars = getStars();
+    
+    if (cost > 0 && stars < cost) {
+        tg.showAlert(`❌ Недостаточно звёзд!\n\nУ вас: ${stars} ⭐\nНужно: ${cost} ⭐`);
+        return;
+    }
+    
+    if (cost > 0) {
+        setStars(stars - cost);
+    }
+    
+    if (currentSlotCaseData.cooldown) {
+        localStorage.setItem('lastFreeCase', new Date().toISOString());
+        generateCases();
+        startFreeTimer();
+    }
+    
+    stopIdleAnimation();
     isSlotSpinning = true;
     document.getElementById('slotSpinBtn').disabled = true;
     
@@ -1582,7 +1646,18 @@ function finishSlotRow(row, winItem, rowIndex) {
         }
     });
     
-    addToInventory(nft);
+    if (nft.isCurrency) {
+        const isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1 || nft.name.indexOf('Сердце') !== -1;
+        if (isStars) {
+            setStars(getStars() + nft.amount);
+            addXP(nft.amount);
+        } else {
+            addXP(10);
+        }
+    } else {
+        addToInventory(nft);
+        addXP(Math.floor(nft.stars / 5));
+    }
     saveToHistory(nft);
     addToGlobalHistory(nft);
     
