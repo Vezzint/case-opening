@@ -126,7 +126,7 @@
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('games')">
+        <div class="nav-item active" data-tab="games" onclick="switchTab('games')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
                 <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
                 <circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -136,7 +136,7 @@
             </svg>
             <div class="nav-label">Игры</div>
         </div>
-        <div class="nav-item" onclick="switchTab('inventory')">
+        <div class="nav-item" data-tab="inventory" onclick="switchTab('inventory')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
                 <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
                 <line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/>
@@ -145,20 +145,20 @@
             </svg>
             <div class="nav-label">Инвентарь</div>
         </div>
-        <div class="nav-item" onclick="switchTab('achievements')">
+        <div class="nav-item" data-tab="achievements" onclick="switchTab('achievements')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
                 <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/>
             </svg>
             <div class="nav-label">Награды</div>
         </div>
-        <div class="nav-item" onclick="switchTab('profile')">
+        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
                 <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
                 <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
             </svg>
             <div class="nav-label">Профиль</div>
         </div>
-        <div class="nav-item" onclick="switchTab('history')">
+        <div class="nav-item" data-tab="history" onclick="switchTab('history')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
                 <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
                 <polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/>
