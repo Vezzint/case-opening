@@ -1369,44 +1369,16 @@ function switchAdminTab(tab) {
 }
 
 function startLoaderAnimation() {
-    const progressBar = document.getElementById('loaderProgressBar');
-    const progressText = document.getElementById('loaderProgressText');
     const loader = document.getElementById('loader');
     
-    // Проверяем, что элементы существуют
-    if (!progressBar || !loader) {
-        // Если элементов нет - сразу запускаем приложение
-        if (typeof init === 'function') {
-            init();
-        }
-        return;
+    // Сразу скрываем лоадер и запускаем приложение
+    if (loader) {
+        loader.style.display = 'none';
     }
     
-    let progress = 0;
-    
-    const interval = setInterval(() => {
-        progress += Math.random() * 3 + 1;
-        if (progress > 100) progress = 100;
-        
-        if (progressBar) {
-            progressBar.style.width = progress + '%';
-        }
-        if (progressText) {
-            progressText.textContent = Math.floor(progress) + '%';
-        }
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                if (loader) {
-                    loader.classList.add('hidden');
-                }
-                if (typeof init === 'function') {
-                    init();
-                }
-            }, 300);
-        }
-    }, 150);
+    if (typeof init === 'function') {
+        init();
+    }
 }
 // ===== НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ =====
 let currentMultiplier = 1;
