@@ -288,7 +288,6 @@ function init() {
     fetchOnlineCount();
     loadHistory();
     initParticles();
-    hideLoader();
     startFreeTimer();
 
     setInterval(fetchOnlineCount, 15000);
@@ -1065,54 +1064,6 @@ function switchTab(tab) {
         renderProfile();
     }
 }
-    // Скрываем все вкладки
-    let tabContents = document.querySelectorAll('.tab-content');
-    for (let j = 0; j < tabContents.length; j++) {
-        tabContents[j].classList.remove('active');
-    }
-    
-    // Показываем нужную вкладку
-    let map = {games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
-    let target = document.getElementById(map[tab]);
-    if (target) {
-        target.classList.add('active');
-        target.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    
-    // Обновляем навигацию по data-tab
-    let navItems = document.querySelectorAll('.nav-item');
-    for (let i = 0; i < navItems.length; i++) {
-        navItems[i].classList.remove('active');
-    }
-    let activeNav = document.querySelector(`.nav-item[data-tab="${tab}"]`);
-    if (activeNav) {
-        activeNav.classList.add('active');
-    }
-    
-    // Показываем/скрываем слайдер
-    let slider = document.querySelector('.nft-slider');
-    if (slider) {
-        if (tab === 'games') {
-            slider.style.display = 'block';
-        } else {
-            slider.style.display = 'none';
-        }
-    }
-    
-    // Вызываем функции рендеринга
-    if (tab === 'inventory') {
-        renderInventory();
-    }
-    if (tab === 'history') {
-        loadHistory();
-    }
-    if (tab === 'achievements') {
-        renderAchievements();
-    }
-    if (tab === 'profile') {
-        renderProfile();
-    }
 
 function renderGames() {
     let container = document.getElementById('gamesContent');
