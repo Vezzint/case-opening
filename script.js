@@ -31,7 +31,6 @@ const CASES_DATA = {
     free: {
         name: "🎁 Бесплатный кейс",
         icon: "🎁",
-        
         price: 0,
         type: "free",
         cooldown: true,
@@ -762,7 +761,6 @@ function addToInventory(nft) {
         isCurrency: nft.isCurrency || false,
         amount: nft.amount || 0,
         rarity: nft.rarity,
-        icon: nft.icon || '',
         uid: Date.now() + '_' + Math.random().toString(36).slice(2),
         time: new Date().toISOString()
     };
@@ -1017,23 +1015,42 @@ function addToGlobalHistory(nft) {
 }
 
 function switchTab(tab) {
-    let navItems = document.querySelectorAll('.nav-item');
-    for (let i = 0; i < navItems.length; i++) {
-        navItems[i].classList.remove('active');
-    }
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+    // Скрываем все вкладки
     let tabContents = document.querySelectorAll('.tab-content');
     for (let j = 0; j < tabContents.length; j++) {
         tabContents[j].classList.remove('active');
     }
+    
+    // Показываем нужную вкладку
     let map = {games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
     let target = document.getElementById(map[tab]);
     if (target) {
         target.classList.add('active');
+        target.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    
+    // Обновляем навигацию по data-tab
+    let navItems = document.querySelectorAll('.nav-item');
+    for (let i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove('active');
+    }
+    let activeNav = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+    if (activeNav) {
+        activeNav.classList.add('active');
+    }
+    
+    // Показываем/скрываем слайдер
+    let slider = document.querySelector('.nft-slider');
+    if (slider) {
+        if (tab === 'games') {
+            slider.style.display = 'block';
+        } else {
+            slider.style.display = 'none';
+        }
+    }
+    
+    // Вызываем функции рендеринга
     if (tab === 'inventory') {
         renderInventory();
     }
