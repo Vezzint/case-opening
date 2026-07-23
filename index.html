@@ -12,7 +12,6 @@
 </head>
 <body>
 
-    <!-- LOADER -->
     <div class="loader-container" id="loader">
         <div class="loader-particles" id="loaderParticles"></div>
         <div class="loader-glow"></div>
@@ -22,8 +21,8 @@
             <div class="loader-hat-ring2"></div>
         </div>
         <div class="loader-text-wrapper">
-            <div class="loader-text-main" id="loaderText">LOADING</div>
-            <div class="loader-text-glitch" id="loaderGlitch">LOADING</div>
+            <div class="loader-text-main">LOADING</div>
+            <div class="loader-text-glitch">LOADING</div>
             <div class="loader-text-shadow">LOADING</div>
         </div>
         <div class="loader-progress-container">
@@ -56,7 +55,7 @@
             <span class="balance-amount" id="balance">0</span>
             <span>⭐</span>
         </div>
-        <div class="balance-box-gram" id="gramBalanceBox">
+        <div class="balance-box-gram">
             <span class="balance-amount" id="gramBalance">0.00</span>
             <span>G</span>
             <button class="gram-plus-btn" onclick="openTopUpModal()">+</button>
@@ -72,6 +71,9 @@
 
     <!-- TAB: GAMES -->
     <div class="tab-content active" id="tabGames">
+        <div class="games-header">
+            <span class="games-category">🎮 Игры</span>
+        </div>
         <div class="nft-slider">
             <div class="nft-scroll" id="nftScroll"></div>
         </div>
@@ -79,22 +81,35 @@
             <div class="game-card" onclick="openCasesModal()">
                 <div class="game-card-icon">🎰</div>
                 <div class="game-card-title">Кейсы</div>
-                <div class="game-card-desc">Открой кейс и получи награду</div>
+                <div class="game-card-desc">Открой кейс</div>
             </div>
             <div class="game-card" onclick="showMinesweeper()">
                 <div class="game-card-icon">💣</div>
                 <div class="game-card-title">Сапёр</div>
-                <div class="game-card-desc">Найди мину и выиграй</div>
+                <div class="game-card-desc">Найди мину</div>
             </div>
             <div class="game-card" onclick="showPromoGames()">
                 <div class="game-card-icon">🎟️</div>
                 <div class="game-card-title">Промокод</div>
-                <div class="game-card-desc">Активируй бонус</div>
+                <div class="game-card-desc">Активируй</div>
             </div>
             <div class="game-card" onclick="showComingSoon()">
                 <div class="game-card-icon">🔄</div>
                 <div class="game-card-title">Скоро</div>
                 <div class="game-card-desc">Новые игры</div>
+            </div>
+        </div>
+        <div class="games-extras">
+            <span class="games-category">📦 Дополнения</span>
+            <div class="games-extras-grid">
+                <div class="game-card small" onclick="showPromoGames()">
+                    <div class="game-card-icon">🎟️</div>
+                    <div class="game-card-title">Промокоды</div>
+                </div>
+                <div class="game-card small" onclick="showSeasonal()">
+                    <div class="game-card-icon">📅</div>
+                    <div class="game-card-title">Сезонные</div>
+                </div>
             </div>
         </div>
         <div id="gamesContent"></div>
@@ -141,42 +156,23 @@
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div class="nav-item active" data-tab="games" onclick="switchTab('games')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="14" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
+            <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="16" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="16" cy="14" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/></svg>
             <div class="nav-label">Игры</div>
         </div>
         <div class="nav-item" data-tab="inventory" onclick="switchTab('inventory')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="18" y1="7" x2="18" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
+            <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/><line x1="18" y1="7" x2="18" y2="4" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/></svg>
             <div class="nav-label">Инвентарь</div>
         </div>
         <div class="nav-item" data-tab="achievements" onclick="switchTab('achievements')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
+            <svg class="nav-icon-svg" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
             <div class="nav-label">Награды</div>
         </div>
         <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
+            <svg class="nav-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
             <div class="nav-label">Профиль</div>
         </div>
         <div class="nav-item" data-tab="history" onclick="switchTab('history')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
+            <svg class="nav-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
             <div class="nav-label">История</div>
         </div>
     </div>
@@ -195,7 +191,7 @@
                 <div class="preview-case-icon" id="previewCaseIcon">📦</div>
                 <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
                 <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
-                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
+                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть</button>
             </div>
             <div class="preview-items-list" id="previewItemsList"></div>
         </div>
@@ -238,7 +234,8 @@
                     <button class="topup-method" data-method="gram" onclick="selectTopUpMethod('gram')">💎 GRAM</button>
                 </div>
                 <div class="topup-input-wrap">
-                    <input type="number" id="topUpAmount" placeholder="Введите сумму" min="0" step="0.01" value="1">
+                    <input type="number" id="topUpAmount" placeholder="Введите сумму" min="0.01" step="0.01" value="1" oninput="updateTopUpInfo()">
+                    <div class="topup-info" id="topUpInfo">Вы получите: 0.01 G</div>
                     <div class="topup-min-info" id="topUpMinInfo">Мин. сумма: 1 STAR</div>
                 </div>
                 <div class="topup-buttons">
@@ -280,8 +277,8 @@
     <div class="case-screen" id="caseScreen">
         <div class="header">
             <button class="back-btn" onclick="closeCaseScreen()">‹</button>
-            <span class="case-title" id="caseScreenTitle">Legendary Case</span>
-            <span class="case-price-display" id="casePriceDisplay">100 GRAM</span>
+            <span class="case-title" id="caseScreenTitle">LEGENDARY CASE</span>
+            <span class="case-price-display" id="casePriceDisplay">100 G</span>
         </div>
         <div class="arrow-indicator">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -291,27 +288,24 @@
             ВЫПАДЕТ ЗДЕСЬ
         </div>
         <div class="slot-rows-container" id="slotRowsContainer">
-            <div class="slot-row" data-row="0">
-                <div class="slot-cell" data-index="0"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="1"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="2"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="3"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="4"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
+            <div class="slot-row" id="mainSlotRow">
+                <!-- Ячейки создаются через JS -->
             </div>
         </div>
         <div class="controls">
-            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">
-                <span class="spin-label">Крутить</span>
-                <span class="spin-price" id="spinPrice">100 G</span>
-            </button>
             <div class="multipliers">
                 <button class="active" data-mult="1" onclick="setSlotMultiplier(1)">1x</button>
                 <button data-mult="2" onclick="setSlotMultiplier(2)">2x</button>
                 <button data-mult="3" onclick="setSlotMultiplier(3)">3x</button>
                 <button data-mult="4" onclick="setSlotMultiplier(4)">4x</button>
             </div>
+            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">
+                <span class="spin-label">Крутить</span>
+                <span class="spin-price" id="spinPrice">100 G</span>
+            </button>
         </div>
-        <div class="items-scroll" id="slotItemsScroll"></div>
+        <div class="rewards-header">Доступные награды</div>
+        <div class="rewards-grid" id="rewardsGrid"></div>
     </div>
 
     <script src="script.js"></script>
