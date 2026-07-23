@@ -12,6 +12,7 @@
 </head>
 <body>
 
+    <!-- LOADER -->
     <div class="loader-container" id="loader">
         <div class="loader-particles" id="loaderParticles"></div>
         <div class="loader-glow"></div>
@@ -39,6 +40,7 @@
 
     <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
 
+    <!-- HEADER -->
     <div class="profile-header">
         <div class="profile-info">
             <div class="profile-avatar" id="avatarContainer">🎰</div>
@@ -54,6 +56,11 @@
             <span class="balance-amount" id="balance">0</span>
             <span>⭐</span>
         </div>
+        <div class="balance-box-gram" id="gramBalanceBox">
+            <span class="balance-amount" id="gramBalance">0.00</span>
+            <span>G</span>
+            <button class="gram-plus-btn" onclick="openTopUpModal()">+</button>
+        </div>
     </div>
 
     <div class="status-bar">
@@ -63,6 +70,7 @@
         </div>
     </div>
 
+    <!-- TAB: GAMES -->
     <div class="tab-content active" id="tabGames">
         <div class="nft-slider">
             <div class="nft-scroll" id="nftScroll"></div>
@@ -92,6 +100,7 @@
         <div id="gamesContent"></div>
     </div>
 
+    <!-- MODAL: CASES -->
     <div class="modal-cases" id="modalCases">
         <div class="modal-cases-content">
             <div class="modal-cases-header">
@@ -109,22 +118,27 @@
         </div>
     </div>
 
+    <!-- TAB: INVENTORY -->
     <div class="tab-content" id="tabInventory">
         <div id="inventoryContainer"></div>
     </div>
 
+    <!-- TAB: HISTORY -->
     <div class="tab-content" id="tabHistory">
         <div id="historyContainer"></div>
     </div>
 
+    <!-- TAB: ACHIEVEMENTS -->
     <div class="tab-content" id="tabAchievements">
         <div id="achievementsContainer"></div>
     </div>
 
+    <!-- TAB: PROFILE -->
     <div class="tab-content" id="tabProfile">
         <div id="profileContainer"></div>
     </div>
 
+    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div class="nav-item active" data-tab="games" onclick="switchTab('games')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
@@ -167,6 +181,7 @@
         </div>
     </div>
 
+    <!-- MODAL: PREVIEW -->
     <div class="modal-preview" id="modalPreview">
         <div class="modal-preview-content">
             <div class="modal-preview-header">
@@ -186,6 +201,7 @@
         </div>
     </div>
 
+    <!-- MODAL: ROULETTE -->
     <div class="modal-roulette" id="modalRoulette">
         <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
         <div class="roulette-box">
@@ -208,6 +224,32 @@
         </div>
     </div>
 
+    <!-- MODAL: TOP UP -->
+    <div class="modal-topup" id="modalTopUp">
+        <div class="modal-topup-content">
+            <div class="modal-topup-header">
+                <h2>💰 Пополнение GRAM</h2>
+                <div class="modal-close" onclick="closeTopUpModal()">✕</div>
+            </div>
+            <div class="modal-topup-body">
+                <div class="topup-methods">
+                    <button class="topup-method active" data-method="stars" onclick="selectTopUpMethod('stars')">⭐ Stars</button>
+                    <button class="topup-method" data-method="crypto" onclick="selectTopUpMethod('crypto')">🪙 Crypto</button>
+                    <button class="topup-method" data-method="gram" onclick="selectTopUpMethod('gram')">💎 GRAM</button>
+                </div>
+                <div class="topup-input-wrap">
+                    <input type="number" id="topUpAmount" placeholder="Введите сумму" min="0" step="0.01" value="1">
+                    <div class="topup-min-info" id="topUpMinInfo">Мин. сумма: 1 STAR</div>
+                </div>
+                <div class="topup-buttons">
+                    <button class="topup-btn topup-btn-cancel" onclick="closeTopUpModal()">Отмена</button>
+                    <button class="topup-btn topup-btn-confirm" onclick="confirmTopUp()">Пополнить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
@@ -234,10 +276,12 @@
         </div>
     </div>
 
+    <!-- CASE SCREEN -->
     <div class="case-screen" id="caseScreen">
         <div class="header">
             <button class="back-btn" onclick="closeCaseScreen()">‹</button>
             <span class="case-title" id="caseScreenTitle">Legendary Case</span>
+            <span class="case-price-display" id="casePriceDisplay">100 GRAM</span>
         </div>
         <div class="arrow-indicator">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -256,9 +300,12 @@
             </div>
         </div>
         <div class="controls">
-            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">Крутить</button>
+            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">
+                <span class="spin-label">Крутить</span>
+                <span class="spin-price" id="spinPrice">100 G</span>
+            </button>
             <div class="multipliers">
-                <button data-mult="1" onclick="setSlotMultiplier(1)">1x</button>
+                <button class="active" data-mult="1" onclick="setSlotMultiplier(1)">1x</button>
                 <button data-mult="2" onclick="setSlotMultiplier(2)">2x</button>
                 <button data-mult="3" onclick="setSlotMultiplier(3)">3x</button>
                 <button data-mult="4" onclick="setSlotMultiplier(4)">4x</button>
