@@ -1417,7 +1417,6 @@ function switchAdminTab(tab) {
     }
 }
 
-// ===== АНИМАЦИЯ ЗАГРУЗКИ =====
 function startLoaderAnimation() {
     let progress = 0;
     const progressBar = document.getElementById('loaderProgressBar');
@@ -1449,7 +1448,10 @@ function startLoaderAnimation() {
                 if (loader) {
                     loader.classList.add('hidden');
                 }
-                init();
+                // Вызываем init() только один раз
+                if (typeof init === 'function') {
+                    init();
+                }
             }, 500);
         }
     }, 150);
@@ -1774,5 +1776,6 @@ function finishSlotRow(row, winItem, rowIndex) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Запускаем анимацию загрузки
     startLoaderAnimation();
 });
