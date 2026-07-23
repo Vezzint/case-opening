@@ -737,21 +737,6 @@ body::before {
 }
 
 /* ===== BOTTOM NAVIGATION ===== */
-.nav-icon-svg {
-    width: 24px;
-    height: 24px;
-    color: #4a4a5a;
-    transition: color 0.3s;
-}
-
-.nav-item.active .nav-icon-svg {
-    color: #a78bfa;
-}
-
-.nav-item:hover .nav-icon-svg {
-    color: #8b5cf6;
-}
-
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -796,6 +781,21 @@ body::before {
 }
 
 .nav-item:hover {
+    color: #8b5cf6;
+}
+
+.nav-icon-svg {
+    width: 24px;
+    height: 24px;
+    color: #4a4a5a;
+    transition: color 0.3s;
+}
+
+.nav-item.active .nav-icon-svg {
+    color: #a78bfa;
+}
+
+.nav-item:hover .nav-icon-svg {
     color: #8b5cf6;
 }
 
@@ -912,6 +912,152 @@ body::before {
 
 .admin-tab-content.active {
     display: block;
+}
+
+.admin-stat-card {
+    background: rgba(30, 20, 50, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.3s;
+}
+
+.admin-stat-card:hover {
+    border-color: rgba(251, 191, 36, 0.2);
+    transform: translateY(-3px);
+}
+
+.admin-stat-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.admin-stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fbbf24;
+    margin-bottom: 5px;
+}
+
+.admin-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.admin-user-row {
+    background: rgba(30, 20, 50, 0.4);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.admin-btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.admin-btn-success {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+}
+
+.admin-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+}
+
+.admin-btn-small {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.admin-btn-quick {
+    padding: 10px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 8px;
+    color: #fbbf24;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 6000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal-content {
+    background: linear-gradient(135deg, #150a2e, #0a0a12);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.admin-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(30, 20, 50, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+}
+
+.admin-action-btn:hover {
+    background: rgba(30, 20, 50, 0.6);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.admin-action-icon {
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 12px;
+}
+
+.admin-action-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.admin-action-desc {
+    font-size: 13px;
+    color: #6b7280;
 }
 
 /* ===== CASE SCREEN ===== */
@@ -1431,6 +1577,24 @@ body::before {
 
 #gamesContent {
     padding: 0 0 20px 0;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes confettiFall {
+    to {
+        transform: translate(calc(var(--x) * 400px - 200px), calc(100vh + 50px)) rotate(720deg);
+        opacity: 0;
+    }
 }
 
 /* ===== RESPONSIVE ===== */
