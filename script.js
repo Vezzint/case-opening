@@ -1,4 +1,4 @@
-// script.js - полный файл с анимацией загрузки и новым экраном
+// script.js - полный файл
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -14,16 +14,16 @@ const NFT_DATABASE = [
     {id:3, name:"15 звёзд",   stars:15,  gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
     {id:4, name:"50 звёзд",   stars:50,  gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
     {id:5, name:"1 may",         stars:20,  gram:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
-    {id:6, name:"Artisan Brick", stars:9400,  gram:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
-    {id:7, name:"Astral Shard",  stars:21000,  gram:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
-    {id:8, name:"Backpack",      stars:500,  gram:0.35, image:"nft/Backpack.jpg",      rarity:"legendary"},
+    {id:6, name:"Artisan Brick", stars:9400,  gram:94, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
+    {id:7, name:"Astral Shard",  stars:21000,  gram:210, image:"nft/Astral Shard.jpg", rarity:"mythic"},
+    {id:8, name:"Backpack",      stars:500,  gram:5, image:"nft/Backpack.jpg",      rarity:"legendary"},
     {id:9, name:"Crystal Eagle", stars:3881,  gram:41.25, image:"nft/Crystal Eagle.jpg",rarity:"mythic"},
-    {id:10,name:"Durovs Cap",    stars:78550, gram:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
-    {id:11,name:"Faith Amulet",  stars:650, gram:6, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
+    {id:10,name:"Durovs Cap",    stars:44500, gram:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
+    {id:11,name:"Faith Amulet",  stars:650, gram:5, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
     {id:12,name:"Happy Brownie", stars:500, gram:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
-    {id:13,name:"Instant Ramen", stars:540, gram:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
-    {id:14,name:"Jolly Chimp",   stars:756, gram:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15, name:"Mighty Arm",   stars:1500, gram:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
+    {id:13,name:"Instant Ramen", stars:540, gram:5.4, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
+    {id:14,name:"Jolly Chimp",   stars:756, gram:6.5, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
+    {id:15, name:"Mighty Arm",   stars:1500, gram:120, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
 const CASES_DATA = {
@@ -474,9 +474,7 @@ function showPreview(caseKey) {
         return;
     }
 
-    // Закрываем модалку с кейсами
     closeCasesModal();
-    // Открываем новый экран с 5 ячейками
     openCaseScreen(caseKey);
 }
 
@@ -782,14 +780,17 @@ function showResult(nft, caseKey) {
 
 function createConfetti() {
     let colors = ['#10b981','#fbbf24','#ef4444','#3b82f6','#a855f7'];
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 200; i++) {
         let el = document.createElement('div');
-        el.style.cssText = 'position:fixed;top:50%;left:50%;width:10px;height:10px;background:' + colors[i % colors.length] + ';border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 2 + 1) + 's linear forwards;--x:' + Math.random() + ';';
+        let size = Math.random() * 8 + 4;
+        let shapes = ['50%', '0'];
+        let shape = shapes[Math.floor(Math.random() * shapes.length)];
+        el.style.cssText = 'position:fixed;top:50%;left:50%;width:' + size + 'px;height:' + size + 'px;background:' + colors[i % colors.length] + ';border-radius:' + shape + ';z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 3 + 2) + 's linear forwards;--x:' + Math.random() + ';box-shadow:0 0 10px ' + colors[i % colors.length] + ';';
         document.body.appendChild(el);
         (function(e) {
             setTimeout(function() {
                 e.remove();
-            }, 3000);
+            }, 4000);
         })(el);
     }
 }
@@ -1059,14 +1060,12 @@ function addToGlobalHistory(nft) {
 }
 
 function switchTab(tab) {
-    // Скрываем все вкладки
     let tabContents = document.querySelectorAll('.tab-content');
     for (let j = 0; j < tabContents.length; j++) {
         tabContents[j].classList.remove('active');
         tabContents[j].style.display = 'none';
     }
     
-    // Показываем нужную вкладку
     let map = {games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
     let target = document.getElementById(map[tab]);
     if (target) {
@@ -1075,7 +1074,6 @@ function switchTab(tab) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // Обновляем навигацию по data-tab
     let navItems = document.querySelectorAll('.nav-item');
     for (let i = 0; i < navItems.length; i++) {
         navItems[i].classList.remove('active');
@@ -1085,7 +1083,6 @@ function switchTab(tab) {
         activeNav.classList.add('active');
     }
     
-    // Показываем/скрываем слайдер
     let slider = document.querySelector('.nft-slider');
     if (slider) {
         if (tab === 'games') {
@@ -1095,7 +1092,6 @@ function switchTab(tab) {
         }
     }
     
-    // Вызываем функции рендеринга
     if (tab === 'inventory') {
         renderInventory();
     }
@@ -1152,6 +1148,10 @@ function activatePromoGame() {
 
 function showComingSoon() {
     tg.showAlert('🔄 Скоро появится!');
+}
+
+function showSeasonal() {
+    tg.showAlert('📅 Сезонные кейсы скоро появятся!');
 }
 
 function renderProfile() {
@@ -1423,7 +1423,6 @@ function startLoaderAnimation() {
     const loader = document.getElementById('loader');
     const particlesContainer = document.getElementById('loaderParticles');
     
-    // Создаем частицы
     if (particlesContainer) {
         for (let i = 0; i < 10; i++) {
             const span = document.createElement('span');
@@ -1431,7 +1430,6 @@ function startLoaderAnimation() {
         }
     }
     
-    // Проверяем, что элементы существуют
     if (!progressBar || !loader) {
         if (typeof init === 'function') {
             init();
@@ -1466,7 +1464,7 @@ function startLoaderAnimation() {
     }, 150);
 }
 
-// ===== НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ =====
+// ===== КЕЙС ЭКРАН =====
 let currentMultiplier = 1;
 let isSlotSpinning = false;
 let slotTimer = null;
@@ -1489,9 +1487,8 @@ function openCaseScreen(caseKey) {
     const screen = document.getElementById('caseScreen');
     if (screen) {
         screen.classList.add('active');
-        document.getElementById('caseScreenTitle').textContent = currentSlotCaseData.name;
+        document.getElementById('caseScreenTitle').textContent = currentSlotCaseData.name.toUpperCase();
         
-        // Показываем цену
         let priceDisplay = document.getElementById('casePriceDisplay');
         if (priceDisplay) {
             if (currentSlotCaseData.priceGram > 0) {
@@ -1499,11 +1496,11 @@ function openCaseScreen(caseKey) {
             } else if (currentSlotCaseData.price > 0) {
                 priceDisplay.textContent = '⭐ ' + currentSlotCaseData.price;
             } else {
-                priceDisplay.textContent = 'БЕСПЛАТНО';
+                priceDisplay.textContent = 'FREE';
             }
         }
         
-        renderSlotItemsList();
+        renderRewardsGrid();
         resetSlotRows();
         updateSlotRows(1);
         updateSpinPrice();
@@ -1554,23 +1551,23 @@ function updateSpinPrice() {
     priceEl.textContent = totalPrice + ' ' + currency;
 }
 
-function renderSlotItemsList() {
-    const container = document.getElementById('slotItemsScroll');
+function renderRewardsGrid() {
+    const container = document.getElementById('rewardsGrid');
     if (!container || !currentSlotCaseData) return;
+    
     let html = '';
     for (let item of currentSlotCaseData.items) {
         const nft = item.nft;
         const color = getRarityColor(nft.rarity);
+        const gramPrice = nft.gram || 0;
         html += `
-            <div class="item-row">
-                <div class="item-icon">
-                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:16px>💎</div>'">
+            <div class="reward-card">
+                <div class="reward-price">${gramPrice > 0 ? gramPrice + ' G' : '—'}</div>
+                <div class="reward-image">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:32px>💎</div>'">
                 </div>
-                <div class="item-info">
-                    <div class="name">${nft.name}</div>
-                    <div class="rarity" style="color:${color}">${nft.rarity ? nft.rarity.toUpperCase() : 'ОБЫЧНЫЙ'}</div>
-                </div>
-                <div class="item-chance">${item.chance}%</div>
+                <div class="reward-name">${nft.name}</div>
+                <div class="reward-bar" style="background:${color};box-shadow:0 0 15px ${color}40;"></div>
             </div>
         `;
     }
@@ -1620,7 +1617,7 @@ function startIdleAnimation() {
                 }
             });
         });
-    }, 800);
+    }, 400);
 }
 
 function stopIdleAnimation() {
@@ -1739,7 +1736,6 @@ function animateSlotRow(row, winItem, rowIndex) {
         cells.forEach((cell, idx) => {
             const randomItem = items[Math.floor(Math.random() * items.length)];
             const nft = randomItem.nft;
-            const color = getRarityColor(nft.rarity);
             const rarityClass = nft.rarity || 'common';
             cell.className = 'slot-cell';
             cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
@@ -1811,24 +1807,10 @@ function finishSlotRow(row, winItem, rowIndex) {
         setTimeout(() => {
             isSlotSpinning = false;
             document.getElementById('slotSpinBtn').disabled = false;
-            
-            let msg = '🎉 Вы выиграли:\n';
-            allRows.forEach((r, idx) => {
-                const result = slotWinResults[idx];
-                if (result) {
-                    msg += `${result.nft.name} (${result.nft.rarity || 'обычный'})\n`;
-                }
-            });
-            tg.showPopup({
-                title: '🎉 Поздравляем!',
-                message: msg,
-                buttons: [{type: 'ok'}]
-            });
-            
             setTimeout(() => {
                 resetSlotRows();
                 slotWinResults = [];
-            }, 5000);
+            }, 3000);
         }, 1500);
     }
 }
@@ -1841,9 +1823,9 @@ function openTopUpModal() {
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        // Сброс
         document.getElementById('topUpAmount').value = 1;
         selectTopUpMethod('stars');
+        updateTopUpInfo();
     }
 }
 
@@ -1859,14 +1841,24 @@ function selectTopUpMethod(method) {
     selectedTopUpMethod = method;
     document.querySelectorAll('.topup-method').forEach(b => b.classList.remove('active'));
     document.querySelector(`.topup-method[data-method="${method}"]`).classList.add('active');
+    updateTopUpInfo();
+}
+
+function updateTopUpInfo() {
+    let amount = parseFloat(document.getElementById('topUpAmount').value) || 0;
+    let infoEl = document.getElementById('topUpInfo');
+    let minInfoEl = document.getElementById('topUpMinInfo');
     
-    let minInfo = document.getElementById('topUpMinInfo');
-    if (method === 'stars') {
-        minInfo.textContent = 'Мин. сумма: 1 STAR (≈ 0.01 G)';
-    } else if (method === 'crypto') {
-        minInfo.textContent = 'Мин. сумма: 0.01 USDT';
-    } else if (method === 'gram') {
-        minInfo.textContent = 'Мин. сумма: 0.1 GRAM';
+    if (selectedTopUpMethod === 'stars') {
+        let gramAmount = amount * 0.0096;
+        infoEl.textContent = `Вы получите: ${gramAmount.toFixed(4)} G`;
+        minInfoEl.textContent = 'Мин. сумма: 1 STAR';
+    } else if (selectedTopUpMethod === 'crypto') {
+        infoEl.textContent = '🪙 Оплата через Crypto';
+        minInfoEl.textContent = 'Мин. сумма: 0.01 USDT';
+    } else if (selectedTopUpMethod === 'gram') {
+        infoEl.textContent = `Вы пополните: ${amount.toFixed(2)} G`;
+        minInfoEl.textContent = 'Мин. сумма: 0.1 GRAM';
     }
 }
 
@@ -1878,21 +1870,14 @@ function confirmTopUp() {
     }
     
     if (selectedTopUpMethod === 'stars') {
-        // Конвертация: 1 GRAM ≈ 104 STARS
-        let starsNeeded = Math.ceil(amount * 104);
+        let gramAmount = amount * 0.0096;
         let currentStars = getStars();
-        if (currentStars < starsNeeded) {
-            tg.showAlert(`❌ Недостаточно звёзд!\n\nНужно: ${starsNeeded} ⭐\nУ вас: ${currentStars} ⭐`);
+        if (currentStars < amount) {
+            tg.showAlert(`❌ Недостаточно звёзд!\n\nНужно: ${amount} ⭐\nУ вас: ${currentStars} ⭐`);
             return;
         }
-        setStars(currentStars - starsNeeded);
-        let gramAmount = amount;
+        setStars(currentStars - Math.ceil(amount));
         setGram(getGram() + gramAmount);
-        tg.showPopup({
-            title: '✅ Пополнено!',
-            message: `Вы получили: ${gramAmount.toFixed(2)} GRAM\nСписано: ${starsNeeded} ⭐`,
-            buttons: [{type: 'ok'}]
-        });
         closeTopUpModal();
     } else if (selectedTopUpMethod === 'crypto') {
         tg.showAlert('🪙 Оплата через Crypto скоро будет доступна!');
