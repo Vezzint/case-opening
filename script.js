@@ -1637,7 +1637,8 @@ function updateSlotRows(count) {
             const row = document.createElement('div');
             row.className = 'slot-row';
             row.dataset.row = i;
-            for (let j = 0; j < 5; j++) {
+            // СОЗДАЁМ 3 ЯЧЕЙКИ В РЯДУ (было 5)
+            for (let j = 0; j < 3; j++) {
                 const cell = document.createElement('div');
                 cell.className = 'slot-cell';
                 cell.dataset.index = j;
@@ -1660,7 +1661,6 @@ function updateSlotRows(count) {
         }
     }
 }
-
 function setSlotMultiplier(mult) {
     currentMultiplier = mult;
     document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
@@ -1760,14 +1760,16 @@ function finishSlotRow(row, winItem, rowIndex) {
     const nft = winItem.nft;
     const rarityClass = nft.rarity || 'common';
     
-    const centerCell = cells[2];
+    // Показываем выигрыш в ЦЕНТРАЛЬНОЙ ячейке (индекс 1, т.к. 3 ячейки)
+    const centerIndex = 1;
+    const centerCell = cells[centerIndex];
     if (!centerCell) return;
     
     centerCell.className = 'slot-cell pulse';
     centerCell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
     
     cells.forEach((cell, idx) => {
-        if (idx === 2) return;
+        if (idx === centerIndex) return;
         if (!currentSlotCaseData || !currentSlotCaseData.items) return;
         const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
         if (!randomItem || !randomItem.nft) return;
@@ -1799,7 +1801,7 @@ function finishSlotRow(row, winItem, rowIndex) {
     const allRows = document.querySelectorAll('.slot-row');
     let finished = 0;
     allRows.forEach(r => {
-        const center = r.querySelector('.slot-cell:nth-child(3)');
+        const center = r.querySelector('.slot-cell:nth-child(2)');
         if (center && center.classList.contains('pulse')) finished++;
     });
     
