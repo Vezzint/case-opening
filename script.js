@@ -814,6 +814,51 @@ function addToInventory(nft) {
     checkMythicAchievement();
 }
 
+function renderSlotItemsList() {
+    const container = document.getElementById('slotItemsScroll');
+    if (!container || !currentSlotCaseData) return;
+    let html = '';
+    for (let item of currentSlotCaseData.items) {
+        const nft = item.nft;
+        const color = getRarityColor(nft.rarity);
+        html += `
+            <div class="item-row">
+                <div class="item-icon">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:16px>💎</div>'">
+                </div>
+                <div class="item-info">
+                    <div class="name">${nft.name}</div>
+                    <div class="rarity" style="color:${color}">${nft.rarity ? nft.rarity.toUpperCase() : 'ОБЫЧНЫЙ'}</div>
+                </div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
+function renderRewardsGrid() {
+    const container = document.getElementById('rewardsGrid');
+    if (!container || !currentSlotCaseData) return;
+    
+    let html = '';
+    for (let item of currentSlotCaseData.items) {
+        const nft = item.nft;
+        const color = getRarityColor(nft.rarity);
+        const gramPrice = nft.gram || 0;
+        html += `
+            <div class="reward-card">
+                <div class="reward-price">${gramPrice > 0 ? gramPrice + ' G' : '—'}</div>
+                <div class="reward-image">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:32px>💎</div>'">
+                </div>
+                <div class="reward-name">${nft.name}</div>
+                <div class="reward-bar" style="background:${color};box-shadow:0 0 15px ${color}40;"></div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
 function loadInventory() {
     inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
     renderInventory();
@@ -1549,29 +1594,6 @@ function updateSpinPrice() {
     }
     
     priceEl.textContent = totalPrice + ' ' + currency;
-}
-
-function renderRewardsGrid() {
-    const container = document.getElementById('rewardsGrid');
-    if (!container || !currentSlotCaseData) return;
-    
-    let html = '';
-    for (let item of currentSlotCaseData.items) {
-        const nft = item.nft;
-        const color = getRarityColor(nft.rarity);
-        const gramPrice = nft.gram || 0;
-        html += `
-            <div class="reward-card">
-                <div class="reward-price">${gramPrice > 0 ? gramPrice + ' G' : '—'}</div>
-                <div class="reward-image">
-                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:32px>💎</div>'">
-                </div>
-                <div class="reward-name">${nft.name}</div>
-                <div class="reward-bar" style="background:${color};box-shadow:0 0 15px ${color}40;"></div>
-            </div>
-        `;
-    }
-    container.innerHTML = html;
 }
 
 function resetSlotRows() {
