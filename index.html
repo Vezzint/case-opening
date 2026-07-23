@@ -63,11 +63,10 @@
         </div>
     </div>
 
-    <div class="nft-slider">
-        <div class="nft-scroll" id="nftScroll"></div>
-    </div>
-
     <div class="tab-content active" id="tabGames">
+        <div class="nft-slider">
+            <div class="nft-scroll" id="nftScroll"></div>
+        </div>
         <div class="games-grid">
             <div class="game-card" onclick="openCasesModal()">
                 <div class="game-card-icon">🎰</div>
@@ -256,9 +255,8 @@
                 <div class="slot-cell" data-index="4"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
             </div>
         </div>
-        <div class="items-scroll" id="slotItemsScroll"></div>
         <div class="controls">
-            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">🎰 Крутить</button>
+            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">Крутить</button>
             <div class="multipliers">
                 <button data-mult="1" onclick="setSlotMultiplier(1)">1x</button>
                 <button data-mult="2" onclick="setSlotMultiplier(2)">2x</button>
@@ -266,6 +264,7 @@
                 <button data-mult="4" onclick="setSlotMultiplier(4)">4x</button>
             </div>
         </div>
+        <div class="items-scroll" id="slotItemsScroll"></div>
     </div>
 
     <script src="script.js"></script>
