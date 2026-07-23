@@ -31,6 +31,7 @@ const CASES_DATA = {
     free: {
         name: "🎁 Бесплатный кейс",
         icon: "🎁",
+        
         price: 0,
         type: "free",
         cooldown: true,
@@ -1400,10 +1401,12 @@ function openCaseScreen(caseKey) {
 
     currentMultiplier = 1;
     document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
-    document.querySelector('.multipliers button[data-mult="1"]').classList.add('active');
+    const multBtn = document.querySelector('.multipliers button[data-mult="1"]');
+    if (multBtn) multBtn.classList.add('active');
 
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-    document.querySelector('.bottom-nav').style.display = 'none';
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) bottomNav.style.display = 'none';
     
     const screen = document.getElementById('caseScreen');
     if (screen) {
@@ -1621,11 +1624,14 @@ function animateSlotRow(row, winItem, rowIndex) {
 
 function finishSlotRow(row, winItem, rowIndex) {
     const cells = row.querySelectorAll('.slot-cell');
+    if (!winItem || !winItem.nft) return;
+    
     const nft = winItem.nft;
-    const color = getRarityColor(nft.rarity);
     const rarityClass = nft.rarity || 'common';
     
     const centerCell = cells[2];
+    if (!centerCell) return;
+    
     centerCell.className = 'slot-cell pulse';
     if (nft.isCurrency) {
         centerCell.innerHTML = `<div class="cell-emoji">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
@@ -1635,7 +1641,9 @@ function finishSlotRow(row, winItem, rowIndex) {
     
     cells.forEach((cell, idx) => {
         if (idx === 2) return;
+        if (!currentSlotCaseData || !currentSlotCaseData.items) return;
         const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
+        if (!randomItem || !randomItem.nft) return;
         const rnft = randomItem.nft;
         const rclass = rnft.rarity || 'common';
         cell.className = 'slot-cell';
