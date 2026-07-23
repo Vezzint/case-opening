@@ -1418,18 +1418,20 @@ function switchAdminTab(tab) {
 }
 
 function startLoaderAnimation() {
-    let progress = 0;
     const progressBar = document.getElementById('loaderProgressBar');
     const progressText = document.getElementById('loaderProgressText');
     const loader = document.getElementById('loader');
     
-    const particlesContainer = document.getElementById('loaderParticles');
-    if (particlesContainer) {
-        for (let i = 0; i < 10; i++) {
-            const span = document.createElement('span');
-            particlesContainer.appendChild(span);
+    // Проверяем, что элементы существуют
+    if (!progressBar || !loader) {
+        // Если элементов нет - сразу запускаем приложение
+        if (typeof init === 'function') {
+            init();
         }
+        return;
     }
+    
+    let progress = 0;
     
     const interval = setInterval(() => {
         progress += Math.random() * 3 + 1;
@@ -1448,15 +1450,13 @@ function startLoaderAnimation() {
                 if (loader) {
                     loader.classList.add('hidden');
                 }
-                // Вызываем init() только один раз
                 if (typeof init === 'function') {
                     init();
                 }
-            }, 500);
+            }, 300);
         }
     }, 150);
 }
-
 // ===== НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ =====
 let currentMultiplier = 1;
 let isSlotSpinning = false;
