@@ -8,11 +8,11 @@ tg.setBackgroundColor('#0a0a0f');
 const ADMIN_ID = 6584350034;
 
 const NFT_DATABASE = [
-    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special", icon:"💝"},
-    {id:1, name:"звезды",     stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common",  icon:"⭐"},
-    {id:2, name:"звёзд",      stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common",  icon:"⭐"},
-    {id:3, name:"звёзд",      stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare",    icon:"⭐"},
-    {id:4, name:"звёзд",      stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic",    icon:"⭐"},
+    {id:0, name:"Подарок",    stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
+    {id:1, name:"3 звезды",   stars:3,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
+    {id:2, name:"5 звёзд",    stars:5,   ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
+    {id:3, name:"15 звёзд",   stars:15,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
+    {id:4, name:"50 звёзд",   stars:50,  ton:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
     {id:5, name:"1 may",         stars:20,  ton:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
     {id:6, name:"Artisan Brick", stars:9400,  ton:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
     {id:7, name:"Astral Shard",  stars:21000,  ton:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
@@ -23,7 +23,7 @@ const NFT_DATABASE = [
     {id:12,name:"Happy Brownie", stars:500, ton:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
     {id:13,name:"Instant Ramen", stars:540, ton:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
     {id:14,name:"Jolly Chimp",   stars:756, ton:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15, name:"Сердце",       stars:0,   ton:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special", icon:"❤️"},
+    {id:15, name:"Сердце",       stars:0,   ton:0,    image:"nft/Heart.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
     {id:16, name:"Mighty Arm",   stars:1500, ton:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
@@ -1032,6 +1032,7 @@ function switchTab(tab) {
     let target = document.getElementById(map[tab]);
     if (target) {
         target.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     if (tab === 'inventory') {
         renderInventory();
