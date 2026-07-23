@@ -1919,18 +1919,13 @@ body::before {
 }
 
 /* ===== НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ ===== */
-.case-screen {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(ellipse at 50% 40%, #0a0a1a, #05050f);
-    z-index: 9999;
-    padding: 20px 16px 30px;
+.case-screen .items-scroll {
+    margin-top: 12px;
+    flex: 1;
     overflow-y: auto;
-    flex-direction: column;
+    padding-right: 4px;
+    min-height: 200px;
+    max-height: none;
 }
 .case-screen.active {
     display: flex;
@@ -2048,7 +2043,7 @@ body::before {
 
 .case-screen .items-scroll {
     margin-top: 16px;
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
     padding-right: 4px;
     flex: 1;
@@ -2067,17 +2062,17 @@ body::before {
 .case-screen .item-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: rgba(30, 20, 50, 0.3);
-    border-radius: 10px;
-    margin-bottom: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(30, 20, 50, 0.35);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 .case-screen .item-row .item-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -2090,20 +2085,22 @@ body::before {
     flex: 1;
 }
 .case-screen .item-row .item-info .name {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
 }
 .case-screen .item-row .item-info .rarity {
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
 }
 .case-screen .item-row .item-chance {
-    font-size: 13px;
+    display: block;
+    font-size: 18px;
     font-weight: 800;
     color: #8b5cf6;
+    min-width: 44px;
+    text-align: right;
 }
-
 .case-screen .controls {
     display: flex;
     align-items: center;
