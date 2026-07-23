@@ -11,21 +11,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Загрузочный экран -->
+    <!-- КРУТАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
     <div class="loader-container" id="loader">
+        <!-- Частицы фона -->
         <div class="loader-particles" id="loaderParticles"></div>
+        
+        <!-- Свечение -->
         <div class="loader-glow"></div>
+        
+        <!-- Вращающаяся Durovs Cap -->
         <div class="loader-hat-container">
             <img src="nft/Durovs Cap.jpg" alt="Durovs Cap" class="loader-hat" id="loaderHat">
             <div class="loader-hat-ring"></div>
             <div class="loader-hat-ring2"></div>
         </div>
+        
+        <!-- Текст Loading с глитч эффектом -->
         <div class="loader-text-wrapper">
             <div class="loader-text-main" id="loaderText">LOADING</div>
             <div class="loader-text-glitch" id="loaderGlitch">LOADING</div>
             <div class="loader-text-shadow">LOADING</div>
         </div>
+        
+        <!-- Прогресс бар -->
         <div class="loader-progress-container">
             <div class="loader-progress-track">
                 <div class="loader-progress-bar" id="loaderProgressBar"></div>
@@ -33,15 +41,15 @@
             </div>
             <div class="loader-progress-text" id="loaderProgressText">0%</div>
         </div>
+        
+        <!-- Подпись -->
         <div class="loader-subtitle">Premium Case Opening</div>
     </div>
 
     <canvas id="particles"></canvas>
 
-    <!-- Админ-кнопка -->
     <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
 
-    <!-- Шапка с балансом -->
     <div class="profile-header">
         <div class="profile-info">
             <div class="profile-avatar" id="avatarContainer">🎰</div>
@@ -55,29 +63,10 @@
         </div>
         <div class="balance-box">
             <span class="balance-amount" id="balance">0</span>
-            <span style="color:#a78bfa;">⭐</span>
-            <span style="margin:0 5px; color:#6b7280;">|</span>
-            <span class="balance-amount" id="gramBalance" style="color:#10b981;">0.00</span>
-            <span style="color:#10b981; font-weight:700;">G</span>
-            <button id="topUpBtn" onclick="openTopUpModal()" style="
-                background: linear-gradient(135deg, #10b981, #059669);
-                border: none;
-                color: #fff;
-                border-radius: 50%;
-                width: 28px;
-                height: 28px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                margin-left: 4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            ">+</button>
+            <span>⭐</span>
         </div>
     </div>
 
-    <!-- Статус-бар -->
     <div class="status-bar">
         <div class="status-left">
             <span class="status-dot"></span>
@@ -85,11 +74,11 @@
         </div>
     </div>
 
-    <!-- Вкладки -->
+    <div class="nft-slider">
+        <div class="nft-scroll" id="nftScroll"></div>
+    </div>
+
     <div class="tab-content active" id="tabGames">
-        <div class="nft-slider">
-            <div class="nft-scroll" id="nftScroll"></div>
-        </div>
         <div class="games-grid">
             <div class="game-card" onclick="openCasesModal()">
                 <div class="game-card-icon">🎰</div>
@@ -115,66 +104,6 @@
         <div id="gamesContent"></div>
     </div>
 
-    <div class="tab-content" id="tabInventory">
-        <div id="inventoryContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabHistory">
-        <div id="historyContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabAchievements">
-        <div id="achievementsContainer"></div>
-    </div>
-
-    <div class="tab-content" id="tabProfile">
-        <div id="profileContainer"></div>
-    </div>
-
-    <!-- Нижняя навигация -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-tab="games" onclick="switchTab('games')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <circle cx="16" cy="14" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <div class="nav-label">Игры</div>
-        </div>
-        <div class="nav-item" data-tab="inventory" onclick="switchTab('inventory')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="18" y1="7" x2="18" y2="4" stroke="currentColor" stroke-width="1.5"/>
-                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <div class="nav-label">Инвентарь</div>
-        </div>
-        <div class="nav-item" data-tab="achievements" onclick="switchTab('achievements')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">Награды</div>
-        </div>
-        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">Профиль</div>
-        </div>
-        <div class="nav-item" data-tab="history" onclick="switchTab('history')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-            <div class="nav-label">История</div>
-        </div>
-    </div>
-
-    <!-- Модалка выбора кейсов -->
     <div class="modal-cases" id="modalCases">
         <div class="modal-cases-content">
             <div class="modal-cases-header">
@@ -192,66 +121,105 @@
         </div>
     </div>
 
-    <!-- Модалка пополнения GRAM -->
-    <div id="topUpModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.97); backdrop-filter:blur(20px); z-index:9999; overflow-y:auto;">
-        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
-            <div style="background: linear-gradient(135deg, #150a2e, #0a0a12); border-radius:24px; padding:30px; max-width:420px; width:100%; border:1px solid rgba(139,92,246,0.2);">
-                <h2 style="font-size:24px; font-weight:900; margin-bottom:20px; background: linear-gradient(135deg, #fff, #a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">💰 Пополнение GRAM</h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <button class="topUpMethod active" data-method="stars" onclick="selectTopUpMethod('stars')" style="flex:1; padding:12px; background:rgba(30,20,50,0.5); border:1px solid rgba(139,92,246,0.3); border-radius:12px; color:#a78bfa; font-weight:700;">⭐ Stars</button>
-                    <button class="topUpMethod" data-method="crypto" onclick="selectTopUpMethod('crypto')" style="flex:1; padding:12px; background:rgba(30,20,50,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#6b7280; font-weight:700;">🪙 Crypto</button>
-                    <button class="topUpMethod" data-method="gram" onclick="selectTopUpMethod('gram')" style="flex:1; padding:12px; background:rgba(30,20,50,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#6b7280; font-weight:700;">💎 GRAM</button>
-                </div>
-                <input type="number" id="topUpAmount" placeholder="Количество звёзд" min="1" oninput="updateTopUpInfo()" style="width:100%; padding:15px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:16px; margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-size:14px; color:#6b7280;">
-                    <span>Вы получите:</span>
-                    <span id="topUpGramResult" style="color:#10b981; font-weight:700;">0.0000 GRAM</span>
-                </div>
-                <div style="font-size:12px; color:#6b7280; margin-bottom:20px;" id="topUpMinInfo">Мин. сумма: 1 ⭐</div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="closeTopUpModal()" style="flex:1; padding:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:#fff; font-weight:700;">Отмена</button>
-                    <button onclick="confirmTopUp()" style="flex:1; padding:16px; background:linear-gradient(135deg,#8b5cf6,#6366f1); border:none; border-radius:14px; color:#fff; font-weight:800;">Пополнить</button>
-                </div>
-            </div>
-        </div>
+    <div class="tab-content" id="tabInventory">
+        <div id="inventoryContainer"></div>
     </div>
 
-    <!-- Экран открытия кейса -->
-    <div class="case-screen" id="caseScreen">
-        <div class="header">
-            <button class="back-btn" onclick="closeCaseScreen()">‹</button>
-            <span class="case-title" id="caseScreenTitle">Legendary Case</span>
-            <span class="case-price-display" id="casePriceDisplay" style="margin-left:auto; font-size:14px; color:#fbbf24; font-weight:700;">⭐ 0</span>
-        </div>
-        <div class="arrow-indicator">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="7,13 12,8 17,13"/>
-                <line x1="12" y1="18" x2="12" y2="8"/>
+    <div class="tab-content" id="tabHistory">
+        <div id="historyContainer"></div>
+    </div>
+
+    <div class="tab-content" id="tabAchievements">
+        <div id="achievementsContainer"></div>
+    </div>
+
+    <div class="tab-content" id="tabProfile">
+        <div id="profileContainer"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('games')">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
+                <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="16" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="16" cy="14" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/>
             </svg>
-            ВЫПАДЕТ ЗДЕСЬ
+            <div class="nav-label">Игры</div>
         </div>
-        <div class="slot-rows-container" id="slotRowsContainer">
-            <div class="slot-row" data-row="0">
-                <div class="slot-cell" data-index="0"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="1"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="2"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="3"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-                <div class="slot-cell" data-index="4"><div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div></div>
-            </div>
+        <div class="nav-item" onclick="switchTab('inventory')">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
+                <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <line x1="6" y1="7" x2="6" y2="4" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="18" y1="7" x2="18" y2="4" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <div class="nav-label">Инвентарь</div>
         </div>
-        <div class="controls">
-            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">Крутить</button>
-            <div class="multipliers">
-                <button data-mult="1" class="active" onclick="setSlotMultiplier(1)">1x</button>
-                <button data-mult="2" onclick="setSlotMultiplier(2)">2x</button>
-                <button data-mult="3" onclick="setSlotMultiplier(3)">3x</button>
-                <button data-mult="4" onclick="setSlotMultiplier(4)">4x</button>
-            </div>
+        <div class="nav-item" onclick="switchTab('achievements')">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
+                <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div class="nav-label">Награды</div>
         </div>
-        <div class="items-scroll" id="slotItemsScroll"></div>
+        <div class="nav-item" onclick="switchTab('profile')">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div class="nav-label">Профиль</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('history')">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <polyline points="12,7 12,12 15,15" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div class="nav-label">История</div>
+        </div>
     </div>
 
-    <!-- Админ-панель -->
+    <div class="modal-preview" id="modalPreview">
+        <div class="modal-preview-content">
+            <div class="modal-preview-header">
+                <h2 id="previewCaseTitle">Case Name</h2>
+                <div class="modal-close" onclick="closePreviewModal()">✕</div>
+            </div>
+            <div class="preview-rolling-container">
+                <div class="preview-rolling-track" id="previewRollingTrack"></div>
+            </div>
+            <div class="preview-info">
+                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
+                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
+                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
+                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
+            </div>
+            <div class="preview-items-list" id="previewItemsList"></div>
+        </div>
+    </div>
+
+    <div class="modal-roulette" id="modalRoulette">
+        <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
+        <div class="roulette-box">
+            <div class="selector"></div>
+            <div class="roulette-wrapper">
+                <div class="roulette-track" id="rouletteTrack"></div>
+            </div>
+        </div>
+        <button class="skip-btn" id="skipBtn" onclick="skipRoulette()">⏩ Пропустить</button>
+        <div class="result-box" id="resultBox">
+            <div class="result-label">🎉 YOU WON!</div>
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-name" id="resultName"></div>
+            <div class="result-rarity" id="resultRarity"></div>
+            <div class="result-values">
+                <span id="resultStars"></span>
+                <span id="resultTon"></span>
+            </div>
+            <button class="close-btn" onclick="closeRouletteModal()">Продолжить</button>
+        </div>
+    </div>
+
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
@@ -281,3 +249,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
