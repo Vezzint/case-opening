@@ -1,4 +1,4 @@
-// script.js - полный файл
+// script.js - полный файл с анимацией загрузки и новым экраном
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -8,22 +8,22 @@ tg.setBackgroundColor('#0a0a0f');
 const ADMIN_ID = 6584350034;
 
 const NFT_DATABASE = [
-    {id:0, name:"Сердце",       stars:0,   gram:0,    image:"nft/Gift.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
+    {id:0, name:"Сердце",       stars:0,   gram:0,    image:"nft/Heart.jpg",         isCurrency:true,  amount:1,  rarity:"special"},
     {id:1, name:"3 звезды",   stars:3,   gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:3,  rarity:"common"},
     {id:2, name:"5 звёзд",    stars:5,   gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:5,  rarity:"common"},
     {id:3, name:"15 звёзд",   stars:15,  gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:15, rarity:"rare"},
     {id:4, name:"50 звёзд",   stars:50,  gram:0,    image:"nft/Stars.jpg",        isCurrency:true,  amount:50, rarity:"epic"},
     {id:5, name:"1 may",         stars:20,  gram:0.10, image:"nft/1 may.jpg",        rarity:"legendary"},
-    {id:6, name:"Artisan Brick", stars:9400,  gram:94, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
-    {id:7, name:"Astral Shard",  stars:21000,  gram:210, image:"nft/Astral Shard.jpg", rarity:"mythic"},
-    {id:8, name:"Backpack",      stars:500,  gram:5, image:"nft/Backpack.jpg",      rarity:"legendary"},
+    {id:6, name:"Artisan Brick", stars:9400,  gram:100, image:"nft/Artisan Brick.jpg",rarity:"legendary"},
+    {id:7, name:"Astral Shard",  stars:21000,  gram:220, image:"nft/Astral Shard.jpg", rarity:"mythic"},
+    {id:8, name:"Backpack",      stars:500,  gram:0.35, image:"nft/Backpack.jpg",      rarity:"legendary"},
     {id:9, name:"Crystal Eagle", stars:3881,  gram:41.25, image:"nft/Crystal Eagle.jpg",rarity:"mythic"},
-    {id:10,name:"Durovs Cap",    stars:44500, gram:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
-    {id:11,name:"Faith Amulet",  stars:650, gram:5, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
+    {id:10,name:"Durovs Cap",    stars:78550, gram:800, image:"nft/Durovs Cap.jpg",    rarity:"mythic"},
+    {id:11,name:"Faith Amulet",  stars:650, gram:6, image:"nft/Faith Amulet.jpg",  rarity:"legendary"},
     {id:12,name:"Happy Brownie", stars:500, gram:5, image:"nft/Happy Brownie.jpg", rarity:"legendary"},
-    {id:13,name:"Instant Ramen", stars:540, gram:5.4, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
-    {id:14,name:"Jolly Chimp",   stars:756, gram:6.5, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
-    {id:15, name:"Mighty Arm",   stars:1500, gram:120, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
+    {id:13,name:"Instant Ramen", stars:540, gram:3, image:"nft/Instant Ramen.jpg", rarity:"legendary"},
+    {id:14,name:"Jolly Chimp",   stars:756, gram:8, image:"nft/Jolly Chimp.jpg",   rarity:"legendary"},
+    {id:15, name:"Mighty Arm",   stars:1500, gram:15, image:"nft/Mighty Arm.jpg",   rarity:"legendary"}
 ];
 
 const CASES_DATA = {
@@ -31,7 +31,6 @@ const CASES_DATA = {
         name: "🎁 Бесплатный кейс",
         icon: "🎁",
         price: 0,
-        priceGram: 0,
         type: "free",
         cooldown: true,
         items: [
@@ -48,7 +47,6 @@ const CASES_DATA = {
         name: "📦 Basic Case",
         icon: "📦",
         price: 50,
-        priceGram: 0,
         type: "basic",
         cooldown: false,
         items: [
@@ -56,7 +54,7 @@ const CASES_DATA = {
             { nft: NFT_DATABASE[2],  chance: 25.0 },
             { nft: NFT_DATABASE[3],  chance: 15.0 },
             { nft: NFT_DATABASE[4],  chance: 8.0  },
-            { nft: NFT_DATABASE[0],  chance: 8.0  },
+            { nft: NFT_DATABASE[15], chance: 8.0  },
             { nft: NFT_DATABASE[8],  chance: 5.0  },
             { nft: NFT_DATABASE[9],  chance: 2.5 },
             { nft: NFT_DATABASE[7],  chance: 1.0 },
@@ -67,14 +65,13 @@ const CASES_DATA = {
         name: "💎 Premium Case",
         icon: "💎",
         price: 500,
-        priceGram: 0,
         type: "premium",
         cooldown: false,
         items: [
             { nft: NFT_DATABASE[2],  chance: 18.0 },
             { nft: NFT_DATABASE[3],  chance: 15.0 },
             { nft: NFT_DATABASE[4],  chance: 10.0 },
-            { nft: NFT_DATABASE[0],  chance: 12.0 },
+            { nft: NFT_DATABASE[15], chance: 12.0 },
             { nft: NFT_DATABASE[11], chance: 12.0 },
             { nft: NFT_DATABASE[12], chance: 10.0 },
             { nft: NFT_DATABASE[13], chance: 8.0  },
@@ -87,13 +84,12 @@ const CASES_DATA = {
     legendary: {
         name: "👑 Legendary Case",
         icon: "👑",
-        price: 0,
-        priceGram: 100,
+        price: 1000,
         type: "legendary",
         cooldown: false,
         items: [
-            { nft: NFT_DATABASE[0], chance: 50.0 },
-            { nft: NFT_DATABASE[15], chance: 50.0 }
+            { nft: NFT_DATABASE[15], chance: 50.0 },
+            { nft: NFT_DATABASE[16], chance: 50.0 }
         ]
     }
 };
@@ -132,19 +128,6 @@ function setStars(val) {
     }
 }
 
-function getGram() {
-    return parseFloat(localStorage.getItem('gameGram') || '0');
-}
-
-function setGram(val) {
-    val = Math.max(0, val);
-    localStorage.setItem('gameGram', val.toFixed(2));
-    let gramEl = document.getElementById('gramBalance');
-    if (gramEl) {
-        gramEl.textContent = val.toFixed(2);
-    }
-}
-
 function checkCanOpen(caseKey) {
     let data = CASES_DATA[caseKey];
     if (!data) {
@@ -162,13 +145,6 @@ function checkCanOpen(caseKey) {
         let stars = getStars();
         if (stars < data.price) {
             return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
-        }
-    }
-
-    if (data.priceGram > 0) {
-        let gram = getGram();
-        if (gram < data.priceGram) {
-            return { ok: false, reason: '❌ Недостаточно GRAM!\n\nУ вас: ' + gram.toFixed(2) + ' G\nНужно: ' + data.priceGram + ' G' };
         }
     }
 
@@ -302,11 +278,6 @@ function init() {
         balanceEl.textContent = getStars();
     }
 
-    let gramEl = document.getElementById('gramBalance');
-    if (gramEl) {
-        gramEl.textContent = getGram().toFixed(2);
-    }
-
     loadUserProgress();
     loadInventory();
     loadAchievements();
@@ -387,7 +358,7 @@ function generateCases() {
             return true;
         }
         if (currentFilter === 'free') {
-            return data.price === 0 && data.priceGram === 0;
+            return data.price === 0;
         }
         if (currentFilter === 'basic') {
             return data.type === 'basic';
@@ -408,35 +379,23 @@ function generateCases() {
         let locked = data.cooldown ? getFreeMsLeft() > 0 : false;
         let ms = locked ? getFreeMsLeft() : 0;
         let stars = getStars();
-        let gram = getGram();
-        let canAfford = true;
-        let priceText = '';
-
-        if (data.price > 0) {
-            canAfford = stars >= data.price;
-            priceText = '⭐ ' + data.price;
-        } else if (data.priceGram > 0) {
-            canAfford = gram >= data.priceGram;
-            priceText = data.priceGram + ' G';
-        } else {
-            priceText = 'БЕСПЛАТНО';
-        }
+        let canAfford = data.price === 0 || stars >= data.price;
 
         let footerHtml = '';
-        if (data.price === 0 && data.priceGram === 0) {
+        if (data.price === 0) {
             let statusText = locked ? '🔒 ЗАБЛОКИРОВАН' : '✅ ДОСТУПЕН';
             let statusColor = locked ? '#ef4444' : '#10b981';
             let timerText = locked ? msToHM(ms) : '';
             footerHtml = '<div><div id="freeStatus" style="font-weight:700;font-size:12px;color:' + statusColor + ';">' + statusText + '</div><div id="freeCountdown" style="color:#6b7280;font-size:10px;margin-top:2px;">' + timerText + '</div></div>';
         } else {
             let priceColor = canAfford ? '#ffd700' : '#ef4444';
-            let shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:10px;margin-top:1px;">Не хватает</div>';
-            footerHtml = '<div><div style="color:' + priceColor + ';font-size:20px;font-weight:900;">' + priceText + '</div>' + shortText + '</div>';
+            let shortText = canAfford ? '' : '<div style="color:#ef4444;font-size:10px;margin-top:1px;">Не хватает ' + (data.price - stars) + ' ⭐</div>';
+            footerHtml = '<div><div style="color:' + priceColor + ';font-size:20px;font-weight:900;">⭐ ' + data.price + '</div>' + shortText + '</div>';
         }
 
         let cardId = key === 'free' ? 'freeCard' : '';
         let opacity = locked ? '0.6' : '1';
-        let badge = (data.price === 0 && data.priceGram === 0) ? '<div class="case-badge">FREE</div>' : '';
+        let badge = data.price === 0 ? '<div class="case-badge">FREE</div>' : '';
 
         html += '<div class="case-big" id="' + cardId + '" onclick="showPreview(\'' + key + '\')" style="opacity:' + opacity + ';">' + badge + '<div class="case-image-section"><div class="case-main-image" style="font-size:60px;">' + data.icon + '</div></div><div class="case-info-section"><div class="case-title" style="font-size:16px;">' + data.name + '</div><div class="case-footer">' + footerHtml + '</div></div></div>';
     }
@@ -474,7 +433,9 @@ function showPreview(caseKey) {
         return;
     }
 
+    // Закрываем модалку с кейсами
     closeCasesModal();
+    // Открываем новый экран с 5 ячейками
     openCaseScreen(caseKey);
 }
 
@@ -495,11 +456,6 @@ function openCaseFromPreview() {
 
     if (data.price > 0) {
         setStars(getStars() - data.price);
-        generateCases();
-    }
-
-    if (data.priceGram > 0) {
-        setGram(getGram() - data.priceGram);
         generateCases();
     }
 
@@ -744,7 +700,7 @@ function showResult(nft, caseKey) {
             let starsEl2 = document.getElementById('resultStars');
             let tonEl2 = document.getElementById('resultTon');
             if (iconEl2) iconEl2.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
-            if (nameEl2) nameEl2.textContent = 'Сердце ❤️';
+            if (nameEl2) nameEl2.textContent = 'Подарок';
             if (rarityEl2) rarityEl2.textContent = 'ОСОБОЕ';
             if (starsEl2) starsEl2.innerHTML = '🎁 Сюрприз!';
             if (tonEl2) tonEl2.innerHTML = '';
@@ -780,17 +736,14 @@ function showResult(nft, caseKey) {
 
 function createConfetti() {
     let colors = ['#10b981','#fbbf24','#ef4444','#3b82f6','#a855f7'];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 120; i++) {
         let el = document.createElement('div');
-        let size = Math.random() * 8 + 4;
-        let shapes = ['50%', '0'];
-        let shape = shapes[Math.floor(Math.random() * shapes.length)];
-        el.style.cssText = 'position:fixed;top:50%;left:50%;width:' + size + 'px;height:' + size + 'px;background:' + colors[i % colors.length] + ';border-radius:' + shape + ';z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 3 + 2) + 's linear forwards;--x:' + Math.random() + ';box-shadow:0 0 10px ' + colors[i % colors.length] + ';';
+        el.style.cssText = 'position:fixed;top:50%;left:50%;width:10px;height:10px;background:' + colors[i % colors.length] + ';border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ' + (Math.random() * 2 + 1) + 's linear forwards;--x:' + Math.random() + ';';
         document.body.appendChild(el);
         (function(e) {
             setTimeout(function() {
                 e.remove();
-            }, 4000);
+            }, 3000);
         })(el);
     }
 }
@@ -801,7 +754,7 @@ function addToInventory(nft) {
         id: nft.id,
         name: nft.name,
         stars: nft.stars,
-        gram: nft.gram || 0,
+        ton: nft.ton,
         image: nft.image,
         isCurrency: nft.isCurrency || false,
         amount: nft.amount || 0,
@@ -812,51 +765,6 @@ function addToInventory(nft) {
     inventory.unshift(newItem);
     localStorage.setItem('inventory', JSON.stringify(inventory));
     checkMythicAchievement();
-}
-
-function renderSlotItemsList() {
-    const container = document.getElementById('slotItemsScroll');
-    if (!container || !currentSlotCaseData) return;
-    let html = '';
-    for (let item of currentSlotCaseData.items) {
-        const nft = item.nft;
-        const color = getRarityColor(nft.rarity);
-        html += `
-            <div class="item-row">
-                <div class="item-icon">
-                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:16px>💎</div>'">
-                </div>
-                <div class="item-info">
-                    <div class="name">${nft.name}</div>
-                    <div class="rarity" style="color:${color}">${nft.rarity ? nft.rarity.toUpperCase() : 'ОБЫЧНЫЙ'}</div>
-                </div>
-            </div>
-        `;
-    }
-    container.innerHTML = html;
-}
-
-function renderRewardsGrid() {
-    const container = document.getElementById('rewardsGrid');
-    if (!container || !currentSlotCaseData) return;
-    
-    let html = '';
-    for (let item of currentSlotCaseData.items) {
-        const nft = item.nft;
-        const color = getRarityColor(nft.rarity);
-        const gramPrice = nft.gram || 0;
-        html += `
-            <div class="reward-card">
-                <div class="reward-price">${gramPrice > 0 ? gramPrice + ' G' : '—'}</div>
-                <div class="reward-image">
-                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:32px>💎</div>'">
-                </div>
-                <div class="reward-name">${nft.name}</div>
-                <div class="reward-bar" style="background:${color};box-shadow:0 0 15px ${color}40;"></div>
-            </div>
-        `;
-    }
-    container.innerHTML = html;
 }
 
 function loadInventory() {
@@ -894,7 +802,7 @@ function renderInventory() {
         let nft = sorted[j];
         let uid = nft.uid || JSON.stringify(nft);
         let safeUid = encodeURIComponent(uid);
-        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:12px;border:2px solid ' + getRarityColor(nft.rarity) + ';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:' + getRarityColor(nft.rarity) + ';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + nft.rarity.toUpperCase() + '</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">' + nft.name + '</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ' + (nft.gram || 0).toFixed(2) + ' GRAM • ⭐ ' + nft.stars + '</div><button onclick="sellNFT(\'' + safeUid + '\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать ' + Math.floor((nft.stars || 0) * 0.7) + ' ⭐</button></div>';
+        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:12px;border:2px solid ' + getRarityColor(nft.rarity) + ';"><div style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative;"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;top:5px;right:5px;background:' + getRarityColor(nft.rarity) + ';padding:3px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + nft.rarity.toUpperCase() + '</div></div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">' + nft.name + '</div><div style="font-size:11px;color:#6b7280;margin-bottom:8px;">💎 ' + nft.gram + ' GRAM • ⭐ ' + nft.stars + '</div><button onclick="sellNFT(\'' + safeUid + '\')" style="width:100%;padding:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Продать ' + Math.floor((nft.stars || 0) * 0.7) + ' ⭐</button></div>';
     }
 
     html += '</div></div>';
@@ -961,7 +869,7 @@ function saveToHistory(nft) {
         id: nft.id,
         name: nft.name,
         stars: nft.stars,
-        gram: nft.gram || 0,
+        ton: nft.ton,
         image: nft.image,
         rarity: nft.rarity,
         time: new Date().toLocaleString('ru-RU')
@@ -989,7 +897,7 @@ function renderHistory(history) {
     let html = '<div style="padding:20px;"><h3 style="margin-bottom:15px;">📜 История (' + history.length + ')</h3>';
     for (let i = 0; i < history.length; i++) {
         let item = history[i];
-        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ' + getRarityColor(item.rarity) + ';flex-shrink:0;"><img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + item.name + '</div><div style="font-size:12px;color:' + getRarityColor(item.rarity) + ';margin-top:4px;">' + (item.rarity ? item.rarity.toUpperCase() : '') + '</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">' + item.time + '</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ ' + item.stars + '</div><div style="font-size:12px;color:#0088cc;">💎 ' + (item.gram || 0).toFixed(2) + ' GRAM</div></div></div>';
+        html += '<div style="background:rgba(30,20,50,0.5);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;align-items:center;gap:15px;"><div style="width:60px;height:60px;border-radius:10px;overflow:hidden;border:2px solid ' + getRarityColor(item.rarity) + ';flex-shrink:0;"><img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div><div style="flex:1;"><div style="font-size:16px;font-weight:700;">' + item.name + '</div><div style="font-size:12px;color:' + getRarityColor(item.rarity) + ';margin-top:4px;">' + (item.rarity ? item.rarity.toUpperCase() : '') + '</div><div style="font-size:11px;color:#6b7280;margin-top:4px;">' + item.time + '</div></div><div style="text-align:right;"><div style="font-size:14px;color:#ffd700;">⭐ ' + item.stars + '</div><div style="font-size:12px;color:#0088cc;">💎 ' + item.ton + ' TON</div></div></div>';
     }
     html += '</div>';
     c.innerHTML = html;
@@ -1089,7 +997,7 @@ function renderGlobalHistory() {
         let item = all[i];
         let nft = item.nft;
         let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
-        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.gram + ' GRAM') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
+        html += '<div class="nft-card" style="border:2px solid ' + color + ';min-width:160px;height:200px;"><div class="nft-image" style="border:2px solid ' + color + ';width:90px;height:90px;margin:0 auto;">' + (nft.isCurrency ? '<img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">' : '<img src="' + nft.image + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:45px>💎</div>\'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">') + '</div><div class="nft-value" style="color:' + color + ';font-size:13px;margin-top:10px;">' + (nft.isCurrency ? nft.name : nft.ton + ' TON') + '</div><div style="font-size:11px;color:#fff;margin-top:8px;text-align:center;">👤 ' + item.username + '</div><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:4px;">' + item.time + '</div></div>';
     }
     slider.innerHTML = html;
 }
@@ -1105,12 +1013,14 @@ function addToGlobalHistory(nft) {
 }
 
 function switchTab(tab) {
+    // Скрываем все вкладки
     let tabContents = document.querySelectorAll('.tab-content');
     for (let j = 0; j < tabContents.length; j++) {
         tabContents[j].classList.remove('active');
         tabContents[j].style.display = 'none';
     }
     
+    // Показываем нужную вкладку
     let map = {games:'tabGames', inventory:'tabInventory', history:'tabHistory', achievements:'tabAchievements', profile:'tabProfile'};
     let target = document.getElementById(map[tab]);
     if (target) {
@@ -1119,6 +1029,7 @@ function switchTab(tab) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
+    // Обновляем навигацию по data-tab
     let navItems = document.querySelectorAll('.nav-item');
     for (let i = 0; i < navItems.length; i++) {
         navItems[i].classList.remove('active');
@@ -1128,6 +1039,7 @@ function switchTab(tab) {
         activeNav.classList.add('active');
     }
     
+    // Показываем/скрываем слайдер
     let slider = document.querySelector('.nft-slider');
     if (slider) {
         if (tab === 'games') {
@@ -1137,6 +1049,7 @@ function switchTab(tab) {
         }
     }
     
+    // Вызываем функции рендеринга
     if (tab === 'inventory') {
         renderInventory();
     }
@@ -1195,10 +1108,6 @@ function showComingSoon() {
     tg.showAlert('🔄 Скоро появится!');
 }
 
-function showSeasonal() {
-    tg.showAlert('📅 Сезонные кейсы скоро появятся!');
-}
-
 function renderProfile() {
     let container = document.getElementById('profileContainer');
     if (!container) return;
@@ -1221,9 +1130,9 @@ function renderProfile() {
     html += '<div class="profile-card-level">📊 Уровень ' + userLevel + '</div></div></div>';
     html += '<div class="profile-stats">';
     html += '<div class="profile-stat-item"><div class="profile-stat-value">' + getStars() + '</div><div class="profile-stat-label">⭐ Звёзд</div></div>';
-    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + getGram().toFixed(2) + '</div><div class="profile-stat-label">💎 GRAM</div></div>';
     html += '<div class="profile-stat-item"><div class="profile-stat-value">' + openedCases + '</div><div class="profile-stat-label">📦 Кейсов</div></div>';
     html += '<div class="profile-stat-item"><div class="profile-stat-value">' + inventory.length + '</div><div class="profile-stat-label">💎 NFT</div></div>';
+    html += '<div class="profile-stat-item"><div class="profile-stat-value">' + userXP + '/' + (userLevel * 100) + '</div><div class="profile-stat-label">📈 Опыт</div></div>';
     html += '</div></div>';
 
     html += '<div class="profile-ref-section">';
@@ -1320,7 +1229,7 @@ function loadAdminStats() {
     if (!statsEl) {
         return;
     }
-    statsEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">' + getStars() + '</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + getGram().toFixed(2) + '</div><div class="admin-stat-label">GRAM</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">' + openedCases + '</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + inventory.length + '</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">' + achievements.length + '</div><div class="admin-stat-label">Ачивок</div></div></div>';
+    statsEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:15px;"><div class="admin-stat-card"><div class="admin-stat-icon">⭐</div><div class="admin-stat-value">' + getStars() + '</div><div class="admin-stat-label">Звёзд</div></div><div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-value">' + openedCases + '</div><div class="admin-stat-label">Кейсов</div></div><div class="admin-stat-card"><div class="admin-stat-icon">💎</div><div class="admin-stat-value">' + inventory.length + '</div><div class="admin-stat-label">NFT</div></div><div class="admin-stat-card"><div class="admin-stat-icon">🏆</div><div class="admin-stat-value">' + achievements.length + '</div><div class="admin-stat-label">Ачивок</div></div></div>';
 }
 
 function loadAllUsers() {
@@ -1333,7 +1242,7 @@ function loadAllUsers() {
     let username = user ? (user.username || 'admin') : 'admin';
     let id = user ? user.id : 0;
     let avatar = name.charAt(0);
-    listEl.innerHTML = '<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">' + avatar + '</div><div><div style="font-size:16px;font-weight:700;">' + name + ' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@' + username + ' • ID: ' + id + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ ' + getStars() + '</span><span>💎 ' + getGram().toFixed(2) + '</span><span>📊 Lvl ' + userLevel + '</span><span>📦 ' + openedCases + '</span><span>💎 ' + inventory.length + '</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(' + id + ',\'' + username + '\',' + getStars() + ')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>';
+    listEl.innerHTML = '<div class="admin-user-row"><div style="display:flex;align-items:center;gap:15px;flex:1;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">' + avatar + '</div><div><div style="font-size:16px;font-weight:700;">' + name + ' <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:3px 8px;border-radius:8px;font-size:11px;color:#000;">ADMIN</span></div><div style="font-size:13px;color:#6b7280;">@' + username + ' • ID: ' + id + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280;"><span>⭐ ' + getStars() + '</span><span>📊 Lvl ' + userLevel + '</span><span>📦 ' + openedCases + '</span><span>💎 ' + inventory.length + '</span></div></div></div><div style="display:flex;gap:8px;"><button class="admin-btn-small admin-btn-success" onclick="manageUserBalance(' + id + ',\'' + username + '\',' + getStars() + ')">💰</button><button class="admin-btn-small admin-btn-danger" onclick="resetUserProgress()">🗑️</button></div></div><div style="padding:20px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid rgba(255,255,255,0.05);margin-top:10px;"><div style="font-size:32px;margin-bottom:8px;">👥</div>Для просмотра всех пользователей нужен backend</div>';
 }
 
 function manageUserBalance(userId, username, curStars) {
@@ -1392,7 +1301,7 @@ function resetUserProgress() {
         buttons:[{id:'yes', type:'destructive', text:'Сбросить'}, {type:'cancel'}]
     }, function(btn) {
         if (btn === 'yes') {
-            let keys = ['gameStars','gameGram','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'];
+            let keys = ['gameStars','userLevel','userXP','openedCases','inventory','achievements','caseHistory','lastFreeCase'];
             for (let i = 0; i < keys.length; i++) {
                 localStorage.removeItem(keys[i]);
             }
@@ -1404,10 +1313,6 @@ function resetUserProgress() {
             let balanceEl = document.getElementById('balance');
             if (balanceEl) {
                 balanceEl.textContent = '0';
-            }
-            let gramEl = document.getElementById('gramBalance');
-            if (gramEl) {
-                gramEl.textContent = '0.00';
             }
             updateLevelDisplay();
             generateCases();
@@ -1426,7 +1331,7 @@ function createPromoCode() {
 }
 
 function exportUserData() {
-    let data = {stars:getStars(), gram:getGram(), level:userLevel, cases:openedCases, inventory:inventory, achievements:achievements};
+    let data = {stars:getStars(), level:userLevel, cases:openedCases, inventory:inventory, achievements:achievements};
     let blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
     let a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1468,6 +1373,7 @@ function startLoaderAnimation() {
     const loader = document.getElementById('loader');
     const particlesContainer = document.getElementById('loaderParticles');
     
+    // Создаем частицы
     if (particlesContainer) {
         for (let i = 0; i < 10; i++) {
             const span = document.createElement('span');
@@ -1475,7 +1381,9 @@ function startLoaderAnimation() {
         }
     }
     
+    // Проверяем, что элементы существуют
     if (!progressBar || !loader) {
+        // Если элементов нет - сразу запускаем приложение
         if (typeof init === 'function') {
             init();
         }
@@ -1508,8 +1416,7 @@ function startLoaderAnimation() {
         }
     }, 150);
 }
-
-// ===== КЕЙС ЭКРАН =====
+// ===== НОВЫЙ ЭКРАН КЕЙСА С 5 ЯЧЕЙКАМИ =====
 let currentMultiplier = 1;
 let isSlotSpinning = false;
 let slotTimer = null;
@@ -1532,23 +1439,10 @@ function openCaseScreen(caseKey) {
     const screen = document.getElementById('caseScreen');
     if (screen) {
         screen.classList.add('active');
-        document.getElementById('caseScreenTitle').textContent = currentSlotCaseData.name.toUpperCase();
-        
-        let priceDisplay = document.getElementById('casePriceDisplay');
-        if (priceDisplay) {
-            if (currentSlotCaseData.priceGram > 0) {
-                priceDisplay.textContent = currentSlotCaseData.priceGram + ' G';
-            } else if (currentSlotCaseData.price > 0) {
-                priceDisplay.textContent = '⭐ ' + currentSlotCaseData.price;
-            } else {
-                priceDisplay.textContent = 'FREE';
-            }
-        }
-        
-        renderRewardsGrid();
+        document.getElementById('caseScreenTitle').textContent = currentSlotCaseData.name;
+        renderSlotItemsList();
         resetSlotRows();
         updateSlotRows(1);
-        updateSpinPrice();
         document.getElementById('slotSpinBtn').disabled = false;
         isSlotSpinning = false;
     }
@@ -1575,25 +1469,27 @@ function closeCaseScreen() {
     document.querySelector(`.multipliers button[data-mult="1"]`).classList.add('active');
 }
 
-function updateSpinPrice() {
-    let priceEl = document.getElementById('spinPrice');
-    if (!priceEl || !currentSlotCaseData) return;
-    
-    let totalPrice = 0;
-    let currency = '';
-    
-    if (currentSlotCaseData.priceGram > 0) {
-        totalPrice = currentSlotCaseData.priceGram * currentMultiplier;
-        currency = 'G';
-    } else if (currentSlotCaseData.price > 0) {
-        totalPrice = currentSlotCaseData.price * currentMultiplier;
-        currency = '⭐';
-    } else {
-        priceEl.textContent = 'FREE';
-        return;
+function renderSlotItemsList() {
+    const container = document.getElementById('slotItemsScroll');
+    if (!container || !currentSlotCaseData) return;
+    let html = '';
+    for (let item of currentSlotCaseData.items) {
+        const nft = item.nft;
+        const color = getRarityColor(nft.rarity);
+        html += `
+            <div class="item-row">
+                <div class="item-icon">
+                    <img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div style=font-size:16px>💎</div>'">
+                </div>
+                <div class="item-info">
+                    <div class="name">${nft.name}</div>
+                    <div class="rarity" style="color:${color}">${nft.rarity ? nft.rarity.toUpperCase() : 'ОБЫЧНЫЙ'}</div>
+                </div>
+                <div class="item-chance">${item.chance}%</div>
+            </div>
+        `;
     }
-    
-    priceEl.textContent = totalPrice + ' ' + currency;
+    container.innerHTML = html;
 }
 
 function resetSlotRows() {
@@ -1604,14 +1500,7 @@ function resetSlotRows() {
         const cells = row.querySelectorAll('.slot-cell');
         cells.forEach(cell => {
             cell.className = 'slot-cell';
-            if (currentSlotCaseData && currentSlotCaseData.items && currentSlotCaseData.items.length > 0) {
-                const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
-                const nft = randomItem.nft;
-                const rarityClass = nft.rarity || 'common';
-                cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
-            } else {
-                cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
-            }
+            cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
         });
     });
     startIdleAnimation();
@@ -1635,11 +1524,15 @@ function startIdleAnimation() {
                     const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
                     const nft = randomItem.nft;
                     const rarityClass = nft.rarity || 'common';
-                    cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+                    if (nft.isCurrency) {
+                        cell.innerHTML = `<div class="cell-emoji">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+                    } else {
+                        cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+                    }
                 }
             });
         });
-    }, 400);
+    }, 800);
 }
 
 function stopIdleAnimation() {
@@ -1659,19 +1552,11 @@ function updateSlotRows(count) {
             const row = document.createElement('div');
             row.className = 'slot-row';
             row.dataset.row = i;
-            // СОЗДАЁМ 3 ЯЧЕЙКИ В РЯДУ (было 5)
-            for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < 5; j++) {
                 const cell = document.createElement('div');
                 cell.className = 'slot-cell';
                 cell.dataset.index = j;
-                if (currentSlotCaseData && currentSlotCaseData.items && currentSlotCaseData.items.length > 0) {
-                    const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
-                    const nft = randomItem.nft;
-                    const rarityClass = nft.rarity || 'common';
-                    cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
-                } else {
-                    cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
-                }
+                cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
                 row.appendChild(cell);
             }
             container.appendChild(row);
@@ -1683,43 +1568,28 @@ function updateSlotRows(count) {
         }
     }
 }
+
 function setSlotMultiplier(mult) {
     currentMultiplier = mult;
     document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
     document.querySelector(`.multipliers button[data-mult="${mult}"]`).classList.add('active');
     updateSlotRows(mult);
     resetSlotRows();
-    updateSpinPrice();
 }
 
 function startSlotSpin() {
     if (isSlotSpinning || !currentSlotCaseData) return;
     
-    let cost = 0;
-    let costType = '';
+    const cost = currentSlotCaseData.price * currentMultiplier;
+    const stars = getStars();
     
-    if (currentSlotCaseData.priceGram > 0) {
-        cost = currentSlotCaseData.priceGram * currentMultiplier;
-        costType = 'gram';
-    } else if (currentSlotCaseData.price > 0) {
-        cost = currentSlotCaseData.price * currentMultiplier;
-        costType = 'stars';
+    if (cost > 0 && stars < cost) {
+        tg.showAlert(`❌ Недостаточно звёзд!\n\nУ вас: ${stars} ⭐\nНужно: ${cost} ⭐`);
+        return;
     }
     
-    if (costType === 'stars') {
-        let stars = getStars();
-        if (stars < cost) {
-            tg.showAlert(`❌ Недостаточно звёзд!\n\nУ вас: ${stars} ⭐\nНужно: ${cost} ⭐`);
-            return;
-        }
+    if (cost > 0) {
         setStars(stars - cost);
-    } else if (costType === 'gram') {
-        let gram = getGram();
-        if (gram < cost) {
-            tg.showAlert(`❌ Недостаточно GRAM!\n\nУ вас: ${gram.toFixed(2)} G\nНужно: ${cost} G`);
-            return;
-        }
-        setGram(gram - cost);
     }
     
     if (currentSlotCaseData.cooldown) {
@@ -1758,9 +1628,14 @@ function animateSlotRow(row, winItem, rowIndex) {
         cells.forEach((cell, idx) => {
             const randomItem = items[Math.floor(Math.random() * items.length)];
             const nft = randomItem.nft;
+            const color = getRarityColor(nft.rarity);
             const rarityClass = nft.rarity || 'common';
             cell.className = 'slot-cell';
-            cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+            if (nft.isCurrency) {
+                cell.innerHTML = `<div class="cell-emoji">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+            } else {
+                cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+            }
         });
         
         cycles++;
@@ -1782,23 +1657,29 @@ function finishSlotRow(row, winItem, rowIndex) {
     const nft = winItem.nft;
     const rarityClass = nft.rarity || 'common';
     
-    // Показываем выигрыш в ЦЕНТРАЛЬНОЙ ячейке (индекс 1, т.к. 3 ячейки)
-    const centerIndex = 1;
-    const centerCell = cells[centerIndex];
+    const centerCell = cells[2];
     if (!centerCell) return;
     
     centerCell.className = 'slot-cell pulse';
-    centerCell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+    if (nft.isCurrency) {
+        centerCell.innerHTML = `<div class="cell-emoji">${nft.icon || '💎'}</div><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+    } else {
+        centerCell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
+    }
     
     cells.forEach((cell, idx) => {
-        if (idx === centerIndex) return;
+        if (idx === 2) return;
         if (!currentSlotCaseData || !currentSlotCaseData.items) return;
         const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
         if (!randomItem || !randomItem.nft) return;
         const rnft = randomItem.nft;
         const rclass = rnft.rarity || 'common';
         cell.className = 'slot-cell';
-        cell.innerHTML = `<img src="${rnft.image}" alt="${rnft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${rnft.name}</div><div class="rarity-bar ${rclass}"></div>`;
+        if (rnft.isCurrency) {
+            cell.innerHTML = `<div class="cell-emoji">${rnft.icon || '💎'}</div><div class="cell-name">${rnft.name}</div><div class="rarity-bar ${rclass}"></div>`;
+        } else {
+            cell.innerHTML = `<img src="${rnft.image}" alt="${rnft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${rnft.name}</div><div class="rarity-bar ${rclass}"></div>`;
+        }
     });
     
     if (nft.isCurrency) {
@@ -1823,7 +1704,7 @@ function finishSlotRow(row, winItem, rowIndex) {
     const allRows = document.querySelectorAll('.slot-row');
     let finished = 0;
     allRows.forEach(r => {
-        const center = r.querySelector('.slot-cell:nth-child(2)');
+        const center = r.querySelector('.slot-cell:nth-child(3)');
         if (center && center.classList.contains('pulse')) finished++;
     });
     
@@ -1831,85 +1712,29 @@ function finishSlotRow(row, winItem, rowIndex) {
         setTimeout(() => {
             isSlotSpinning = false;
             document.getElementById('slotSpinBtn').disabled = false;
+            
+            let msg = '🎉 Вы выиграли:\n';
+            allRows.forEach((r, idx) => {
+                const result = slotWinResults[idx];
+                if (result) {
+                    msg += `${result.nft.name} (${result.nft.rarity || 'обычный'})\n`;
+                }
+            });
+            tg.showPopup({
+                title: '🎉 Поздравляем!',
+                message: msg,
+                buttons: [{type: 'ok'}]
+            });
+            
             setTimeout(() => {
                 resetSlotRows();
                 slotWinResults = [];
-            }, 3000);
+            }, 5000);
         }, 1500);
     }
 }
 
-// ===== TOP UP MODAL =====
-let selectedTopUpMethod = 'stars';
-
-function openTopUpModal() {
-    let modal = document.getElementById('modalTopUp');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        document.getElementById('topUpAmount').value = 1;
-        selectTopUpMethod('stars');
-        updateTopUpInfo();
-    }
-}
-
-function closeTopUpModal() {
-    let modal = document.getElementById('modalTopUp');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-}
-
-function selectTopUpMethod(method) {
-    selectedTopUpMethod = method;
-    document.querySelectorAll('.topup-method').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.topup-method[data-method="${method}"]`).classList.add('active');
-    updateTopUpInfo();
-}
-
-function updateTopUpInfo() {
-    let amount = parseFloat(document.getElementById('topUpAmount').value) || 0;
-    let infoEl = document.getElementById('topUpInfo');
-    let minInfoEl = document.getElementById('topUpMinInfo');
-    
-    if (selectedTopUpMethod === 'stars') {
-        let gramAmount = amount * 0.0096;
-        infoEl.textContent = `Вы получите: ${gramAmount.toFixed(4)} G`;
-        minInfoEl.textContent = 'Мин. сумма: 1 STAR';
-    } else if (selectedTopUpMethod === 'crypto') {
-        infoEl.textContent = '🪙 Оплата через Crypto';
-        minInfoEl.textContent = 'Мин. сумма: 0.01 USDT';
-    } else if (selectedTopUpMethod === 'gram') {
-        infoEl.textContent = `Вы пополните: ${amount.toFixed(2)} G`;
-        minInfoEl.textContent = 'Мин. сумма: 0.1 GRAM';
-    }
-}
-
-function confirmTopUp() {
-    let amount = parseFloat(document.getElementById('topUpAmount').value);
-    if (!amount || amount <= 0) {
-        tg.showAlert('Введите корректную сумму!');
-        return;
-    }
-    
-    if (selectedTopUpMethod === 'stars') {
-        let gramAmount = amount * 0.0096;
-        let currentStars = getStars();
-        if (currentStars < amount) {
-            tg.showAlert(`❌ Недостаточно звёзд!\n\nНужно: ${amount} ⭐\nУ вас: ${currentStars} ⭐`);
-            return;
-        }
-        setStars(currentStars - Math.ceil(amount));
-        setGram(getGram() + gramAmount);
-        closeTopUpModal();
-    } else if (selectedTopUpMethod === 'crypto') {
-        tg.showAlert('🪙 Оплата через Crypto скоро будет доступна!');
-    } else if (selectedTopUpMethod === 'gram') {
-        tg.showAlert('💎 Перевод GRAM пока недоступен');
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
+    // Запускаем анимацию загрузки
     startLoaderAnimation();
 });
