@@ -11,19 +11,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- КРУТАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
     <div class="loader-container" id="loader">
+        <!-- Частицы фона -->
         <div class="loader-particles" id="loaderParticles"></div>
+        
+        <!-- Свечение -->
         <div class="loader-glow"></div>
+        
+        <!-- Вращающаяся Durovs Cap -->
         <div class="loader-hat-container">
             <img src="nft/Durovs Cap.jpg" alt="Durovs Cap" class="loader-hat" id="loaderHat">
             <div class="loader-hat-ring"></div>
             <div class="loader-hat-ring2"></div>
         </div>
+        
+        <!-- Текст Loading с глитч эффектом -->
         <div class="loader-text-wrapper">
             <div class="loader-text-main" id="loaderText">LOADING</div>
             <div class="loader-text-glitch" id="loaderGlitch">LOADING</div>
             <div class="loader-text-shadow">LOADING</div>
         </div>
+        
+        <!-- Прогресс бар -->
         <div class="loader-progress-container">
             <div class="loader-progress-track">
                 <div class="loader-progress-bar" id="loaderProgressBar"></div>
@@ -31,6 +41,8 @@
             </div>
             <div class="loader-progress-text" id="loaderProgressText">0%</div>
         </div>
+        
+        <!-- Подпись -->
         <div class="loader-subtitle">Premium Case Opening</div>
     </div>
 
@@ -49,16 +61,9 @@
                 </div>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-            <div class="balance-box">
-                <span class="balance-amount" id="balance">0</span>
-                <span>⭐</span>
-            </div>
-            <div class="balance-box-gram">
-                <span class="balance-amount" id="gramBalance">0.00</span>
-                <span>G</span>
-                <button class="gram-plus-btn" onclick="openTopUpModal()">+</button>
-            </div>
+        <div class="balance-box">
+            <span class="balance-amount" id="balance">0</span>
+            <span>⭐</span>
         </div>
     </div>
 
@@ -215,32 +220,6 @@
         </div>
     </div>
 
-    <!-- MODAL: TOP UP -->
-    <div class="modal-topup" id="modalTopUp">
-        <div class="modal-topup-content">
-            <div class="modal-topup-header">
-                <h2>💰 Пополнение GRAM</h2>
-                <div class="modal-close" onclick="closeTopUpModal()">✕</div>
-            </div>
-            <div class="modal-topup-body">
-                <div class="topup-methods">
-                    <button class="topup-method active" data-method="stars" onclick="selectTopUpMethod('stars')">⭐ Stars</button>
-                    <button class="topup-method" data-method="crypto" onclick="selectTopUpMethod('crypto')">🪙 Crypto</button>
-                    <button class="topup-method" data-method="gram" onclick="selectTopUpMethod('gram')">💎 GRAM</button>
-                </div>
-                <div class="topup-input-wrap">
-                    <input type="number" id="topUpAmount" placeholder="Введите сумму" min="0.01" step="0.01" value="1" oninput="updateTopUpInfo()">
-                    <div class="topup-info" id="topUpInfo">Вы получите: 0.01 G</div>
-                    <div class="topup-min-info" id="topUpMinInfo">Мин. сумма: 1 STAR</div>
-                </div>
-                <div class="topup-buttons">
-                    <button class="topup-btn topup-btn-cancel" onclick="closeTopUpModal()">Отмена</button>
-                    <button class="topup-btn topup-btn-confirm" onclick="confirmTopUp()">Пополнить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
@@ -265,39 +244,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- ===== CASE SCREEN (ДОБАВЛЕН) ===== -->
-    <div class="case-screen" id="caseScreen">
-        <div class="header">
-            <button class="back-btn" onclick="closeCaseScreen()">←</button>
-            <div class="case-title" id="caseScreenTitle">КЕЙС</div>
-            <div class="case-price-display" id="casePriceDisplay">FREE</div>
-        </div>
-
-        <div class="arrow-indicator">
-            <svg width="24" height="12" viewBox="0 0 24 12">
-                <polygon points="12,12 0,0 24,0" fill="#6366f1" opacity="0.5"/>
-            </svg>
-            ВЫИГРЫШ
-        </div>
-
-        <div class="slot-rows-container" id="slotRowsContainer"></div>
-
-        <div class="controls">
-            <div class="multipliers">
-                <button data-mult="1" class="active" onclick="setSlotMultiplier(1)">1</button>
-                <button data-mult="2" onclick="setSlotMultiplier(2)">2</button>
-                <button data-mult="3" onclick="setSlotMultiplier(3)">3</button>
-            </div>
-            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">
-                <span class="spin-label">🎰 КРУТИТЬ</span>
-                <span class="spin-price" id="spinPrice">FREE</span>
-            </button>
-        </div>
-
-        <div class="rewards-header">🎯 ДОСТУПНЫЕ НАГРАДЫ</div>
-        <div class="rewards-grid" id="rewardsGrid"></div>
     </div>
 
     <script src="script.js"></script>
