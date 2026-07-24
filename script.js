@@ -1465,7 +1465,7 @@ function startLoaderAnimation() {
     }, 150);
 }
 
-// ===== CASE SCREEN =====
+// ===== CASE SCREEN (ИСПРАВЛЕННЫЕ ФУНКЦИИ) =====
 let currentMultiplier = 1;
 let isSlotSpinning = false;
 let slotTimer = null;
@@ -1475,12 +1475,10 @@ let idleAnimationInterval = null;
 
 function openCaseScreen(caseKey) {
     currentSlotCaseData = CASES_DATA[caseKey];
-    if (!currentSlotCaseData) return;
-
-    currentMultiplier = 1;
-    document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
-    const multBtn = document.querySelector('.multipliers button[data-mult="1"]');
-    if (multBtn) multBtn.classList.add('active');
+    if (!currentSlotCaseData) {
+        console.error('Кейс не найден:', caseKey);
+        return;
+    }
 
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     const bottomNav = document.querySelector('.bottom-nav');
@@ -1488,6 +1486,7 @@ function openCaseScreen(caseKey) {
     
     const screen = document.getElementById('caseScreen');
     if (screen) {
+        screen.style.display = 'flex';
         screen.classList.add('active');
         document.getElementById('caseScreenTitle').textContent = currentSlotCaseData.name.toUpperCase();
         
@@ -1504,7 +1503,6 @@ function openCaseScreen(caseKey) {
         
         renderRewardsGrid();
         resetSlotRows();
-        updateSlotRows(1);
         updateSpinPrice();
         document.getElementById('slotSpinBtn').disabled = false;
         isSlotSpinning = false;
@@ -1515,6 +1513,7 @@ function closeCaseScreen() {
     const screen = document.getElementById('caseScreen');
     if (screen) {
         screen.classList.remove('active');
+        screen.style.display = 'none';
     }
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = '');
     document.querySelector('.bottom-nav').style.display = '';
@@ -1579,11 +1578,17 @@ function renderRewardsGrid() {
 function resetSlotRows() {
     const container = document.getElementById('slotRowsContainer');
     if (!container) return;
-    const rows = container.querySelectorAll('.slot-row');
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('.slot-cell');
-        cells.forEach(cell => {
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < currentMultiplier; i++) {
+        const row = document.createElement('div');
+        row.className = 'slot-row';
+        row.dataset.row = i;
+        for (let j = 0; j < 5; j++) {
+            const cell = document.createElement('div');
             cell.className = 'slot-cell';
+            cell.dataset.index = j;
             if (currentSlotCaseData && currentSlotCaseData.items && currentSlotCaseData.items.length > 0) {
                 const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
                 const nft = randomItem.nft;
@@ -1592,8 +1597,10 @@ function resetSlotRows() {
             } else {
                 cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
             }
-        });
-    });
+            row.appendChild(cell);
+        }
+        container.appendChild(row);
+    }
     startIdleAnimation();
 }
 
@@ -1627,45 +1634,10 @@ function stopIdleAnimation() {
     }
 }
 
-function updateSlotRows(count) {
-    const container = document.getElementById('slotRowsContainer');
-    if (!container) return;
-    const currentRows = container.querySelectorAll('.slot-row').length;
-    
-    if (count > currentRows) {
-        for (let i = currentRows; i < count; i++) {
-            const row = document.createElement('div');
-            row.className = 'slot-row';
-            row.dataset.row = i;
-            for (let j = 0; j < 5; j++) {
-                const cell = document.createElement('div');
-                cell.className = 'slot-cell';
-                cell.dataset.index = j;
-                if (currentSlotCaseData && currentSlotCaseData.items && currentSlotCaseData.items.length > 0) {
-                    const randomItem = currentSlotCaseData.items[Math.floor(Math.random() * currentSlotCaseData.items.length)];
-                    const nft = randomItem.nft;
-                    const rarityClass = nft.rarity || 'common';
-                    cell.innerHTML = `<img src="${nft.image}" alt="${nft.name}" onerror="this.parentElement.innerHTML='<div class=cell-emoji>💎</div>'"><div class="cell-name">${nft.name}</div><div class="rarity-bar ${rarityClass}"></div>`;
-                } else {
-                    cell.innerHTML = `<div class="cell-emoji">🎰</div><div class="cell-name">Кейс</div><div class="rarity-bar common"></div>`;
-                }
-                row.appendChild(cell);
-            }
-            container.appendChild(row);
-        }
-    } else if (count < currentRows) {
-        for (let i = currentRows - 1; i >= count; i--) {
-            const row = container.querySelectorAll('.slot-row')[i];
-            if (row) row.remove();
-        }
-    }
-}
-
 function setSlotMultiplier(mult) {
     currentMultiplier = mult;
     document.querySelectorAll('.multipliers button').forEach(b => b.classList.remove('active'));
     document.querySelector(`.multipliers button[data-mult="${mult}"]`).classList.add('active');
-    updateSlotRows(mult);
     resetSlotRows();
     updateSpinPrice();
 }
@@ -1879,6 +1851,7 @@ function confirmTopUp() {
         setStars(currentStars - Math.ceil(amount));
         setGram(getGram() + gramAmount);
         closeTopUpModal();
+        tg.showAlert(`✅ Пополнено!\n+${gramAmount.toFixed(4)} G`);
     } else if (selectedTopUpMethod === 'crypto') {
         tg.showAlert('🪙 Оплата через Crypto скоро будет доступна!');
     } else if (selectedTopUpMethod === 'gram') {
