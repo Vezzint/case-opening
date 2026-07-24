@@ -267,6 +267,39 @@
         </div>
     </div>
 
+    <!-- ===== CASE SCREEN (ДОБАВЛЕН) ===== -->
+    <div class="case-screen" id="caseScreen">
+        <div class="header">
+            <button class="back-btn" onclick="closeCaseScreen()">←</button>
+            <div class="case-title" id="caseScreenTitle">КЕЙС</div>
+            <div class="case-price-display" id="casePriceDisplay">FREE</div>
+        </div>
+
+        <div class="arrow-indicator">
+            <svg width="24" height="12" viewBox="0 0 24 12">
+                <polygon points="12,12 0,0 24,0" fill="#6366f1" opacity="0.5"/>
+            </svg>
+            ВЫИГРЫШ
+        </div>
+
+        <div class="slot-rows-container" id="slotRowsContainer"></div>
+
+        <div class="controls">
+            <div class="multipliers">
+                <button data-mult="1" class="active" onclick="setSlotMultiplier(1)">1</button>
+                <button data-mult="2" onclick="setSlotMultiplier(2)">2</button>
+                <button data-mult="3" onclick="setSlotMultiplier(3)">3</button>
+            </div>
+            <button class="spin-btn" id="slotSpinBtn" onclick="startSlotSpin()">
+                <span class="spin-label">🎰 КРУТИТЬ</span>
+                <span class="spin-price" id="spinPrice">FREE</span>
+            </button>
+        </div>
+
+        <div class="rewards-header">🎯 ДОСТУПНЫЕ НАГРАДЫ</div>
+        <div class="rewards-grid" id="rewardsGrid"></div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
