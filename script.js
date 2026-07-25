@@ -1,4 +1,4 @@
-// script.js - полный файл с анимацией загрузки
+// script.js - ПОЛНАЯ ВЕРСИЯ
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -755,7 +755,6 @@ function showResult(nft, caseKey) {
             let tonEl = document.getElementById('resultTon');
             if (iconEl) iconEl.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
             if (nameEl) {
-                // Убираем цифру из названия, чтобы не было дублирования
                 let cleanName = nft.name.replace(/^\d+\s*/, '');
                 nameEl.textContent = '+' + nft.amount + ' ' + cleanName;
             }
@@ -1416,7 +1415,6 @@ function switchAdminTab(tab) {
     }
 }
 
-
 // ===== АНИМАЦИЯ ЗАГРУЗКИ =====
 function startLoaderAnimation() {
     let progress = 0;
@@ -1424,7 +1422,6 @@ function startLoaderAnimation() {
     const progressText = document.getElementById('loaderProgressText');
     const loader = document.getElementById('loader');
     
-    // Создаем частицы
     const particlesContainer = document.getElementById('loaderParticles');
     if (particlesContainer) {
         for (let i = 0; i < 10; i++) {
@@ -1433,8 +1430,7 @@ function startLoaderAnimation() {
         }
     }
     
-    // Анимируем прогресс
-    const interval = setInterval(() => {
+    const interval = setInterval(function() {
         progress += Math.random() * 3 + 1;
         if (progress > 100) progress = 100;
         
@@ -1447,19 +1443,16 @@ function startLoaderAnimation() {
         
         if (progress >= 100) {
             clearInterval(interval);
-            setTimeout(() => {
+            setTimeout(function() {
                 if (loader) {
                     loader.classList.add('hidden');
                 }
-                // Запускаем основное приложение
                 init();
             }, 500);
         }
     }, 150);
 }
 
-// Запускаем анимацию загрузки при загрузке страницы
-// Убираем вызов init() здесь, так как он вызывается внутри startLoaderAnimation()
 document.addEventListener('DOMContentLoaded', function() {
     startLoaderAnimation();
 });
