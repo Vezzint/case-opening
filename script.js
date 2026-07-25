@@ -1,4 +1,4 @@
-// script.js - ПОЛНАЯ ВЕРСИЯ
+// script.js - ПОЛНАЯ ВЕРСИЯ С МНОЖЕСТВЕННЫМИ КЕЙСАМИ
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -116,6 +116,13 @@ let currentWinItem = null;
 let isRouletteSpinning = false;
 let rouletteTimeout = null;
 
+// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ МНОЖЕСТВЕННЫХ КЕЙСОВ
+let selectedMultiplier = 1;
+let activeModals = [];
+let isSpinning = false;
+let spinResults = [];
+let spinTimeouts = [];
+
 function getStars() {
     return parseInt(localStorage.getItem('gameStars') || '0', 10);
 }
@@ -129,7 +136,7 @@ function setStars(val) {
     }
 }
 
-function checkCanOpen(caseKey) {
+function checkCanOpen(caseKey, count = 1) {
     let data = CASES_DATA[caseKey];
     if (!data) {
         return { ok: false, reason: 'Кейс не найден' };
@@ -144,8 +151,9 @@ function checkCanOpen(caseKey) {
 
     if (data.price > 0) {
         let stars = getStars();
-        if (stars < data.price) {
-            return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + data.price + ' ⭐' };
+        let totalPrice = data.price * count;
+        if (stars < totalPrice) {
+            return { ok: false, reason: '❌ Недостаточно звёзд!\n\nУ вас: ' + stars + ' ⭐\nНужно: ' + totalPrice + ' ⭐' };
         }
     }
 
@@ -423,19 +431,21 @@ function closeCasesModal() {
     }
 }
 
+// ===== НОВАЯ ЛОГИКА ПРЕДПРОСМОТРА С МНОЖЕСТВЕННЫМИ КЕЙСАМИ =====
 function showPreview(caseKey) {
     let data = CASES_DATA[caseKey];
     if (!data) {
         return;
     }
 
-    let check = checkCanOpen(caseKey);
+    let check = checkCanOpen(caseKey, 1);
     if (!check.ok) {
         tg.showAlert(check.reason);
         return;
     }
 
     currentCase = caseKey;
+    selectedMultiplier = 1;
 
     let titleEl = document.getElementById('previewCaseTitle');
     let iconEl = document.getElementById('previewCaseIcon');
@@ -448,16 +458,27 @@ function showPreview(caseKey) {
     if (nameEl) nameEl.textContent = data.name.toUpperCase();
     if (priceEl) priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
 
+    // ОБНОВЛЯЕМ КНОПКИ МНОЖИТЕЛЕЙ
+    updateMultiplierButtons();
+
     if (btn) {
-        btn.textContent = data.price === 0 ? 'Открыть бесплатно' : 'Открыть за ⭐ ' + data.price;
+        btn.textContent = '🎰 КРУТИТЬ';
         btn.disabled = false;
         btn.style.opacity = '1';
     }
 
+    // ЗАПОЛНЯЕМ ТРЕК ПРИЗАМИ (бесконечная прокрутка)
     let track = document.getElementById('previewRollingTrack');
     if (track) {
         track.innerHTML = '';
-        let itemsToShow = data.items.concat(data.items).concat(data.items);
+        // Создаем много копий для бесконечного эффекта
+        let itemsToShow = [];
+        for (let r = 0; r < 5; r++) {
+            for (let i = 0; i < data.items.length; i++) {
+                itemsToShow.push(data.items[i]);
+            }
+        }
+        
         for (let i = 0; i < itemsToShow.length; i++) {
             let item = itemsToShow[i];
             let nft = item.nft;
@@ -475,6 +496,7 @@ function showPreview(caseKey) {
         }
     }
 
+    // ЗАПОЛНЯЕМ СПИСОК ВОЗМОЖНЫХ НАГРАД
     let itemsList = document.getElementById('previewItemsList');
     if (itemsList) {
         let listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
@@ -499,32 +521,54 @@ function showPreview(caseKey) {
     document.body.style.overflow = 'hidden';
 }
 
-function closePreviewModal() {
-    let modal = document.getElementById('modalPreview');
-    if (modal) {
-        modal.classList.remove('active');
+function updateMultiplierButtons() {
+    let container = document.getElementById('multiplierButtons');
+    if (!container) return;
+    
+    let multipliers = [1, 2, 3, 4];
+    let html = '';
+    for (let i = 0; i < multipliers.length; i++) {
+        let m = multipliers[i];
+        let active = m === selectedMultiplier ? 'active' : '';
+        html += '<button class="multiplier-btn ' + active + '" onclick="setMultiplier(' + m + ')">' + m + 'x</button>';
     }
-    document.body.style.overflow = '';
-    currentCase = null;
+    container.innerHTML = html;
+    
+    // Обновляем цену
+    updateTotalPrice();
+}
+
+function setMultiplier(val) {
+    selectedMultiplier = val;
+    updateMultiplierButtons();
+}
+
+function updateTotalPrice() {
+    let data = CASES_DATA[currentCase];
+    if (!data) return;
+    let priceEl = document.getElementById('previewCasePrice');
+    if (priceEl) {
+        let total = data.price * selectedMultiplier;
+        priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + total + ' (x' + selectedMultiplier + ')';
+    }
 }
 
 function openCaseFromPreview() {
-    if (!currentCase) {
+    if (!currentCase || isSpinning) {
         return;
     }
 
     let data = CASES_DATA[currentCase];
-    let check = checkCanOpen(currentCase);
+    let check = checkCanOpen(currentCase, selectedMultiplier);
 
     if (!check.ok) {
         tg.showAlert(check.reason);
-        closePreviewModal();
-        generateCases();
         return;
     }
 
+    // Списываем звёзды
     if (data.price > 0) {
-        setStars(getStars() - data.price);
+        setStars(getStars() - (data.price * selectedMultiplier));
         generateCases();
     }
 
@@ -534,195 +578,351 @@ function openCaseFromPreview() {
         startFreeTimer();
     }
 
-    let key = currentCase;
+    // Закрываем предпросмотр и запускаем множественные модалки
     closePreviewModal();
     setTimeout(function() {
-        startRoulette(key);
+        startMultipleRoulettes(currentCase, selectedMultiplier);
     }, 300);
 }
 
-function startRoulette(caseKey) {
-    if (isRouletteSpinning) {
-        return;
+// ===== МНОЖЕСТВЕННЫЕ РУЛЕТКИ =====
+function startMultipleRoulettes(caseKey, count) {
+    if (isSpinning) return;
+    isSpinning = true;
+    activeModals = [];
+    spinResults = [];
+    
+    // Очищаем предыдущие таймауты
+    for (let i = 0; i < spinTimeouts.length; i++) {
+        clearTimeout(spinTimeouts[i]);
     }
-    isRouletteSpinning = true;
+    spinTimeouts = [];
 
     let data = CASES_DATA[caseKey];
     if (!data) {
-        isRouletteSpinning = false;
+        isSpinning = false;
         return;
     }
 
-    let modal = document.getElementById('modalRoulette');
-    let track = document.getElementById('rouletteTrack');
-    let resultBox = document.getElementById('resultBox');
-    let title = document.getElementById('rouletteTitle');
-    let skipBtn = document.getElementById('skipBtn');
-
-    if (!modal || !track) {
-        isRouletteSpinning = false;
-        return;
+    // Создаем модалки для каждого множителя
+    for (let i = 0; i < count; i++) {
+        let modal = createRouletteModal(i, count);
+        activeModals.push({
+            modal: modal,
+            track: modal.querySelector('.roulette-track-multi'),
+            winItem: null,
+            isDone: false
+        });
     }
 
-    modal.classList.add('active');
-    if (resultBox) {
-        resultBox.classList.remove('active');
-    }
-    if (title) {
-        title.textContent = '🎲 ОТКРЫВАЕМ...';
-    }
-    if (skipBtn) {
-        skipBtn.style.display = 'block';
-    }
-    document.body.style.overflow = 'hidden';
-
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0px)';
-    track.innerHTML = '';
-
-    let WIN_IDX = 35;
-    let TOTAL = 60;
-    let winItem = getRandomItemByChance(data.items);
-    currentWinItem = winItem;
-
-    for (let i = 0; i < TOTAL; i++) {
-        let item = (i === WIN_IDX) ? winItem : data.items[Math.floor(Math.random() * data.items.length)];
-        let div = document.createElement('div');
-        div.className = 'roulette-item';
-        let borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
-        div.style.borderColor = borderColor;
-        if (item.nft.isCurrency) {
-            div.innerHTML = '<img src="' + item.nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
-        } else {
-            div.innerHTML = '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
-        }
-        track.appendChild(div);
-    }
-
-    requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-            let firstItem = track.children[0];
-            if (!firstItem) {
-                isRouletteSpinning = false;
-                return;
+    // Заполняем треки призами
+    for (let i = 0; i < activeModals.length; i++) {
+        let track = activeModals[i].track;
+        let winItem = getRandomItemByChance(data.items);
+        activeModals[i].winItem = winItem;
+        
+        track.innerHTML = '';
+        let WIN_IDX = 35;
+        let TOTAL = 60;
+        
+        for (let j = 0; j < TOTAL; j++) {
+            let item = (j === WIN_IDX) ? winItem : data.items[Math.floor(Math.random() * data.items.length)];
+            let div = document.createElement('div');
+            div.className = 'roulette-item-multi';
+            let borderColor = item.nft.isCurrency ? '#fbbf24' : getRarityColor(item.nft.rarity);
+            div.style.borderColor = borderColor;
+            if (item.nft.isCurrency) {
+                div.innerHTML = '<img src="' + item.nft.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+            } else {
+                div.innerHTML = '<img src="' + item.nft.image + '" alt="' + item.nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML=\'<div style=font-size:60px>💎</div>\'">';
             }
+            track.appendChild(div);
+        }
+    }
 
-            let itemW = firstItem.getBoundingClientRect().width;
-            let gap = 10;
-            let stepW = itemW + gap;
+    // Запускаем анимацию через секунду
+    setTimeout(function() {
+        startAllRoulettes();
+    }, 500);
+}
 
-            let wrapper = track.parentElement;
-            let wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
-            let center = wrapW / 2;
+function createRouletteModal(index, total) {
+    let modal = document.createElement('div');
+    modal.className = 'modal-roulette-multi';
+    modal.style.animationDelay = (index * 0.1) + 's';
+    
+    let label = total > 1 ? 'Кейс #' + (index + 1) : '';
+    
+    modal.innerHTML = `
+        <div class="roulette-multi-header">
+            <span class="roulette-multi-label">${label}</span>
+            <span class="roulette-multi-result" id="resultLabel_${index}">🎰 Крутим...</span>
+        </div>
+        <div class="roulette-multi-box">
+            <div class="selector-multi"></div>
+            <div class="roulette-multi-wrapper">
+                <div class="roulette-track-multi"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Добавляем CSS для модалок
+    if (!document.getElementById('multiRouletteStyle')) {
+        let style = document.createElement('style');
+        style.id = 'multiRouletteStyle';
+        style.textContent = `
+            .modal-roulette-multi {
+                position: fixed;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 500px;
+                background: rgba(10, 10, 18, 0.97);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(139, 92, 246, 0.2);
+                border-radius: 16px;
+                padding: 20px;
+                z-index: 3500;
+                animation: slideUp 0.3s ease-out forwards;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            }
+            
+            .modal-roulette-multi:nth-child(1) { top: 5%; }
+            .modal-roulette-multi:nth-child(2) { top: 28%; }
+            .modal-roulette-multi:nth-child(3) { top: 51%; }
+            .modal-roulette-multi:nth-child(4) { top: 74%; }
+            
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+            
+            .roulette-multi-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+                font-size: 14px;
+                font-weight: 700;
+                color: #a78bfa;
+            }
+            
+            .roulette-multi-label {
+                background: rgba(139, 92, 246, 0.2);
+                padding: 4px 12px;
+                border-radius: 8px;
+                font-size: 12px;
+            }
+            
+            .roulette-multi-result {
+                font-size: 14px;
+                color: #fbbf24;
+            }
+            
+            .roulette-multi-box {
+                width: 100%;
+                height: 100px;
+                background: rgba(20, 10, 40, 0.5);
+                border-radius: 12px;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .roulette-multi-wrapper {
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                transform: translateY(-50%);
+                height: 80px;
+                overflow: hidden;
+            }
+            
+            .selector-multi {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 2px;
+                height: 80px;
+                background: linear-gradient(180deg, transparent, #8b5cf6, transparent);
+                z-index: 10;
+                box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+            }
+            
+            .selector-multi::before {
+                content: '';
+                position: absolute;
+                top: -12px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 14px solid #8b5cf6;
+                filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.4));
+            }
+            
+            .roulette-track-multi {
+                display: flex;
+                gap: 8px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                align-items: center;
+                padding: 0 10px;
+                transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            }
+            
+            .roulette-item-multi {
+                width: 70px;
+                height: 70px;
+                background: rgba(0, 0, 0, 0.6);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #8b5cf6;
+                flex-shrink: 0;
+                overflow: hidden;
+            }
+            
+            .roulette-item-multi img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 6px;
+            }
+            
+            .roulette-multi-result-win {
+                color: #10b981 !important;
+                animation: resultPulse 0.5s ease-in-out 3;
+            }
+            
+            @keyframes resultPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    return modal;
+}
 
-            let winCenterX = WIN_IDX * stepW + itemW / 2;
-            let offset = center - winCenterX;
-
+function startAllRoulettes() {
+    let WIN_IDX = 35;
+    let delays = [0, 0.1, 0.2, 0.3];
+    
+    for (let i = 0; i < activeModals.length; i++) {
+        let data = activeModals[i];
+        let track = data.track;
+        let firstItem = track.children[0];
+        
+        if (!firstItem) {
+            continue;
+        }
+        
+        let itemW = firstItem.getBoundingClientRect().width;
+        let gap = 8;
+        let stepW = itemW + gap;
+        let wrapW = track.parentElement.getBoundingClientRect().width;
+        let center = wrapW / 2;
+        let winCenterX = WIN_IDX * stepW + itemW / 2;
+        let offset = center - winCenterX;
+        
+        // Задержка для каскадного эффекта
+        setTimeout(function() {
             track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
             track.style.transform = 'translateX(' + offset + 'px)';
-            if (title) {
-                title.textContent = '🎰 КРУТИМ...';
+        }, delays[i] * 300);
+    }
+    
+    // Останавливаем все одновременно через 5.5 секунд
+    let stopTimeout = setTimeout(function() {
+        for (let i = 0; i < activeModals.length; i++) {
+            let data = activeModals[i];
+            let resultLabel = document.getElementById('resultLabel_' + i);
+            let winItem = data.winItem;
+            
+            if (resultLabel) {
+                resultLabel.textContent = '🎉 ' + winItem.nft.name;
+                resultLabel.className = 'roulette-multi-result-win';
             }
+            
+            data.isDone = true;
+            
+            // Добавляем выигрыш
+            processWin(winItem.nft);
+        }
+        
+        isSpinning = false;
+        
+        // Закрываем модалки через 3 секунды
+        setTimeout(function() {
+            closeAllMultiModals();
+        }, 3000);
+        
+    }, 5500);
+    
+    spinTimeouts.push(stopTimeout);
+}
 
-            if (rouletteTimeout) {
-                clearTimeout(rouletteTimeout);
-            }
-            rouletteTimeout = setTimeout(function() {
-                if (title) {
-                    title.textContent = '🎉 РЕЗУЛЬТАТ!';
-                }
-                showResult(winItem.nft, caseKey);
-                openedCases++;
-                localStorage.setItem('openedCases', openedCases);
-                checkAchievements();
-                checkMythicAchievement();
-                generateCases();
-                if (skipBtn) {
-                    skipBtn.style.display = 'none';
-                }
-                isRouletteSpinning = false;
-                rouletteTimeout = null;
-            }, 5500);
-        });
-    });
+function processWin(nft) {
+    // Обработка выигрыша (добавляем в инвентарь, начисляем звёзды и т.д.)
+    if (nft.isCurrency) {
+        let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1 || nft.name.indexOf('Сердце') !== -1;
+        if (isStars) {
+            setStars(getStars() + nft.amount);
+            addXP(nft.amount);
+        } else {
+            addXP(10);
+        }
+    } else {
+        addToInventory(nft);
+        saveToHistory(nft);
+        addXP(Math.floor(nft.stars / 5));
+        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
+            createConfetti();
+        }
+    }
+    addToGlobalHistory(nft);
+    
+    openedCases++;
+    localStorage.setItem('openedCases', openedCases);
+    checkAchievements();
+    checkMythicAchievement();
+    generateCases();
+}
+
+function closeAllMultiModals() {
+    let modals = document.querySelectorAll('.modal-roulette-multi');
+    for (let i = 0; i < modals.length; i++) {
+        modals[i].style.animation = 'slideDown 0.3s ease-in forwards';
+        setTimeout(function(el) {
+            el.remove();
+        }, 300, modals[i]);
+    }
+    activeModals = [];
+    isSpinning = false;
+}
+
+// ===== СТАРАЯ ЛОГИКА РУЛЕТКИ (ОСТАВЛЯЕМ ДЛЯ СОВМЕСТИМОСТИ) =====
+function startRoulette(caseKey) {
+    // Используем новую логику с множителем 1
+    startMultipleRoulettes(caseKey, 1);
 }
 
 function skipRoulette() {
-    if (!currentWinItem || !isRouletteSpinning) {
-        return;
-    }
-
-    let track = document.getElementById('rouletteTrack');
-    let title = document.getElementById('rouletteTitle');
-    let skipBtn = document.getElementById('skipBtn');
-
-    if (rouletteTimeout) {
-        clearTimeout(rouletteTimeout);
-        rouletteTimeout = null;
-    }
-
-    if (track) {
-        track.style.transition = 'transform 0.3s cubic-bezier(0.05, 0.85, 0.15, 1)';
-    }
-    if (title) {
-        title.textContent = '🎉 РЕЗУЛЬТАТ!';
-    }
-
-    let WIN_IDX = 35;
-    if (track) {
-        let firstItem = track.children[0];
-        if (firstItem) {
-            let itemW = firstItem.getBoundingClientRect().width;
-            let gap = 10;
-            let stepW = itemW + gap;
-            let wrapper = track.parentElement;
-            let wrapW = wrapper ? wrapper.getBoundingClientRect().width : 370;
-            let center = wrapW / 2;
-            let winCenterX = WIN_IDX * stepW + itemW / 2;
-            let offset = center - winCenterX;
-            track.style.transform = 'translateX(' + offset + 'px)';
-        }
-    }
-
-    setTimeout(function() {
-        if (skipBtn) {
-            skipBtn.style.display = 'none';
-        }
-        showResult(currentWinItem.nft, currentCase);
-        openedCases++;
-        localStorage.setItem('openedCases', openedCases);
-        checkAchievements();
-        checkMythicAchievement();
-        generateCases();
-        isRouletteSpinning = false;
-    }, 400);
+    // Для новой логики скип не нужен
 }
 
 function closeRouletteModal() {
-    let modal = document.getElementById('modalRoulette');
-    let track = document.getElementById('rouletteTrack');
-    let skipBtn = document.getElementById('skipBtn');
-
-    if (rouletteTimeout) {
-        clearTimeout(rouletteTimeout);
-        rouletteTimeout = null;
-    }
-
-    if (modal) {
-        modal.classList.remove('active');
-    }
-    document.body.style.overflow = '';
-    isRouletteSpinning = false;
-
-    if (track) {
-        track.style.display = 'flex';
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(0px)';
-        track.innerHTML = '';
-    }
-    if (skipBtn) {
-        skipBtn.style.display = 'block';
-    }
+    closeAllMultiModals();
 }
 
 function getRandomItemByChance(items) {
@@ -738,69 +938,7 @@ function getRandomItemByChance(items) {
 }
 
 function showResult(nft, caseKey) {
-    let resultBox = document.getElementById('resultBox');
-    if (resultBox) {
-        resultBox.classList.add('active');
-    }
-
-    if (nft.isCurrency) {
-        let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1 || nft.name.indexOf('Сердце') !== -1;
-        if (isStars) {
-            let newBal = getStars() + nft.amount;
-            setStars(newBal);
-            let iconEl = document.getElementById('resultIcon');
-            let nameEl = document.getElementById('resultName');
-            let rarityEl = document.getElementById('resultRarity');
-            let starsEl = document.getElementById('resultStars');
-            let tonEl = document.getElementById('resultTon');
-            if (iconEl) iconEl.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
-            if (nameEl) {
-                let cleanName = nft.name.replace(/^\d+\s*/, '');
-                nameEl.textContent = '+' + nft.amount + ' ' + cleanName;
-            }
-            if (rarityEl) rarityEl.textContent = 'ВАЛЮТА';
-            if (starsEl) starsEl.innerHTML = 'Баланс: ⭐ ' + newBal;
-            if (tonEl) tonEl.innerHTML = '';
-            addXP(nft.amount);
-        } else {
-            let iconEl2 = document.getElementById('resultIcon');
-            let nameEl2 = document.getElementById('resultName');
-            let rarityEl2 = document.getElementById('resultRarity');
-            let starsEl2 = document.getElementById('resultStars');
-            let tonEl2 = document.getElementById('resultTon');
-            if (iconEl2) iconEl2.innerHTML = '<img src="' + nft.image + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;">';
-            if (nameEl2) nameEl2.textContent = 'Подарок';
-            if (rarityEl2) rarityEl2.textContent = 'ОСОБОЕ';
-            if (starsEl2) starsEl2.innerHTML = '🎁 Сюрприз!';
-            if (tonEl2) tonEl2.innerHTML = '';
-            addXP(10);
-        }
-        if (resultBox) resultBox.style.borderColor = '#fbbf24';
-        let rarityEl3 = document.getElementById('resultRarity');
-        if (rarityEl3) rarityEl3.style.background = '#fbbf24';
-    } else {
-        let iconEl3 = document.getElementById('resultIcon');
-        let nameEl3 = document.getElementById('resultName');
-        let rarityEl4 = document.getElementById('resultRarity');
-        let starsEl3 = document.getElementById('resultStars');
-        let tonEl3 = document.getElementById('resultTon');
-        if (iconEl3) iconEl3.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" style="width:140px;height:140px;object-fit:cover;border-radius:12px;" onerror="this.style.display=\'none\'">';
-        if (nameEl3) nameEl3.textContent = nft.name;
-        if (rarityEl4) rarityEl4.textContent = nft.rarity.toUpperCase();
-        let color = getRarityColor(nft.rarity);
-        if (resultBox) resultBox.style.borderColor = color;
-        if (rarityEl4) rarityEl4.style.background = color;
-        if (starsEl3) starsEl3.innerHTML = '⭐ ' + nft.stars;
-        if (tonEl3) tonEl3.innerHTML = '💎 ' + nft.ton + ' TON';
-        addXP(Math.floor(nft.stars / 5));
-        addToInventory(nft);
-        saveToHistory(nft);
-        if (nft.rarity === 'legendary' || nft.rarity === 'mythic') {
-            createConfetti();
-        }
-    }
-
-    addToGlobalHistory(nft);
+    // Устаревшая функция, оставлена для совместимости
 }
 
 function createConfetti() {
