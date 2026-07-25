@@ -39,6 +39,7 @@
 
     <div class="admin-badge hidden" id="adminBadge" onclick="openAdminPanel()">👑 ADMIN</div>
 
+    <!-- ПРОФИЛЬ -->
     <div class="profile-header">
         <div class="profile-info">
             <div class="profile-avatar" id="avatarContainer">🎰</div>
@@ -63,10 +64,12 @@
         </div>
     </div>
 
+    <!-- СЛАЙДЕР С ВЫИГРЫШАМИ -->
     <div class="nft-slider">
         <div class="nft-scroll" id="nftScroll"></div>
     </div>
 
+    <!-- ВКЛАДКА ИГРЫ -->
     <div class="tab-content active" id="tabGames">
         <div class="games-grid">
             <div class="game-card" onclick="openCasesModal()">
@@ -93,6 +96,7 @@
         <div id="gamesContent"></div>
     </div>
 
+    <!-- МОДАЛКА КЕЙСОВ -->
     <div class="modal-cases" id="modalCases">
         <div class="modal-cases-content">
             <div class="modal-cases-header">
@@ -110,22 +114,62 @@
         </div>
     </div>
 
+    <!-- МОДАЛКА ПРЕДПРОСМОТРА КЕЙСА (С МНОЖИТЕЛЯМИ) -->
+    <div class="modal-preview" id="modalPreview">
+        <div class="modal-preview-content">
+            <div class="modal-preview-header">
+                <h2 id="previewCaseTitle">Case Name</h2>
+                <div class="modal-close" onclick="closePreviewModal()">✕</div>
+            </div>
+            
+            <!-- БЕСКОНЕЧНАЯ ПРОКРУТКА ПРИЗОВ -->
+            <div class="preview-rolling-container">
+                <div class="preview-rolling-track" id="previewRollingTrack"></div>
+            </div>
+            
+            <div class="preview-info">
+                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
+                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
+                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
+                
+                <!-- УПРАВЛЕНИЕ: КРУТИТЬ + МНОЖИТЕЛИ -->
+                <div class="preview-controls">
+                    <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">🎰 КРУТИТЬ</button>
+                    <div class="multiplier-group" id="multiplierButtons">
+                        <button class="multiplier-btn active" onclick="setMultiplier(1)">1x</button>
+                        <button class="multiplier-btn" onclick="setMultiplier(2)">2x</button>
+                        <button class="multiplier-btn" onclick="setMultiplier(3)">3x</button>
+                        <button class="multiplier-btn" onclick="setMultiplier(4)">4x</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- СПИСОК ВОЗМОЖНЫХ НАГРАД -->
+            <div class="preview-items-list" id="previewItemsList"></div>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА ИНВЕНТАРЯ -->
     <div class="tab-content" id="tabInventory">
         <div id="inventoryContainer"></div>
     </div>
 
+    <!-- ВКЛАДКА ИСТОРИИ -->
     <div class="tab-content" id="tabHistory">
         <div id="historyContainer"></div>
     </div>
 
+    <!-- ВКЛАДКА ДОСТИЖЕНИЙ -->
     <div class="tab-content" id="tabAchievements">
         <div id="achievementsContainer"></div>
     </div>
 
+    <!-- ВКЛАДКА ПРОФИЛЯ -->
     <div class="tab-content" id="tabProfile">
         <div id="profileContainer"></div>
     </div>
 
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('games')">
             <svg class="nav-icon-svg" viewBox="0 0 24 24" width="24" height="24">
@@ -168,50 +212,7 @@
         </div>
     </div>
 
-    <!-- Модалка предпросмотра кейса -->
-    <div class="modal-preview" id="modalPreview">
-        <div class="modal-preview-content">
-            <div class="modal-preview-header">
-                <h2 id="previewCaseTitle">Case Name</h2>
-                <div class="modal-close" onclick="closePreviewModal()">✕</div>
-            </div>
-            <div class="preview-rolling-container">
-                <div class="preview-rolling-track" id="previewRollingTrack"></div>
-            </div>
-            <div class="preview-info">
-                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
-                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
-                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
-                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">Открыть кейс</button>
-            </div>
-            <div class="preview-items-list" id="previewItemsList"></div>
-        </div>
-    </div>
-
-    <!-- Модалка рулетки -->
-    <div class="modal-roulette" id="modalRoulette">
-        <div class="roulette-title" id="rouletteTitle">🎲 OPENING...</div>
-        <div class="roulette-box">
-            <div class="selector"></div>
-            <div class="roulette-wrapper">
-                <div class="roulette-track" id="rouletteTrack"></div>
-            </div>
-        </div>
-        <button class="skip-btn" id="skipBtn" onclick="skipRoulette()">⏩ Пропустить</button>
-        <div class="result-box" id="resultBox">
-            <div class="result-label">🎉 YOU WON!</div>
-            <div class="result-icon" id="resultIcon"></div>
-            <div class="result-name" id="resultName"></div>
-            <div class="result-rarity" id="resultRarity"></div>
-            <div class="result-values">
-                <span id="resultStars"></span>
-                <span id="resultTon"></span>
-            </div>
-            <button class="close-btn" onclick="closeRouletteModal()">Продолжить</button>
-        </div>
-    </div>
-
-    <!-- Админ панель -->
+    <!-- АДМИН ПАНЕЛЬ -->
     <div class="admin-panel-modal" id="adminPanel">
         <div class="admin-panel-container">
             <div class="admin-panel-header">
