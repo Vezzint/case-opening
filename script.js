@@ -447,33 +447,36 @@ function showPreview(caseKey) {
     currentCase = caseKey;
     selectedMultiplier = 1;
 
+    // Заголовок в хедере
     let titleEl = document.getElementById('previewCaseTitle');
-    let iconEl = document.getElementById('previewCaseIcon');
-    let nameEl = document.getElementById('previewCaseName');
-    let priceEl = document.getElementById('previewCasePrice');
-    let btn = document.getElementById('previewOpenBtn');
-
     if (titleEl) titleEl.textContent = data.name;
+
+    // Название по центру над модалкой крутки
+    let nameCentered = document.getElementById('previewCaseNameCentered');
+    if (nameCentered) nameCentered.textContent = data.name.toUpperCase();
+
+    // Иконка (скрыта)
+    let iconEl = document.getElementById('previewCaseIcon');
     if (iconEl) iconEl.textContent = data.icon;
-    if (nameEl) nameEl.textContent = data.name.toUpperCase();
-    if (priceEl) priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + data.price;
 
-    // ОБНОВЛЯЕМ КНОПКИ МНОЖИТЕЛЕЙ
-    updateMultiplierButtons();
-
+    // Кнопка "Крутить"
+    let btn = document.getElementById('previewOpenBtn');
     if (btn) {
-        btn.textContent = '🎰 КРУТИТЬ';
+        btn.textContent = 'КРУТИТЬ';
         btn.disabled = false;
         btn.style.opacity = '1';
     }
 
-    // ЗАПОЛНЯЕМ ТРЕК ПРИЗАМИ (бесконечная прокрутка)
+    // Обновляем цену и множители
+    updateMultiplierButtons();
+
+    // ЗАПОЛНЯЕМ ТРЕК ПРИЗАМИ (медленнее, с правильными названиями)
     let track = document.getElementById('previewRollingTrack');
     if (track) {
         track.innerHTML = '';
         // Создаем много копий для бесконечного эффекта
         let itemsToShow = [];
-        for (let r = 0; r < 5; r++) {
+        for (let r = 0; r < 8; r++) {
             for (let i = 0; i < data.items.length; i++) {
                 itemsToShow.push(data.items[i]);
             }
@@ -487,16 +490,22 @@ function showPreview(caseKey) {
             let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
             div.style.borderColor = color;
 
+            // Показываем количество звёзд цифрами
+            let displayName = nft.name;
+            if (nft.isCurrency && nft.amount > 0) {
+                displayName = nft.amount + ' ⭐';
+            }
+
             if (nft.isCurrency) {
-                div.innerHTML = '<img src="' + nft.image + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+                div.innerHTML = '<img src="' + nft.image + '" style="width:50px;height:50px;object-fit:cover;border-radius:6px;"><div class="item-name">' + displayName + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
             } else {
-                div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div class=item-icon>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
+                div.innerHTML = '<img src="' + nft.image + '" alt="' + nft.name + '" onerror="this.parentElement.innerHTML=\'<div style=font-size:30px>💎</div>\'"><div class="item-name">' + nft.name + '</div><div class="item-rarity-label" style="color:' + color + ';">' + nft.rarity + '</div>';
             }
             track.appendChild(div);
         }
     }
 
-    // ЗАПОЛНЯЕМ СПИСОК ВОЗМОЖНЫХ НАГРАД
+    // ЗАПОЛНЯЕМ СПИСОК ВОЗМОЖНЫХ НАГРАД (с цифрами)
     let itemsList = document.getElementById('previewItemsList');
     if (itemsList) {
         let listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
@@ -504,8 +513,14 @@ function showPreview(caseKey) {
             let it = data.items[j];
             let nft = it.nft;
             if (!nft) continue;
+            
+            let displayName = nft.name;
+            if (nft.isCurrency && nft.amount > 0) {
+                displayName = nft.amount + ' ⭐';
+            }
+            
             if (nft.isCurrency) {
-                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;overflow:hidden;"><img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
+                listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:#fbbf24;overflow:hidden;"><img src="' + nft.image + '" style="width:100%;height:100%;object-fit:cover;"></div><div class="preview-item-info"><div class="preview-item-name">' + displayName + '</div><div class="preview-item-rarity" style="color:#fbbf24;">Валюта</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
             } else {
                 let color = getRarityColor(nft.rarity);
                 listHtml += '<div class="preview-item-row"><div class="preview-item-icon" style="border-color:' + color + ';"><img src="' + nft.image + '" alt="' + nft.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'"></div><div class="preview-item-info"><div class="preview-item-name">' + nft.name + '</div><div class="preview-item-rarity" style="color:' + color + ';">' + nft.rarity.toUpperCase() + '</div><div class="preview-item-price">⭐ ' + nft.stars + ' • 💎 ' + nft.ton + ' TON</div></div><div class="preview-item-chance">' + it.chance + '%</div></div>';
@@ -521,6 +536,7 @@ function showPreview(caseKey) {
     document.body.style.overflow = 'hidden';
 }
 
+
 function updateMultiplierButtons() {
     let container = document.getElementById('multiplierButtons');
     if (!container) return;
@@ -534,7 +550,6 @@ function updateMultiplierButtons() {
     }
     container.innerHTML = html;
     
-    // Обновляем цену
     updateTotalPrice();
 }
 
@@ -549,10 +564,13 @@ function updateTotalPrice() {
     let priceEl = document.getElementById('previewCasePrice');
     if (priceEl) {
         let total = data.price * selectedMultiplier;
-        priceEl.textContent = data.price === 0 ? 'БЕСПЛАТНО' : '⭐ ' + total + ' (x' + selectedMultiplier + ')';
+        if (data.price === 0) {
+            priceEl.textContent = 'БЕСПЛАТНО';
+        } else {
+            priceEl.textContent = '⭐ ' + total;
+        }
     }
 }
-
 function openCaseFromPreview() {
     if (!currentCase || isSpinning) {
         return;
@@ -568,7 +586,8 @@ function openCaseFromPreview() {
 
     // Списываем звёзды
     if (data.price > 0) {
-        setStars(getStars() - (data.price * selectedMultiplier));
+        let totalPrice = data.price * selectedMultiplier;
+        setStars(getStars() - totalPrice);
         generateCases();
     }
 
