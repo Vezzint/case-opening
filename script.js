@@ -1,4 +1,4 @@
-// script.js - ПОЛНАЯ ВЕРСИЯ С МНОЖЕСТВЕННЫМИ КЕЙСАМИ
+// script.js - ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
@@ -29,7 +29,7 @@ const NFT_DATABASE = [
 
 const CASES_DATA = {
     free: {
-        name: "🎁 Бесплатный кейс",
+        name: "Бесплатный кейс",
         icon: "🎁",
         price: 0,
         type: "free",
@@ -45,7 +45,7 @@ const CASES_DATA = {
         ]
     },
     basic: {
-        name: "📦 Basic Case",
+        name: "Basic Case",
         icon: "📦",
         price: 50,
         type: "basic",
@@ -63,7 +63,7 @@ const CASES_DATA = {
         ]
     },
     premium: {
-        name: "💎 Premium Case",
+        name: "Premium Case",
         icon: "💎",
         price: 500,
         type: "premium",
@@ -83,7 +83,7 @@ const CASES_DATA = {
         ]
     },
     legendary: {
-        name: "👑 Legendary Case",
+        name: "Legendary Case",
         icon: "👑",
         price: 1000,
         type: "legendary",
@@ -116,7 +116,6 @@ let currentWinItem = null;
 let isRouletteSpinning = false;
 let rouletteTimeout = null;
 
-// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ МНОЖЕСТВЕННЫХ КЕЙСОВ
 let selectedMultiplier = 1;
 let activeModals = [];
 let isSpinning = false;
@@ -136,7 +135,8 @@ function setStars(val) {
     }
 }
 
-function checkCanOpen(caseKey, count = 1) {
+function checkCanOpen(caseKey, count) {
+    count = count || 1;
     let data = CASES_DATA[caseKey];
     if (!data) {
         return { ok: false, reason: 'Кейс не найден' };
@@ -431,7 +431,7 @@ function closeCasesModal() {
     }
 }
 
-// ===== НОВАЯ ЛОГИКА ПРЕДПРОСМОТРА С МНОЖЕСТВЕННЫМИ КЕЙСАМИ =====
+// ===== ОСНОВНАЯ ЛОГИКА ПРЕДПРОСМОТРА =====
 function showPreview(caseKey) {
     let data = CASES_DATA[caseKey];
     if (!data) {
@@ -447,19 +447,15 @@ function showPreview(caseKey) {
     currentCase = caseKey;
     selectedMultiplier = 1;
 
-    // Заголовок в хедере
     let titleEl = document.getElementById('previewCaseTitle');
     if (titleEl) titleEl.textContent = data.name;
 
-    // Название по центру над модалкой крутки
     let nameCentered = document.getElementById('previewCaseNameCentered');
     if (nameCentered) nameCentered.textContent = data.name.toUpperCase();
 
-    // Иконка (скрыта)
     let iconEl = document.getElementById('previewCaseIcon');
     if (iconEl) iconEl.textContent = data.icon;
 
-    // Кнопка "Крутить"
     let btn = document.getElementById('previewOpenBtn');
     if (btn) {
         btn.textContent = 'КРУТИТЬ';
@@ -467,14 +463,11 @@ function showPreview(caseKey) {
         btn.style.opacity = '1';
     }
 
-    // Обновляем цену и множители
     updateMultiplierButtons();
 
-    // ЗАПОЛНЯЕМ ТРЕК ПРИЗАМИ (медленнее, с правильными названиями)
     let track = document.getElementById('previewRollingTrack');
     if (track) {
         track.innerHTML = '';
-        // Создаем много копий для бесконечного эффекта
         let itemsToShow = [];
         for (let r = 0; r < 8; r++) {
             for (let i = 0; i < data.items.length; i++) {
@@ -490,7 +483,6 @@ function showPreview(caseKey) {
             let color = nft.isCurrency ? '#fbbf24' : getRarityColor(nft.rarity);
             div.style.borderColor = color;
 
-            // Показываем количество звёзд цифрами
             let displayName = nft.name;
             if (nft.isCurrency && nft.amount > 0) {
                 displayName = nft.amount + ' ⭐';
@@ -505,7 +497,6 @@ function showPreview(caseKey) {
         }
     }
 
-    // ЗАПОЛНЯЕМ СПИСОК ВОЗМОЖНЫХ НАГРАД (с цифрами)
     let itemsList = document.getElementById('previewItemsList');
     if (itemsList) {
         let listHtml = '<div class="preview-items-title">💎 Возможные награды</div>';
@@ -536,6 +527,14 @@ function showPreview(caseKey) {
     document.body.style.overflow = 'hidden';
 }
 
+function closePreviewModal() {
+    let modal = document.getElementById('modalPreview');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
+    currentCase = null;
+}
 
 function updateMultiplierButtons() {
     let container = document.getElementById('multiplierButtons');
@@ -571,6 +570,7 @@ function updateTotalPrice() {
         }
     }
 }
+
 function openCaseFromPreview() {
     if (!currentCase || isSpinning) {
         return;
@@ -584,7 +584,6 @@ function openCaseFromPreview() {
         return;
     }
 
-    // Списываем звёзды
     if (data.price > 0) {
         let totalPrice = data.price * selectedMultiplier;
         setStars(getStars() - totalPrice);
@@ -597,7 +596,6 @@ function openCaseFromPreview() {
         startFreeTimer();
     }
 
-    // Закрываем предпросмотр и запускаем множественные модалки
     closePreviewModal();
     setTimeout(function() {
         startMultipleRoulettes(currentCase, selectedMultiplier);
@@ -611,7 +609,6 @@ function startMultipleRoulettes(caseKey, count) {
     activeModals = [];
     spinResults = [];
     
-    // Очищаем предыдущие таймауты
     for (let i = 0; i < spinTimeouts.length; i++) {
         clearTimeout(spinTimeouts[i]);
     }
@@ -623,7 +620,6 @@ function startMultipleRoulettes(caseKey, count) {
         return;
     }
 
-    // Создаем модалки для каждого множителя
     for (let i = 0; i < count; i++) {
         let modal = createRouletteModal(i, count);
         activeModals.push({
@@ -634,7 +630,6 @@ function startMultipleRoulettes(caseKey, count) {
         });
     }
 
-    // Заполняем треки призами
     for (let i = 0; i < activeModals.length; i++) {
         let track = activeModals[i].track;
         let winItem = getRandomItemByChance(data.items);
@@ -659,7 +654,6 @@ function startMultipleRoulettes(caseKey, count) {
         }
     }
 
-    // Запускаем анимацию через секунду
     setTimeout(function() {
         startAllRoulettes();
     }, 500);
@@ -675,7 +669,7 @@ function createRouletteModal(index, total) {
     modal.innerHTML = `
         <div class="roulette-multi-header">
             <span class="roulette-multi-label">${label}</span>
-            <span class="roulette-multi-result" id="resultLabel_${index}">🎰 Крутим...</span>
+            <span class="roulette-multi-result" id="resultLabel_${index}">КРУТИМ...</span>
         </div>
         <div class="roulette-multi-box">
             <div class="selector-multi"></div>
@@ -687,7 +681,6 @@ function createRouletteModal(index, total) {
     
     document.body.appendChild(modal);
     
-    // Добавляем CSS для модалок
     if (!document.getElementById('multiRouletteStyle')) {
         let style = document.createElement('style');
         style.id = 'multiRouletteStyle';
@@ -707,17 +700,18 @@ function createRouletteModal(index, total) {
                 animation: slideUp 0.3s ease-out forwards;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             }
-            
             .modal-roulette-multi:nth-child(1) { top: 5%; }
             .modal-roulette-multi:nth-child(2) { top: 28%; }
             .modal-roulette-multi:nth-child(3) { top: 51%; }
             .modal-roulette-multi:nth-child(4) { top: 74%; }
-            
             @keyframes slideUp {
                 from { opacity: 0; transform: translateX(-50%) translateY(20px); }
                 to { opacity: 1; transform: translateX(-50%) translateY(0); }
             }
-            
+            @keyframes slideDown {
+                from { opacity: 1; transform: translateX(-50%) translateY(0); }
+                to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            }
             .roulette-multi-header {
                 display: flex;
                 justify-content: space-between;
@@ -727,19 +721,24 @@ function createRouletteModal(index, total) {
                 font-weight: 700;
                 color: #a78bfa;
             }
-            
             .roulette-multi-label {
                 background: rgba(139, 92, 246, 0.2);
                 padding: 4px 12px;
                 border-radius: 8px;
                 font-size: 12px;
             }
-            
             .roulette-multi-result {
                 font-size: 14px;
                 color: #fbbf24;
             }
-            
+            .roulette-multi-result-win {
+                color: #10b981 !important;
+                animation: resultPulse 0.5s ease-in-out 3;
+            }
+            @keyframes resultPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+            }
             .roulette-multi-box {
                 width: 100%;
                 height: 100px;
@@ -748,7 +747,6 @@ function createRouletteModal(index, total) {
                 position: relative;
                 overflow: hidden;
             }
-            
             .roulette-multi-wrapper {
                 position: absolute;
                 top: 50%;
@@ -758,7 +756,6 @@ function createRouletteModal(index, total) {
                 height: 80px;
                 overflow: hidden;
             }
-            
             .selector-multi {
                 position: absolute;
                 left: 50%;
@@ -770,7 +767,6 @@ function createRouletteModal(index, total) {
                 z-index: 10;
                 box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
             }
-            
             .selector-multi::before {
                 content: '';
                 position: absolute;
@@ -784,7 +780,6 @@ function createRouletteModal(index, total) {
                 border-top: 14px solid #8b5cf6;
                 filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.4));
             }
-            
             .roulette-track-multi {
                 display: flex;
                 gap: 8px;
@@ -794,9 +789,8 @@ function createRouletteModal(index, total) {
                 height: 100%;
                 align-items: center;
                 padding: 0 10px;
-                transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+                transition: transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
             }
-            
             .roulette-item-multi {
                 width: 70px;
                 height: 70px;
@@ -809,22 +803,11 @@ function createRouletteModal(index, total) {
                 flex-shrink: 0;
                 overflow: hidden;
             }
-            
             .roulette-item-multi img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
                 border-radius: 6px;
-            }
-            
-            .roulette-multi-result-win {
-                color: #10b981 !important;
-                animation: resultPulse 0.5s ease-in-out 3;
-            }
-            
-            @keyframes resultPulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.2); }
             }
         `;
         document.head.appendChild(style);
@@ -854,14 +837,12 @@ function startAllRoulettes() {
         let winCenterX = WIN_IDX * stepW + itemW / 2;
         let offset = center - winCenterX;
         
-        // Задержка для каскадного эффекта
         setTimeout(function() {
-            track.style.transition = 'transform 5s cubic-bezier(0.05, 0.85, 0.15, 1)';
+            track.style.transition = 'transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
             track.style.transform = 'translateX(' + offset + 'px)';
         }, delays[i] * 300);
     }
     
-    // Останавливаем все одновременно через 5.5 секунд
     let stopTimeout = setTimeout(function() {
         for (let i = 0; i < activeModals.length; i++) {
             let data = activeModals[i];
@@ -869,30 +850,30 @@ function startAllRoulettes() {
             let winItem = data.winItem;
             
             if (resultLabel) {
-                resultLabel.textContent = '🎉 ' + winItem.nft.name;
+                let displayName = winItem.nft.name;
+                if (winItem.nft.isCurrency && winItem.nft.amount > 0) {
+                    displayName = winItem.nft.amount + ' ⭐';
+                }
+                resultLabel.textContent = '🎉 ' + displayName;
                 resultLabel.className = 'roulette-multi-result-win';
             }
             
             data.isDone = true;
-            
-            // Добавляем выигрыш
             processWin(winItem.nft);
         }
         
         isSpinning = false;
         
-        // Закрываем модалки через 3 секунды
         setTimeout(function() {
             closeAllMultiModals();
-        }, 3000);
+        }, 3500);
         
-    }, 5500);
+    }, 6500);
     
     spinTimeouts.push(stopTimeout);
 }
 
 function processWin(nft) {
-    // Обработка выигрыша (добавляем в инвентарь, начисляем звёзды и т.д.)
     if (nft.isCurrency) {
         let isStars = nft.name.indexOf('звезд') !== -1 || nft.name.indexOf('звёзд') !== -1 || nft.name.indexOf('Сердце') !== -1;
         if (isStars) {
@@ -930,20 +911,6 @@ function closeAllMultiModals() {
     isSpinning = false;
 }
 
-// ===== СТАРАЯ ЛОГИКА РУЛЕТКИ (ОСТАВЛЯЕМ ДЛЯ СОВМЕСТИМОСТИ) =====
-function startRoulette(caseKey) {
-    // Используем новую логику с множителем 1
-    startMultipleRoulettes(caseKey, 1);
-}
-
-function skipRoulette() {
-    // Для новой логики скип не нужен
-}
-
-function closeRouletteModal() {
-    closeAllMultiModals();
-}
-
 function getRandomItemByChance(items) {
     let rand = Math.random() * 100;
     let cum = 0;
@@ -954,10 +921,6 @@ function getRandomItemByChance(items) {
         }
     }
     return items[items.length - 1];
-}
-
-function showResult(nft, caseKey) {
-    // Устаревшая функция, оставлена для совместимости
 }
 
 function createConfetti() {
@@ -1267,12 +1230,6 @@ function switchTab(tab) {
     if (tab === 'profile') {
         renderProfile();
     }
-}
-
-function renderGames() {
-    let container = document.getElementById('gamesContent');
-    if (!container) return;
-    container.innerHTML = '';
 }
 
 function showMinesweeper() {
