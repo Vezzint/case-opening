@@ -114,40 +114,49 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА ПРЕДПРОСМОТРА КЕЙСА (С МНОЖИТЕЛЯМИ) -->
-    <div class="modal-preview" id="modalPreview">
-        <div class="modal-preview-content">
-            <div class="modal-preview-header">
-                <h2 id="previewCaseTitle">Case Name</h2>
-                <div class="modal-close" onclick="closePreviewModal()">✕</div>
+<!-- МОДАЛКА ПРЕДПРОСМОТРА КЕЙСА (ИСПРАВЛЕННАЯ) -->
+<div class="modal-preview" id="modalPreview">
+    <div class="modal-preview-content">
+        <!-- ХЕДЕР СО СТРЕЛКОЙ НАЗАД -->
+        <div class="modal-preview-header">
+            <div class="modal-preview-back" onclick="closePreviewModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
             </div>
-            
-            <!-- БЕСКОНЕЧНАЯ ПРОКРУТКА ПРИЗОВ -->
-            <div class="preview-rolling-container">
-                <div class="preview-rolling-track" id="previewRollingTrack"></div>
-            </div>
-            
-            <div class="preview-info">
-                <div class="preview-case-icon" id="previewCaseIcon">📦</div>
-                <div class="preview-case-name" id="previewCaseName">CASE NAME</div>
-                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
-                
-                <!-- УПРАВЛЕНИЕ: КРУТИТЬ + МНОЖИТЕЛИ -->
-                <div class="preview-controls">
-                    <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">🎰 КРУТИТЬ</button>
-                    <div class="multiplier-group" id="multiplierButtons">
-                        <button class="multiplier-btn active" onclick="setMultiplier(1)">1x</button>
-                        <button class="multiplier-btn" onclick="setMultiplier(2)">2x</button>
-                        <button class="multiplier-btn" onclick="setMultiplier(3)">3x</button>
-                        <button class="multiplier-btn" onclick="setMultiplier(4)">4x</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- СПИСОК ВОЗМОЖНЫХ НАГРАД -->
-            <div class="preview-items-list" id="previewItemsList"></div>
+            <h2 id="previewCaseTitle">Case Name</h2>
+            <div style="width:40px;"></div>
         </div>
+        
+        <!-- НАЗВАНИЕ КЕЙСА НАД МОДАЛКОЙ КРУТКИ -->
+        <div class="preview-case-name-centered" id="previewCaseNameCentered">CASE NAME</div>
+        
+        <!-- МОДАЛКА КРУТКИ (УМЕНЬШЕННАЯ) -->
+        <div class="preview-rolling-container">
+            <div class="preview-rolling-track" id="previewRollingTrack"></div>
+            <div class="preview-rolling-overlay"></div>
+        </div>
+        
+        <div class="preview-info">
+            <div class="preview-case-icon" id="previewCaseIcon">📦</div>
+            
+            <!-- УПРАВЛЕНИЕ: КРУТИТЬ + МНОЖИТЕЛИ + ЦЕНА -->
+            <div class="preview-controls">
+                <button class="open-case-btn" id="previewOpenBtn" onclick="openCaseFromPreview()">КРУТИТЬ</button>
+                <div class="multiplier-group" id="multiplierButtons">
+                    <button class="multiplier-btn active" onclick="setMultiplier(1)">1x</button>
+                    <button class="multiplier-btn" onclick="setMultiplier(2)">2x</button>
+                    <button class="multiplier-btn" onclick="setMultiplier(3)">3x</button>
+                    <button class="multiplier-btn" onclick="setMultiplier(4)">4x</button>
+                </div>
+                <div class="preview-case-price" id="previewCasePrice">⭐ 50</div>
+            </div>
+        </div>
+        
+        <!-- СПИСОК ВОЗМОЖНЫХ НАГРАД -->
+        <div class="preview-items-list" id="previewItemsList"></div>
     </div>
+</div>
 
     <!-- ВКЛАДКА ИНВЕНТАРЯ -->
     <div class="tab-content" id="tabInventory">
